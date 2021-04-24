@@ -9,7 +9,8 @@ type alias Model =
 type alias Character =
     { c12csInitial : C12cs
     , c12csAdvances : C12cs
-    , skills : List Skill
+    , basicSkills : List Skill
+    , advancedSkills : List Skill
     }
 
 
@@ -17,7 +18,8 @@ emptyCharacter : Character
 emptyCharacter =
     { c12csInitial = emptyC12cs
     , c12csAdvances = emptyC12cs
-    , skills = []
+    , basicSkills = basicSkills
+    , advancedSkills = []
     }
 
 
@@ -49,7 +51,7 @@ type C12c
 
 
 type alias Skill =
-    { advancements : Int
+    { advances : Int
     , c12c : C12c
     , name : String
     }
@@ -58,6 +60,119 @@ type alias Skill =
 type alias Talent =
     { name : String
     , timesTaken : String
+    }
+
+
+basicSkills : List Skill
+basicSkills =
+    [ { advances = 0
+      , c12c = Dex
+      , name = "Art"
+      }
+    , { advances = 0
+      , c12c = Ag
+      , name = "Athletics"
+      }
+    , { advances = 0
+      , c12c = Fel
+      , name = "Bribery"
+      }
+    , { advances = 0
+      , c12c = Fel
+      , name = "Charm"
+      }
+    , { advances = 0
+      , c12c = WP
+      , name = "Charm Animal"
+      }
+    , { advances = 0
+      , c12c = S
+      , name = "Climb"
+      }
+    , { advances = 0
+      , c12c = WP
+      , name = "Cool"
+      }
+    , { advances = 0
+      , c12c = T
+      , name = "Consume Alcohol"
+      }
+    , { advances = 0
+      , c12c = Ag
+      , name = "Dodge"
+      }
+    , { advances = 0
+      , c12c = Ag
+      , name = "Drive"
+      }
+    , { advances = 0
+      , c12c = T
+      , name = "Endurance"
+      }
+    , { advances = 0
+      , c12c = Fel
+      , name = "Entertain"
+      }
+    , { advances = 0
+      , c12c = Int
+      , name = "Gamble"
+      }
+    , { advances = 0
+      , c12c = Fel
+      , name = "Gossip"
+      }
+    , { advances = 0
+      , c12c = Fel
+      , name = "Haggle"
+      }
+    , { advances = 0
+      , c12c = S
+      , name = "Intimidate"
+      }
+    , { advances = 0
+      , c12c = I
+      , name = "Intuition"
+      }
+    , { advances = 0
+      , c12c = Fel
+      , name = "Leadership"
+      }
+    , { advances = 0
+      , c12c = WS
+      , name = "Melee (Basic)"
+      }
+    , { advances = 0
+      , c12c = I
+      , name = "Navigation"
+      }
+    , { advances = 0
+      , c12c = Int
+      , name = "Outdoor Survival"
+      }
+    , { advances = 0
+      , c12c = I
+      , name = "Perception"
+      }
+    , { advances = 0
+      , c12c = Ag
+      , name = "Ride"
+      }
+    , { advances = 0
+      , c12c = S
+      , name = "Row"
+      }
+    , { advances = 0
+      , c12c = Ag
+      , name = "Stealth"
+      }
+    ]
+
+
+emptySkill : Skill
+emptySkill =
+    { advances = 0
+    , c12c = WS
+    , name = ""
     }
 
 
@@ -121,6 +236,11 @@ getC12c c12c c12cs =
         Fel -> c12cs.fel
 
 
+getC12cs : Character -> C12cs
+getC12cs character =
+    addC12cs character.c12csInitial character.c12csAdvances
+
+
 setC12c : Int -> C12c -> C12cs -> C12cs
 setC12c value c12c c12cs =
     case c12c of
@@ -166,6 +286,22 @@ c12cToFullString c12c =
         Fel -> "Fellowship"
 
 
+c12cFromString : String -> Maybe C12c
+c12cFromString str =
+    case str of
+        "WS" -> Just WS
+        "BS" -> Just BS
+        "S" -> Just S
+        "T" -> Just T
+        "I" -> Just I
+        "Ag" -> Just Ag
+        "Dex" -> Just Dex
+        "Int" -> Just Int
+        "WP" -> Just WP
+        "Fel" -> Just Fel
+        _ -> Nothing
+
+
 c12csCost : C12cs -> Int
 c12csCost c12cs =
     List.foldl
@@ -209,6 +345,60 @@ c12cCost value =
         230 * (value - 45) + 3825
 
 
-skillValue : C12cs -> Skill -> Int
-skillValue c12cs skill =
-    getC12c skill.c12c c12cs + skill.advancements
+skillCost : Int -> Int
+skillCost value =
+    if value <= 5 then
+        10 * value
+
+    else if value <= 10 then
+        15 * (value - 5) + 50
+
+    else if value <= 15 then
+        20 * (value - 10) + 125
+
+    else if value <= 20 then
+        30 * (value - 15) + 225
+
+    else if value <= 25 then
+        40 * (value - 20) + 375
+
+    else if value <= 30 then
+        60 * (value - 25) + 575
+
+    else if value <= 35 then
+        80 * (value - 30) + 875
+
+    else if value <= 40 then
+        110 * (value - 35) + 1275
+
+    else if value <= 45 then
+        140 * (value - 40) + 1825
+
+    else
+        180 * (value - 45) + 2525
+
+
+skillValue : Character -> Skill -> Int
+skillValue character skill =
+    getC12c skill.c12c (getC12cs character) + skill.advances
+
+
+skillsCost : List Skill -> Int
+skillsCost skills =
+    List.foldl
+        (\skill total ->
+            total + skillCost skill.advances
+        )
+        0
+        skills
+
+
+spentExp : Character -> Int
+spentExp character =
+    List.foldl
+        (+)
+        0
+        [ c12csCost character.c12csAdvances
+        , skillsCost character.basicSkills
+        , skillsCost character.advancedSkills
+        ]
