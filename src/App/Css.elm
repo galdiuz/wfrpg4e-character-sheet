@@ -4,6 +4,6 @@ css : String
 css =
     """
 .number-input {
-    width: 30px
+    width: 45px
 }
     """

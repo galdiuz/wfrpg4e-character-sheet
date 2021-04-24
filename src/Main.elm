@@ -256,6 +256,53 @@ update msg model =
                 |> asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
+        Msg.AddExpAdjustment ->
+            List.append
+                model.character.expAdjustments
+                [ App.emptyExpAdjustment ]
+                |> asExpAdjustmentsIn model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetExpAdjustmentDescription index str ->
+            List.Extra.updateAt
+                index
+                (\talent ->
+                    { talent | description = str }
+                )
+                model.character.expAdjustments
+                |> asExpAdjustmentsIn model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetExpAdjustmentValue index str ->
+            case String.toInt str of
+                Just value ->
+                    List.Extra.updateAt
+                        index
+                        (\adjustment ->
+                            { adjustment | value = value }
+                        )
+                        model.character.expAdjustments
+                        |> asExpAdjustmentsIn model.character
+                        |> asCharacterIn model
+                        |> Cmd.Extra.withNoCmd
+
+                Nothing ->
+                    if String.isEmpty str then
+                        List.Extra.updateAt
+                            index
+                            (\adjustment ->
+                                { adjustment | value = 0 }
+                            )
+                            model.character.expAdjustments
+                            |> asExpAdjustmentsIn model.character
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
 
 asC12csAdvancesIn : App.Character -> App.C12cs -> App.Character
 asC12csAdvancesIn character c12cs =
@@ -285,3 +332,8 @@ asAdvancedSkillsIn character skills =
 asTalentsIn : App.Character -> List App.Talent -> App.Character
 asTalentsIn character talents =
     { character | talents = talents }
+
+
+asExpAdjustmentsIn : App.Character -> List App.ExpAdjustment -> App.Character
+asExpAdjustmentsIn character adjustments =
+    { character | expAdjustments = adjustments }

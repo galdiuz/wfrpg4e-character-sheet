@@ -12,6 +12,7 @@ type alias Character =
     , basicSkills : List Skill
     , advancedSkills : List Skill
     , talents : List Talent
+    , expAdjustments : List ExpAdjustment
     }
 
 
@@ -22,6 +23,7 @@ emptyCharacter =
     , basicSkills = basicSkills
     , advancedSkills = []
     , talents = []
+    , expAdjustments = []
     }
 
 
@@ -71,6 +73,19 @@ emptyTalent =
     { description = ""
     , timesTaken = 0
     , name = ""
+    }
+
+
+type alias ExpAdjustment =
+    { description : String
+    , value : Int
+    }
+
+
+emptyExpAdjustment : ExpAdjustment
+emptyExpAdjustment =
+    { description = ""
+    , value = 0
     }
 
 
@@ -414,6 +429,12 @@ talentsCost talents =
         talents
 
 
+expAdjustmentsCost : List ExpAdjustment -> Int
+expAdjustmentsCost adjustments =
+    List.map .value adjustments
+        |> List.foldl (+) 0
+
+
 spentExp : Character -> Int
 spentExp character =
     List.foldl
@@ -423,4 +444,5 @@ spentExp character =
         , skillsCost character.basicSkills
         , skillsCost character.advancedSkills
         , talentsCost character.talents
+        , expAdjustmentsCost character.expAdjustments
         ]

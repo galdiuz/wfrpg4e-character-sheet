@@ -19,6 +19,7 @@ view model =
         , viewBasicSkills model
         , viewAdvancedSkills model
         , viewTalents model
+        , viewAdjustments model
         ]
 
 
@@ -353,6 +354,48 @@ viewTalentRow index talent =
             [ viewTextareaInput
                 { onInput = Msg.SetTalentDescription index
                 , value = talent.description
+                }
+            ]
+        ]
+
+
+viewAdjustments : App.Model -> Html Msg
+viewAdjustments model =
+    Html.table
+        []
+        (List.concat
+            [ [ Html.tr
+                []
+                [ Html.th [] [ Html.text "Value" ]
+                , Html.th [] [ Html.text "Description" ]
+                ]
+              ]
+            , List.indexedMap viewAdjustmentRow model.character.expAdjustments
+            , [ viewButton
+                { onClick = Msg.AddExpAdjustment
+                , text = "Add"
+                }
+              ]
+            ]
+        )
+
+
+viewAdjustmentRow : Int -> App.ExpAdjustment -> Html Msg
+viewAdjustmentRow index adjustment =
+    Html.tr
+        []
+        [ Html.td
+            []
+            [ viewNumberInput
+                { onInput = Msg.SetExpAdjustmentValue index
+                , value = adjustment.value
+                }
+            ]
+        , Html.td
+            []
+            [ viewTextareaInput
+                { onInput = Msg.SetExpAdjustmentDescription index
+                , value = adjustment.description
                 }
             ]
         ]
