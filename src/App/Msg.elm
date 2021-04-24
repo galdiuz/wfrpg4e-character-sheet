@@ -1,6 +1,7 @@
 module App.Msg exposing (Msg(..))
 
 import App
+import File
 
 
 type Msg
@@ -20,3 +21,7 @@ type Msg
     | AddExpAdjustment
     | SetExpAdjustmentValue Int String
     | SetExpAdjustmentDescription Int String
+    | Save
+    | Load
+    | LoadFile File.File
+    | FileLoaded String

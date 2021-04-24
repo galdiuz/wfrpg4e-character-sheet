@@ -1,12 +1,19 @@
 module Main exposing (main)
 
 import App exposing (Model)
+import App.Json
 import App.Msg as Msg exposing (Msg)
 import App.UI
 import Browser
 import Browser.Navigation as Navigation
 import Cmd.Extra
+import File
+import File.Download
+import File.Select
+import Json.Decode
+import Json.Encode
 import List.Extra
+import Task
 import Url
 
 
@@ -180,7 +187,7 @@ update msg model =
 
         Msg.SetAdvancedSkillC12c index str ->
             case App.c12cFromString str of
-                Just c12c ->
+                Ok c12c ->
                     List.Extra.updateAt
                         index
                         (\skill ->
@@ -191,7 +198,7 @@ update msg model =
                         |> asCharacterIn model
                         |> Cmd.Extra.withNoCmd
 
-                Nothing ->
+                Err _ ->
                     Cmd.Extra.withNoCmd model
 
         Msg.AddTalent ->
@@ -317,6 +324,36 @@ update msg model =
 
                     else
                         Cmd.Extra.withNoCmd model
+
+        Msg.Save ->
+            ( model
+            , Json.Encode.encode 0 (App.Json.encodeCharacter model.character)
+                |> File.Download.string "file.json" "application/json"
+            )
+
+        Msg.Load ->
+            ( model
+            , File.Select.file [ "application/json" ] Msg.LoadFile
+            )
+
+        Msg.LoadFile file ->
+            ( model
+            , Task.perform Msg.FileLoaded (File.toString file)
+            )
+
+        Msg.FileLoaded str ->
+            case Json.Decode.decodeString App.Json.decodeCharacter str of
+                Ok character ->
+                    character
+                        |> asCharacterIn model
+                        |> Cmd.Extra.withNoCmd
+
+                Err err ->
+                    let
+                        _ = Debug.log "err" err
+                    in
+                    Cmd.Extra.withNoCmd model
+
 
 
 asC12csAdvancesIn : App.Character -> App.C12cs -> App.Character

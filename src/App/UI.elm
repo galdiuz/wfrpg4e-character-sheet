@@ -14,12 +14,28 @@ view model =
     Html.div
         []
         [ Html.node "style" [] [ Html.text App.Css.css ]
+        , viewFile
         , viewExperience model
         , viewC12cs model
         , viewBasicSkills model
         , viewAdvancedSkills model
         , viewTalents model
         , viewAdjustments model
+        ]
+
+
+viewFile : Html Msg
+viewFile =
+    Html.div
+        []
+        [ viewButton
+            { onClick = Msg.Save
+            , text = "Save"
+            }
+        , viewButton
+            { onClick = Msg.Load
+            , text = "Load"
+            }
         ]
 
 

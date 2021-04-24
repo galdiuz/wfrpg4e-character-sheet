@@ -314,20 +314,20 @@ c12cToFullString c12c =
         Fel -> "Fellowship"
 
 
-c12cFromString : String -> Maybe C12c
+c12cFromString : String -> Result String C12c
 c12cFromString str =
     case str of
-        "WS" -> Just WS
-        "BS" -> Just BS
-        "S" -> Just S
-        "T" -> Just T
-        "I" -> Just I
-        "Ag" -> Just Ag
-        "Dex" -> Just Dex
-        "Int" -> Just Int
-        "WP" -> Just WP
-        "Fel" -> Just Fel
-        _ -> Nothing
+        "WS" -> Ok WS
+        "BS" -> Ok BS
+        "S" -> Ok S
+        "T" -> Ok T
+        "I" -> Ok I
+        "Ag" -> Ok Ag
+        "Dex" -> Ok Dex
+        "Int" -> Ok Int
+        "WP" -> Ok WP
+        "Fel" -> Ok Fel
+        _ -> Err ("Cannot make characteristic from '" ++ str ++ "'")
 
 
 c12csCost : C12cs -> Int
