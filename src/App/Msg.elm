@@ -16,6 +16,7 @@ type Msg
     | SetTalentName Int String
     | SetTalentTimesTaken Int String
     | SetTalentDescription Int String
+    | SetExperience String
     | AddExpAdjustment
     | SetExpAdjustmentValue Int String
     | SetExpAdjustmentDescription Int String

@@ -12,6 +12,7 @@ type alias Character =
     , basicSkills : List Skill
     , advancedSkills : List Skill
     , talents : List Talent
+    , experience : Int
     , expAdjustments : List ExpAdjustment
     }
 
@@ -23,6 +24,7 @@ emptyCharacter =
     , basicSkills = basicSkills
     , advancedSkills = []
     , talents = []
+    , experience = 0
     , expAdjustments = []
     }
 
@@ -433,6 +435,11 @@ expAdjustmentsCost : List ExpAdjustment -> Int
 expAdjustmentsCost adjustments =
     List.map .value adjustments
         |> List.foldl (+) 0
+
+
+currentExp : Character -> Int
+currentExp character =
+    character.experience - spentExp character
 
 
 spentExp : Character -> Int

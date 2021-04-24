@@ -158,12 +158,36 @@ viewButton data =
 
 viewExperience : App.Model -> Html Msg
 viewExperience model =
-    Html.div
+    Html.table
         []
-        [ Html.text "Spent: "
-        , App.spentExp model.character
-            |> String.fromInt
-            |> Html.text
+        [ Html.tr
+            []
+            [ Html.th [] [ Html.text "Total" ]
+            , Html.th [] [ Html.text "Spent" ]
+            , Html.th [] [ Html.text "Current" ]
+            ]
+        , Html.tr
+            []
+            [ Html.td
+                []
+                [ viewNumberInput
+                    { onInput = Msg.SetExperience
+                    , value = model.character.experience
+                    }
+                ]
+            , Html.td
+                []
+                [ App.spentExp model.character
+                    |> String.fromInt
+                    |> Html.text
+                ]
+            , Html.td
+                []
+                [ App.currentExp model.character
+                    |> String.fromInt
+                    |> Html.text
+                ]
+            ]
         ]
 
 

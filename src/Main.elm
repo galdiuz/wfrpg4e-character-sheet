@@ -256,6 +256,21 @@ update msg model =
                 |> asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
+        Msg.SetExperience str ->
+            case String.toInt str of
+                Just value ->
+                    if value >= 0 then
+                        value
+                            |> asExperienceIn model.character
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+                Nothing ->
+                    Cmd.Extra.withNoCmd model
+
         Msg.AddExpAdjustment ->
             List.append
                 model.character.expAdjustments
@@ -337,3 +352,8 @@ asTalentsIn character talents =
 asExpAdjustmentsIn : App.Character -> List App.ExpAdjustment -> App.Character
 asExpAdjustmentsIn character adjustments =
     { character | expAdjustments = adjustments }
+
+
+asExperienceIn : App.Character -> Int -> App.Character
+asExperienceIn character value =
+    { character | experience = value }
