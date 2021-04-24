@@ -349,9 +349,6 @@ update msg model =
                         |> Cmd.Extra.withNoCmd
 
                 Err err ->
-                    let
-                        _ = Debug.log "err" err
-                    in
                     Cmd.Extra.withNoCmd model
 
 
