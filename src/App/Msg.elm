@@ -12,3 +12,7 @@ type Msg
     | SetAdvancedSkillName Int String
     | SetAdvancedSkillC12c Int String
     | AddAdvancedSkill
+    | AddTalent
+    | SetTalentName Int String
+    | SetTalentTimesTaken Int String
+    | SetTalentDescription Int String

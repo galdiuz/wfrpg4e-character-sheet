@@ -11,6 +11,7 @@ type alias Character =
     , c12csAdvances : C12cs
     , basicSkills : List Skill
     , advancedSkills : List Skill
+    , talents : List Talent
     }
 
 
@@ -20,6 +21,7 @@ emptyCharacter =
     , c12csAdvances = emptyC12cs
     , basicSkills = basicSkills
     , advancedSkills = []
+    , talents = []
     }
 
 
@@ -58,8 +60,17 @@ type alias Skill =
 
 
 type alias Talent =
-    { name : String
-    , timesTaken : String
+    { description : String
+    , timesTaken : Int
+    , name : String
+    }
+
+
+emptyTalent : Talent
+emptyTalent =
+    { description = ""
+    , timesTaken = 0
+    , name = ""
     }
 
 
@@ -393,6 +404,16 @@ skillsCost skills =
         skills
 
 
+talentsCost : List Talent -> Int
+talentsCost talents =
+    List.foldl
+        (\talent total ->
+            total + (talent.timesTaken * (talent.timesTaken + 1) * 50)
+        )
+        0
+        talents
+
+
 spentExp : Character -> Int
 spentExp character =
     List.foldl
@@ -401,4 +422,5 @@ spentExp character =
         [ c12csCost character.c12csAdvances
         , skillsCost character.basicSkills
         , skillsCost character.advancedSkills
+        , talentsCost character.talents
         ]

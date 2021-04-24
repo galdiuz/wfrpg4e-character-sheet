@@ -18,6 +18,7 @@ view model =
         , viewC12cs model
         , viewBasicSkills model
         , viewAdvancedSkills model
+        , viewTalents model
         ]
 
 
@@ -107,6 +108,17 @@ viewTextInput data =
         [ HA.type_ "text"
         , HA.class "text-input"
         , HA.value data.value
+        , Events.onInput data.onInput
+        ]
+        []
+
+
+viewTextareaInput : TextInputData msg -> Html msg
+viewTextareaInput data =
+    Html.textarea
+        [ HA.class "textarea-input"
+        , HA.value data.value
+        , HA.attribute "rows" "1"
         , Events.onInput data.onInput
         ]
         []
@@ -294,3 +306,53 @@ viewSelect data =
             )
             data.options
         )
+
+
+viewTalents : App.Model -> Html Msg
+viewTalents model =
+    Html.table
+        []
+        (List.concat
+            [ [ Html.tr
+                []
+                [ Html.th [] [ Html.text "Name" ]
+                , Html.th [] [ Html.text "Times taken" ]
+                , Html.th [] [ Html.text "Description" ]
+                ]
+              ]
+            , List.indexedMap viewTalentRow model.character.talents
+            , [ viewButton
+                { onClick = Msg.AddTalent
+                , text = "Add"
+                }
+              ]
+            ]
+        )
+
+
+viewTalentRow : Int -> App.Talent -> Html Msg
+viewTalentRow index talent =
+    Html.tr
+        []
+        [ Html.td
+            []
+            [ viewTextInput
+                { onInput = Msg.SetTalentName index
+                , value = talent.name
+                }
+            ]
+        , Html.td
+            []
+            [ viewNumberInput
+                { onInput = Msg.SetTalentTimesTaken index
+                , value = talent.timesTaken
+                }
+            ]
+        , Html.td
+            []
+            [ viewTextareaInput
+                { onInput = Msg.SetTalentDescription index
+                , value = talent.description
+                }
+            ]
+        ]

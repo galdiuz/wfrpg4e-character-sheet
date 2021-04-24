@@ -194,6 +194,68 @@ update msg model =
                 Nothing ->
                     Cmd.Extra.withNoCmd model
 
+        Msg.AddTalent ->
+            List.append
+                model.character.talents
+                [ App.emptyTalent ]
+                |> asTalentsIn model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetTalentTimesTaken index str ->
+            case String.toInt str of
+                Just value ->
+                    if value >= 0 && value <= 99 then
+                        List.Extra.updateAt
+                            index
+                            (\talent ->
+                                { talent | timesTaken = value }
+                            )
+                            model.character.talents
+                            |> asTalentsIn model.character
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+                Nothing ->
+                    if String.isEmpty str then
+                        List.Extra.updateAt
+                            index
+                            (\talents ->
+                                { talents | timesTaken = 0 }
+                            )
+                            model.character.talents
+                            |> asTalentsIn model.character
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+        Msg.SetTalentName index str ->
+            List.Extra.updateAt
+                index
+                (\talent ->
+                    { talent | name = str }
+                )
+                model.character.talents
+                |> asTalentsIn model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetTalentDescription index str ->
+            List.Extra.updateAt
+                index
+                (\talent ->
+                    { talent | description = str }
+                )
+                model.character.talents
+                |> asTalentsIn model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
 
 asC12csAdvancesIn : App.Character -> App.C12cs -> App.Character
 asC12csAdvancesIn character c12cs =
@@ -218,3 +280,8 @@ asBasicSkillsIn character skills =
 asAdvancedSkillsIn : App.Character -> List App.Skill -> App.Character
 asAdvancedSkillsIn character skills =
     { character | advancedSkills = skills }
+
+
+asTalentsIn : App.Character -> List App.Talent -> App.Character
+asTalentsIn character talents =
+    { character | talents = talents }
