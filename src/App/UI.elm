@@ -15,12 +15,29 @@ view model =
         []
         [ Html.node "style" [] [ Html.text App.Css.css ]
         , viewFile
-        , viewExperience model
-        , viewC12cs model
-        , viewBasicSkills model
-        , viewAdvancedSkills model
-        , viewTalents model
-        , viewAdjustments model
+        , viewContent model
+        ]
+
+
+viewContent : Model -> Html Msg
+viewContent model =
+    Html.div
+        [ HA.class "content" ]
+        [ viewCard "Information" (viewInformation model)
+        , viewCard "Characteristics" (viewC12cs model)
+        , viewCard "Skills" (viewSkills model)
+        , viewCard "Talents" (viewTalents model)
+        , viewCard "Experience" (viewExperience model)
+        ]
+
+
+viewCard : String -> Html Msg -> Html Msg
+viewCard label content =
+    Html.div
+        [ HA.class "card"
+        ]
+        [ Html.text label
+        , content
         ]
 
 
@@ -39,78 +56,89 @@ viewFile =
         ]
 
 
-viewC12cs : App.Model -> Html Msg
-viewC12cs model =
-    Html.table
+viewInformation : App.Model -> Html Msg
+viewInformation model =
+    Html.div
         []
-        [ Html.tr
-            []
-            (List.append
-                [ Html.th [] []
-                ]
-                (List.map
-                    (\c12c ->
-                        Html.th
-                            []
-                            [ Html.text (App.c12cToString c12c) ]
-                    )
-                    App.allC12cs
-                )
-            )
-        , Html.tr
-            []
-            (List.append
-                [ Html.td
-                    []
-                    [ Html.text "Initial" ]
-                ]
-                (viewC12csInputRow model.character.c12csInitial Msg.SetC12csInitial)
-            )
-        , Html.tr
-            []
-            (List.append
-                [ Html.td
-                    []
-                    [ Html.text "Advances" ]
-                ]
-                (viewC12csInputRow model.character.c12csAdvances Msg.SetC12csAdvances)
-            )
-        , Html.tr
-            []
-            (List.append
-                [ Html.td
-                    []
-                    [ Html.text "Current" ]
-                ]
-                (List.map
-                    (\c12c ->
-                        Html.td
-                            []
-                            [ App.getC12cs model.character
-                                |> App.getC12c c12c
-                                |> String.fromInt
-                                |> Html.text
-                            ]
-                    )
-                    App.allC12cs
-                )
-            )
+        [ Html.text "Name"
+        , viewTextInput
+            { onInput = Msg.SetInformation "name"
+            , value = model.character.info.name
+            }
+        , Html.text "Species"
+        , viewTextInput
+            { onInput = Msg.SetInformation "species"
+            , value = model.character.info.species
+            }
+        , Html.text "Class"
+        , viewTextInput
+            { onInput = Msg.SetInformation "class"
+            , value = model.character.info.class
+            }
+        , Html.text "Career Path"
+        , viewTextInput
+            { onInput = Msg.SetInformation "careerPath"
+            , value = model.character.info.careerPath
+            }
+        , Html.text "Career"
+        , viewTextInput
+            { onInput = Msg.SetInformation "career"
+            , value = model.character.info.class
+            }
+        , Html.text "Status"
+        , viewTextInput
+            { onInput = Msg.SetInformation "status"
+            , value = model.character.info.status
+            }
+        , Html.text "Age"
+        , viewTextInput
+            { onInput = Msg.SetInformation "age"
+            , value = model.character.info.age
+            }
+        , Html.text "Height"
+        , viewTextInput
+            { onInput = Msg.SetInformation "height"
+            , value = model.character.info.height
+            }
+        , Html.text "Hair"
+        , viewTextInput
+            { onInput = Msg.SetInformation "hair"
+            , value = model.character.info.hair
+            }
+        , Html.text "Eyes"
+        , viewTextInput
+            { onInput = Msg.SetInformation "eyes"
+            , value = model.character.info.eyes
+            }
         ]
 
 
-viewC12csInputRow : App.C12cs -> (App.C12c -> String -> Msg) -> List (Html Msg)
-viewC12csInputRow c12cs onInput =
-    List.map
-        (\c12c ->
-            Html.td
-                []
-                [ viewNumberInput
-                    { onInput = onInput c12c
-                    , value = App.getC12c c12c c12cs
-                    }
-                ]
-        )
-        App.allC12cs
+viewC12cs : App.Model -> Html Msg
+viewC12cs model =
+    Html.div
+        [ HA.style "display" "grid"
+        , HA.style "flex-wrap" "wrap"
+        ]
+        (List.map (viewC12c model) App.allC12cs)
+
+
+viewC12c model c12c =
+    Html.div
+        []
+        [ Html.text (App.c12cToFullString c12c)
+        , viewNumberInput
+            { onInput = Msg.SetC12csInitial c12c
+            , value = App.getC12c c12c model.character.c12csInitial
+            }
+        , viewNumberInput
+            { onInput = Msg.SetC12csAdvances c12c
+            , value = App.getC12c c12c model.character.c12csAdvances
+            }
+        , App.getC12cs model.character
+            |> App.getC12c c12c
+            |> String.fromInt
+            |> Html.text
+        ]
 
 
 type alias TextInputData msg =
@@ -174,6 +202,15 @@ viewButton data =
 
 viewExperience : App.Model -> Html Msg
 viewExperience model =
+    Html.div
+        []
+        [ viewExperienceTable model
+        , viewAdjustments model
+        ]
+
+
+viewExperienceTable : App.Model -> Html Msg
+viewExperienceTable model =
     Html.table
         []
         [ Html.tr
@@ -204,6 +241,15 @@ viewExperience model =
                     |> Html.text
                 ]
             ]
+        ]
+
+
+viewSkills : App.Model -> Html Msg
+viewSkills model =
+    Html.div
+        []
+        [ viewBasicSkills model
+        , viewAdvancedSkills model
         ]
 
 

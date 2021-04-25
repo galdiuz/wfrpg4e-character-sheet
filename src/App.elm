@@ -14,6 +14,7 @@ type alias Character =
     , talents : List Talent
     , experience : Int
     , expAdjustments : List ExpAdjustment
+    , info : Information
     }
 
 
@@ -26,6 +27,7 @@ emptyCharacter =
     , talents = []
     , experience = 0
     , expAdjustments = []
+    , info = emptyInformation
     }
 
 
@@ -54,6 +56,34 @@ type C12c
     | Int
     | WP
     | Fel
+
+
+type alias Information =
+    { age : String
+    , career : String
+    , careerPath : String
+    , class : String
+    , eyes : String
+    , hair : String
+    , height : String
+    , name : String
+    , species : String
+    , status : String
+    }
+
+
+emptyInformation =
+    { age = ""
+    , career = ""
+    , careerPath = ""
+    , class = ""
+    , eyes = ""
+    , hair = ""
+    , height = ""
+    , name = ""
+    , species = ""
+    , status = ""
+    }
 
 
 type alias Skill =
@@ -371,6 +401,22 @@ c12cCost value =
 
     else
         230 * (value - 45) + 3825
+
+
+setInformation : String -> String -> Information -> Information
+setInformation field value info =
+    case field of
+        "age" -> { info | age = value }
+        "career" -> { info | career = value }
+        "careerPath" -> { info | careerPath = value }
+        "class" -> { info | class = value }
+        "eyes" -> { info | eyes = value }
+        "hair" -> { info | hair = value }
+        "height" -> { info | height = value }
+        "name" -> { info | name = value }
+        "species" -> { info | species = value }
+        "status" -> { info | status = value }
+        _ -> info
 
 
 skillCost : Int -> Int

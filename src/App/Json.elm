@@ -17,6 +17,7 @@ encodeCharacter character =
         , ( "talents", Encode.list encodeTalent character.talents )
         , ( "experience", Encode.int character.experience )
         , ( "expAdjustments", Encode.list encodeExpAdjustment character.expAdjustments )
+        , ( "info", encodeInformation character.info )
         ]
 
 
@@ -33,6 +34,22 @@ encodeC12cs c12cs =
         , ( "int", Encode.int c12cs.int )
         , ( "wp", Encode.int c12cs.wp )
         , ( "fel", Encode.int c12cs.fel )
+        ]
+
+
+encodeInformation : App.Information -> Encode.Value
+encodeInformation info =
+    Encode.object
+        [ ( "age", Encode.string info.age )
+        , ( "career", Encode.string info.career )
+        , ( "careerPath", Encode.string info.careerPath )
+        , ( "class", Encode.string info.class )
+        , ( "eyes", Encode.string info.eyes )
+        , ( "hair", Encode.string info.hair )
+        , ( "height", Encode.string info.height )
+        , ( "name", Encode.string info.name )
+        , ( "species", Encode.string info.species )
+        , ( "status", Encode.string info.status )
         ]
 
 
@@ -71,6 +88,7 @@ decodeCharacter =
     Field.require "talents" (Decode.list decodeTalent) <| \talents ->
     Field.require "experience" Decode.int <| \experience ->
     Field.require "expAdjustments" (Decode.list decodeExpAdjustment) <| \expAdjustments ->
+    Field.require "info" decodeInformation <| \info ->
     Decode.succeed
         { c12csInitial = c12csInitial
         , c12csAdvances = c12csAdvances
@@ -79,6 +97,7 @@ decodeCharacter =
         , talents = talents
         , experience = experience
         , expAdjustments = expAdjustments
+        , info = info
         }
 
 
@@ -105,6 +124,32 @@ decodeC12cs =
         , int = int
         , wp = wp
         , fel = fel
+        }
+
+
+decodeInformation : Decode.Decoder App.Information
+decodeInformation =
+    Field.require "age" Decode.string <| \age ->
+    Field.require "career" Decode.string <| \career ->
+    Field.require "careerPath" Decode.string <| \careerPath ->
+    Field.require "class" Decode.string <| \class ->
+    Field.require "eyes" Decode.string <| \eyes ->
+    Field.require "hair" Decode.string <| \hair ->
+    Field.require "height" Decode.string <| \height ->
+    Field.require "name" Decode.string <| \name ->
+    Field.require "species" Decode.string <| \species ->
+    Field.require "status" Decode.string <| \status ->
+    Decode.succeed
+        { age = age
+        , career = career
+        , careerPath = careerPath
+        , class = class
+        , eyes = eyes
+        , hair = hair
+        , height = height
+        , name = name
+        , species = species
+        , status = status
         }
 
 

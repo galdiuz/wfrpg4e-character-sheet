@@ -25,3 +25,4 @@ type Msg
     | Load
     | LoadFile File.File
     | FileLoaded String
+    | SetInformation String String

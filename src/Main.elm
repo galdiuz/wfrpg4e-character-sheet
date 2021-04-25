@@ -351,6 +351,11 @@ update msg model =
                 Err err ->
                     Cmd.Extra.withNoCmd model
 
+        Msg.SetInformation field value ->
+            App.setInformation field value model.character.info
+                |> asInformationIn model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
 
 
 asC12csAdvancesIn : App.Character -> App.C12cs -> App.Character
@@ -391,3 +396,8 @@ asExpAdjustmentsIn character adjustments =
 asExperienceIn : App.Character -> Int -> App.Character
 asExperienceIn character value =
     { character | experience = value }
+
+
+asInformationIn : App.Character -> App.Information -> App.Character
+asInformationIn character info =
+    { character | info = info }
