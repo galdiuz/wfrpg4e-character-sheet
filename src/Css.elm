@@ -1,4 +1,4 @@
-module App.Css exposing (css)
+module Css exposing (css)
 
 css : String
 css =

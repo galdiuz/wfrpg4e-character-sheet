@@ -1,8 +1,11 @@
-module App.UI exposing (view)
+module View exposing (view)
 
-import App exposing (Model)
-import App.Css
-import App.Msg as Msg exposing (Msg)
+import Model exposing (Model)
+import Css
+import Character as Character
+import Msg as Msg exposing (Msg)
+import Ui
+import Draggable
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Attributes.Extra as HAE
@@ -11,33 +14,84 @@ import Html.Events as Events
 
 view : Model -> Html Msg
 view model =
+    let
+        c = columns model.windowWidth
+    in
     Html.div
         []
-        [ Html.node "style" [] [ Html.text App.Css.css ]
-        , viewFile
+        [ Html.node "style" [] [ Html.text Css.css ]
+        , viewHeader
         , viewContent model
+        ]
+
+
+minColumnWidth : Int
+minColumnWidth =
+    400
+
+
+columns : Int -> Int
+columns width =
+    max 1 (width // minColumnWidth)
+
+
+viewHeader : Html Msg
+viewHeader =
+    Html.div
+        []
+        [ viewFile
         ]
 
 
 viewContent : Model -> Html Msg
 viewContent model =
     Html.div
-        [ HA.class "content" ]
-        [ viewCard "Information" (viewInformation model)
-        , viewCard "Characteristics" (viewC12cs model)
-        , viewCard "Skills" (viewSkills model)
-        , viewCard "Talents" (viewTalents model)
-        , viewCard "Experience" (viewExperience model)
+        [ HA.class "content"
+        , HA.style "flex-direction" "row"
         ]
+        (List.map
+            (\column ->
+                Html.div
+                    [ HA.style "width" "50%"
+                    ]
+                    (List.map (viewCard model) column)
+            )
+            model.ui.columns
+        )
 
 
-viewCard : String -> Html Msg -> Html Msg
-viewCard label content =
+viewCard : Model -> Ui.Card -> Html Msg
+viewCard model card =
+    let
+        label =
+            Ui.cardTitle card
+    in
     Html.div
         [ HA.class "card"
         ]
-        [ Html.text label
-        , content
+        [ Html.div
+            (List.append
+                [ Draggable.mouseTrigger label Msg.DragMsg
+                , HA.style "cursor" "move"
+                ]
+                (Draggable.touchTriggers label Msg.DragMsg)
+            )
+            [ Html.text label ]
+        , case card of
+            Ui.C12cs ->
+                viewC12cs model
+
+            Ui.Experience ->
+                viewExperience model
+
+            Ui.Information ->
+                viewInformation model
+
+            Ui.Skills ->
+                viewSkills model
+
+            Ui.Talents ->
+                viewTalents model
         ]
 
 
@@ -56,7 +110,7 @@ viewFile =
         ]
 
 
-viewInformation : App.Model -> Html Msg
+viewInformation : Model -> Html Msg
 viewInformation model =
     Html.div
         []
@@ -83,7 +137,7 @@ viewInformation model =
         , Html.text "Career"
         , viewTextInput
             { onInput = Msg.SetInformation "career"
-            , value = model.character.info.class
+            , value = model.character.info.career
             }
         , Html.text "Status"
         , viewTextInput
@@ -113,29 +167,29 @@ viewInformation model =
         ]
 
 
-viewC12cs : App.Model -> Html Msg
+viewC12cs : Model -> Html Msg
 viewC12cs model =
     Html.div
         [ HA.style "display" "grid"
         , HA.style "flex-wrap" "wrap"
         ]
-        (List.map (viewC12c model) App.allC12cs)
+        (List.map (viewC12c model) Character.allC12cs)
 
 
 viewC12c model c12c =
     Html.div
         []
-        [ Html.text (App.c12cToFullString c12c)
+        [ Html.text (Character.c12cToFullString c12c)
         , viewNumberInput
             { onInput = Msg.SetC12csInitial c12c
-            , value = App.getC12c c12c model.character.c12csInitial
+            , value = Character.getC12c c12c model.character.c12csInitial
             }
         , viewNumberInput
             { onInput = Msg.SetC12csAdvances c12c
-            , value = App.getC12c c12c model.character.c12csAdvances
+            , value = Character.getC12c c12c model.character.c12csAdvances
             }
-        , App.getC12cs model.character
-            |> App.getC12c c12c
+        , Character.getC12cs model.character
+            |> Character.getC12c c12c
             |> String.fromInt
             |> Html.text
         ]
@@ -200,7 +254,7 @@ viewButton data =
         [ Html.text data.text ]
 
 
-viewExperience : App.Model -> Html Msg
+viewExperience : Model -> Html Msg
 viewExperience model =
     Html.div
         []
@@ -209,7 +263,7 @@ viewExperience model =
         ]
 
 
-viewExperienceTable : App.Model -> Html Msg
+viewExperienceTable : Model -> Html Msg
 viewExperienceTable model =
     Html.table
         []
@@ -230,13 +284,13 @@ viewExperienceTable model =
                 ]
             , Html.td
                 []
-                [ App.spentExp model.character
+                [ Character.spentExp model.character
                     |> String.fromInt
                     |> Html.text
                 ]
             , Html.td
                 []
-                [ App.currentExp model.character
+                [ Character.currentExp model.character
                     |> String.fromInt
                     |> Html.text
                 ]
@@ -244,7 +298,7 @@ viewExperienceTable model =
         ]
 
 
-viewSkills : App.Model -> Html Msg
+viewSkills : Model -> Html Msg
 viewSkills model =
     Html.div
         []
@@ -253,7 +307,7 @@ viewSkills model =
         ]
 
 
-viewBasicSkills : App.Model -> Html Msg
+viewBasicSkills : Model -> Html Msg
 viewBasicSkills model =
     Html.table
         []
@@ -270,7 +324,7 @@ viewBasicSkills model =
         )
 
 
-viewBasicSkillRow : App.Model -> Int -> App.Skill -> Html Msg
+viewBasicSkillRow : Model -> Int -> Character.Skill -> Html Msg
 viewBasicSkillRow model index skill =
     Html.tr
         []
@@ -279,11 +333,11 @@ viewBasicSkillRow model index skill =
             [ Html.text skill.name ]
         , Html.td
             []
-            [ Html.text (App.c12cToString skill.c12c) ]
+            [ Html.text (Character.c12cToString skill.c12c) ]
         , Html.td
             []
-            [ App.getC12cs model.character
-                |> App.getC12c skill.c12c
+            [ Character.getC12cs model.character
+                |> Character.getC12c skill.c12c
                 |> String.fromInt
                 |> Html.text
             ]
@@ -293,7 +347,7 @@ viewBasicSkillRow model index skill =
             }
         , Html.td
             []
-            [ App.skillValue model.character skill
+            [ Character.skillValue model.character skill
                 |> String.fromInt
                 |> Html.text
             ]
@@ -323,7 +377,7 @@ viewAdvancedSkills model =
         )
 
 
-viewAdvancedSkillRow : App.Model -> Int -> App.Skill -> Html Msg
+viewAdvancedSkillRow : Model -> Int -> Character.Skill -> Html Msg
 viewAdvancedSkillRow model index skill =
     Html.tr
         []
@@ -340,8 +394,8 @@ viewAdvancedSkillRow model index skill =
             ]
         , Html.td
             []
-            [ App.getC12cs model.character
-                |> App.getC12c skill.c12c
+            [ Character.getC12cs model.character
+                |> Character.getC12c skill.c12c
                 |> String.fromInt
                 |> Html.text
             ]
@@ -351,19 +405,19 @@ viewAdvancedSkillRow model index skill =
             }
         , Html.td
             []
-            [ App.skillValue model.character skill
+            [ Character.skillValue model.character skill
                 |> String.fromInt
                 |> Html.text
             ]
         ]
 
 
-viewC12cSelect : Int -> App.Skill -> Html Msg
+viewC12cSelect : Int -> Character.Skill -> Html Msg
 viewC12cSelect index skill =
     viewSelect
-        { options = App.allC12cs
-        , label = App.c12cToString
-        , value = App.c12cToString
+        { options = Character.allC12cs
+        , label = Character.c12cToString
+        , value = Character.c12cToString
         , selected = Just skill.c12c
         , onInput = Msg.SetAdvancedSkillC12c index
         }
@@ -395,7 +449,7 @@ viewSelect data =
         )
 
 
-viewTalents : App.Model -> Html Msg
+viewTalents : Model -> Html Msg
 viewTalents model =
     Html.table
         []
@@ -417,7 +471,7 @@ viewTalents model =
         )
 
 
-viewTalentRow : Int -> App.Talent -> Html Msg
+viewTalentRow : Int -> Character.Talent -> Html Msg
 viewTalentRow index talent =
     Html.tr
         []
@@ -445,7 +499,7 @@ viewTalentRow index talent =
         ]
 
 
-viewAdjustments : App.Model -> Html Msg
+viewAdjustments : Model -> Html Msg
 viewAdjustments model =
     Html.table
         []
@@ -466,7 +520,7 @@ viewAdjustments model =
         )
 
 
-viewAdjustmentRow : Int -> App.ExpAdjustment -> Html Msg
+viewAdjustmentRow : Int -> Character.ExpAdjustment -> Html Msg
 viewAdjustmentRow index adjustment =
     Html.tr
         []

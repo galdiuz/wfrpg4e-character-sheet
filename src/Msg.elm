@@ -1,13 +1,14 @@
-module App.Msg exposing (Msg(..))
+module Msg exposing (Msg(..))
 
-import App
+import Character as Character
+import Draggable
 import File
 
 
 type Msg
     = NoOp
-    | SetC12csAdvances App.C12c String
-    | SetC12csInitial App.C12c String
+    | SetC12csAdvances Character.C12c String
+    | SetC12csInitial Character.C12c String
     | SetBasicSkillAdvances Int String
     | SetAdvancedSkillAdvances Int String
     | SetAdvancedSkillName Int String
@@ -24,5 +25,8 @@ type Msg
     | Save
     | Load
     | LoadFile File.File
-    | FileLoaded String
+    | LoadString String
     | SetInformation String String
+    | SetWindowSize Int Int
+    | SetDragDelta Draggable.Delta
+    | DragMsg (Draggable.Msg String)

@@ -1,9 +1,4 @@
-module App exposing (..)
-
-
-type alias Model =
-    { character : Character
-    }
+module Character exposing (..)
 
 
 type alias Character =

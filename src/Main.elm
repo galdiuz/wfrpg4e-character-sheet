@@ -1,20 +1,25 @@
 module Main exposing (main)
 
-import App exposing (Model)
-import App.Json
-import App.Msg as Msg exposing (Msg)
-import App.UI
 import Browser
-import Browser.Navigation as Navigation
+import Browser.Dom
+import Browser.Events
+import Browser.Navigation
+import Character
 import Cmd.Extra
+import Draggable
 import File
 import File.Download
 import File.Select
+import Json
 import Json.Decode
 import Json.Encode
 import List.Extra
+import Model exposing (Model)
+import Msg as Msg exposing (Msg)
 import Task
+import Ui
 import Url
+import View
 
 
 type alias Flags =
@@ -33,23 +38,38 @@ main =
         }
 
 
-init : flags -> Url.Url -> Navigation.Key -> ( Model, Cmd Msg )
+init : flags -> Url.Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
 init flags url _ =
-    { character = App.emptyCharacter
+    { character = Character.emptyCharacter
+    , drag = Draggable.init
+    , position = ( 0, 0 )
+    , windowWidth = 0
+    , ui = Ui.emptyUi
     }
-        |> Cmd.Extra.withNoCmd
+        |> Cmd.Extra.withCmd
+            (Task.perform
+                (\viewport ->
+                    Msg.SetWindowSize
+                        (floor viewport.scene.width)
+                        (floor viewport.scene.height)
+                )
+                Browser.Dom.getViewport
+            )
 
 
 view : Model -> Browser.Document Msg
 view model =
-    { body = [ App.UI.view model ]
+    { body = [ View.view model ]
     , title = ""
     }
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.batch
+        [ Browser.Events.onResize Msg.SetWindowSize
+        , Draggable.subscriptions Msg.DragMsg model.drag
+        ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -62,7 +82,7 @@ update msg model =
             case String.toInt str of
                 Just value ->
                     if value >= 0 && value <= 99 then
-                        App.setC12c value c12c model.character.c12csAdvances
+                        Character.setC12c value c12c model.character.c12csAdvances
                             |> asC12csAdvancesIn model.character
                             |> asCharacterIn model
                             |> Cmd.Extra.withNoCmd
@@ -72,7 +92,7 @@ update msg model =
 
                 Nothing ->
                     if String.isEmpty str then
-                        App.setC12c 0 c12c model.character.c12csAdvances
+                        Character.setC12c 0 c12c model.character.c12csAdvances
                             |> asC12csAdvancesIn model.character
                             |> asCharacterIn model
                             |> Cmd.Extra.withNoCmd
@@ -84,7 +104,7 @@ update msg model =
             case String.toInt str of
                 Just value ->
                     if value >= 0 && value <= 99 then
-                        App.setC12c value c12c model.character.c12csInitial
+                        Character.setC12c value c12c model.character.c12csInitial
                             |> asC12csInitialIn model.character
                             |> asCharacterIn model
                             |> Cmd.Extra.withNoCmd
@@ -94,7 +114,7 @@ update msg model =
 
                 Nothing ->
                     if String.isEmpty str then
-                        App.setC12c 0 c12c model.character.c12csInitial
+                        Character.setC12c 0 c12c model.character.c12csInitial
                             |> asC12csInitialIn model.character
                             |> asCharacterIn model
                             |> Cmd.Extra.withNoCmd
@@ -180,13 +200,13 @@ update msg model =
         Msg.AddAdvancedSkill ->
             List.append
                 model.character.advancedSkills
-                [ App.emptySkill ]
+                [ Character.emptySkill ]
                 |> asAdvancedSkillsIn model.character
                 |> asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetAdvancedSkillC12c index str ->
-            case App.c12cFromString str of
+            case Character.c12cFromString str of
                 Ok c12c ->
                     List.Extra.updateAt
                         index
@@ -204,7 +224,7 @@ update msg model =
         Msg.AddTalent ->
             List.append
                 model.character.talents
-                [ App.emptyTalent ]
+                [ Character.emptyTalent ]
                 |> asTalentsIn model.character
                 |> asCharacterIn model
                 |> Cmd.Extra.withNoCmd
@@ -281,7 +301,7 @@ update msg model =
         Msg.AddExpAdjustment ->
             List.append
                 model.character.expAdjustments
-                [ App.emptyExpAdjustment ]
+                [ Character.emptyExpAdjustment ]
                 |> asExpAdjustmentsIn model.character
                 |> asCharacterIn model
                 |> Cmd.Extra.withNoCmd
@@ -327,7 +347,7 @@ update msg model =
 
         Msg.Save ->
             ( model
-            , Json.Encode.encode 0 (App.Json.encodeCharacter model.character)
+            , Json.Encode.encode 0 (Json.encodeCharacter model.character)
                 |> File.Download.string "file.json" "application/json"
             )
 
@@ -338,11 +358,11 @@ update msg model =
 
         Msg.LoadFile file ->
             ( model
-            , Task.perform Msg.FileLoaded (File.toString file)
+            , Task.perform Msg.LoadString (File.toString file)
             )
 
-        Msg.FileLoaded str ->
-            case Json.Decode.decodeString App.Json.decodeCharacter str of
+        Msg.LoadString str ->
+            case Json.Decode.decodeString Json.decodeCharacter str of
                 Ok character ->
                     character
                         |> asCharacterIn model
@@ -352,52 +372,77 @@ update msg model =
                     Cmd.Extra.withNoCmd model
 
         Msg.SetInformation field value ->
-            App.setInformation field value model.character.info
+            Character.setInformation field value model.character.info
                 |> asInformationIn model.character
                 |> asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
+        Msg.SetWindowSize x y ->
+            { model | windowWidth = x }
+                |> Cmd.Extra.withNoCmd
 
-asC12csAdvancesIn : App.Character -> App.C12cs -> App.Character
-asC12csAdvancesIn character c12cs =
-    { character | c12csAdvances = c12cs }
+        Msg.SetDragDelta ( dx, dy ) ->
+            let
+                ( x, y ) =
+                    model.position
+            in
+            { model
+                | position =
+                    ( round (toFloat x + dx)
+                    , round (toFloat y + dy)
+                    )
+            }
+                |> Cmd.Extra.withNoCmd
+
+        Msg.DragMsg dragMsg ->
+            Draggable.update dragConfig dragMsg model
 
 
-asC12csInitialIn : App.Character -> App.C12cs -> App.Character
-asC12csInitialIn character c12cs =
-    { character | c12csInitial = c12cs }
+dragConfig : Draggable.Config String Msg
+dragConfig =
+    Draggable.basicConfig Msg.SetDragDelta
 
 
-asCharacterIn : App.Model -> App.Character -> App.Model
+asCharacterIn : Model -> Character.Character -> Model
 asCharacterIn model character =
     { model | character = character }
 
 
-asBasicSkillsIn : App.Character -> List App.Skill -> App.Character
+asC12csAdvancesIn : Character.Character -> Character.C12cs -> Character.Character
+asC12csAdvancesIn character c12cs =
+    { character | c12csAdvances = c12cs }
+
+
+asC12csInitialIn : Character.Character -> Character.C12cs -> Character.Character
+asC12csInitialIn character c12cs =
+    { character | c12csInitial = c12cs }
+
+
+asBasicSkillsIn : Character.Character -> List Character.Skill -> Character.Character
 asBasicSkillsIn character skills =
     { character | basicSkills = skills }
 
 
-asAdvancedSkillsIn : App.Character -> List App.Skill -> App.Character
+asAdvancedSkillsIn : Character.Character -> List Character.Skill -> Character.Character
 asAdvancedSkillsIn character skills =
     { character | advancedSkills = skills }
 
 
-asTalentsIn : App.Character -> List App.Talent -> App.Character
+asTalentsIn : Character.Character -> List Character.Talent -> Character.Character
 asTalentsIn character talents =
     { character | talents = talents }
 
 
-asExpAdjustmentsIn : App.Character -> List App.ExpAdjustment -> App.Character
+asExpAdjustmentsIn : Character.Character -> List Character.ExpAdjustment -> Character.Character
 asExpAdjustmentsIn character adjustments =
     { character | expAdjustments = adjustments }
 
 
-asExperienceIn : App.Character -> Int -> App.Character
+asExperienceIn : Character.Character -> Int -> Character.Character
 asExperienceIn character value =
     { character | experience = value }
 
 
-asInformationIn : App.Character -> App.Information -> App.Character
+asInformationIn : Character.Character -> Character.Information -> Character.Character
 asInformationIn character info =
     { character | info = info }

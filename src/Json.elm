@@ -1,13 +1,13 @@
-module App.Json exposing (..)
+module Json exposing (..)
 
-import App
+import Character as Character
 import Json.Decode as Decode
 import Json.Decode.Extra
 import Json.Decode.Field as Field
 import Json.Encode as Encode
 
 
-encodeCharacter : App.Character -> Encode.Value
+encodeCharacter : Character.Character -> Encode.Value
 encodeCharacter character =
     Encode.object
         [ ( "c12csInitial", encodeC12cs character.c12csInitial )
@@ -21,7 +21,7 @@ encodeCharacter character =
         ]
 
 
-encodeC12cs : App.C12cs -> Encode.Value
+encodeC12cs : Character.C12cs -> Encode.Value
 encodeC12cs c12cs =
     Encode.object
         [ ( "ws", Encode.int c12cs.ws )
@@ -37,7 +37,7 @@ encodeC12cs c12cs =
         ]
 
 
-encodeInformation : App.Information -> Encode.Value
+encodeInformation : Character.Information -> Encode.Value
 encodeInformation info =
     Encode.object
         [ ( "age", Encode.string info.age )
@@ -53,16 +53,16 @@ encodeInformation info =
         ]
 
 
-encodeSkill : App.Skill -> Encode.Value
+encodeSkill : Character.Skill -> Encode.Value
 encodeSkill skill =
     Encode.object
         [ ( "advances", Encode.int skill.advances )
-        , ( "c12c", Encode.string (App.c12cToString skill.c12c) )
+        , ( "c12c", Encode.string (Character.c12cToString skill.c12c) )
         , ( "name", Encode.string skill.name )
         ]
 
 
-encodeTalent : App.Talent -> Encode.Value
+encodeTalent : Character.Talent -> Encode.Value
 encodeTalent talent =
     Encode.object
         [ ( "description", Encode.string talent.description )
@@ -71,7 +71,7 @@ encodeTalent talent =
         ]
 
 
-encodeExpAdjustment : App.ExpAdjustment -> Encode.Value
+encodeExpAdjustment : Character.ExpAdjustment -> Encode.Value
 encodeExpAdjustment adjustment =
     Encode.object
         [ ( "description", Encode.string adjustment.description )
@@ -79,7 +79,7 @@ encodeExpAdjustment adjustment =
         ]
 
 
-decodeCharacter : Decode.Decoder App.Character
+decodeCharacter : Decode.Decoder Character.Character
 decodeCharacter =
     Field.require "c12csInitial" decodeC12cs <| \c12csInitial ->
     Field.require "c12csAdvances" decodeC12cs <| \c12csAdvances ->
@@ -101,7 +101,7 @@ decodeCharacter =
         }
 
 
-decodeC12cs : Decode.Decoder App.C12cs
+decodeC12cs : Decode.Decoder Character.C12cs
 decodeC12cs =
     Field.require "ws" Decode.int <| \ws ->
     Field.require "bs" Decode.int <| \bs ->
@@ -127,7 +127,7 @@ decodeC12cs =
         }
 
 
-decodeInformation : Decode.Decoder App.Information
+decodeInformation : Decode.Decoder Character.Information
 decodeInformation =
     Field.require "age" Decode.string <| \age ->
     Field.require "career" Decode.string <| \career ->
@@ -153,7 +153,7 @@ decodeInformation =
         }
 
 
-decodeSkill : Decode.Decoder App.Skill
+decodeSkill : Decode.Decoder Character.Skill
 decodeSkill =
     Decode.map3
         (\advances c12c name ->
@@ -167,14 +167,14 @@ decodeSkill =
         (Decode.field "name" Decode.string)
 
 
-decodeC12c : Decode.Decoder App.C12c
+decodeC12c : Decode.Decoder Character.C12c
 decodeC12c =
     Decode.andThen
-        (App.c12cFromString >> Json.Decode.Extra.fromResult)
+        (Character.c12cFromString >> Json.Decode.Extra.fromResult)
         Decode.string
 
 
-decodeTalent : Decode.Decoder App.Talent
+decodeTalent : Decode.Decoder Character.Talent
 decodeTalent =
     Decode.map3
         (\description timesTaken name ->
@@ -188,7 +188,7 @@ decodeTalent =
         (Decode.field "name" Decode.string)
 
 
-decodeExpAdjustment : Decode.Decoder App.ExpAdjustment
+decodeExpAdjustment : Decode.Decoder Character.ExpAdjustment
 decodeExpAdjustment =
     Decode.map2
         (\description value ->
