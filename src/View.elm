@@ -14,25 +14,27 @@ import Html.Events as Events
 
 view : Model -> Html Msg
 view model =
-    let
-        c = columns model.windowWidth
-    in
     Html.div
         []
         [ Html.node "style" [] [ Html.text Css.css ]
         , viewHeader
         , viewContent model
+        , viewDraggedCard model
         ]
 
 
-minColumnWidth : Int
-minColumnWidth =
-    400
+viewDraggedCard model =
+    case model.ui.draggedCard of
+        Just card ->
+            Html.div
+                [ HA.style "position" "absolute"
+                , HA.style "left" (String.fromInt (Tuple.first model.ui.position) ++ "px")
+                , HA.style "top" (String.fromInt (Tuple.second model.ui.position) ++ "px")
+                ]
+                [ viewCard model card ]
 
-
-columns : Int -> Int
-columns width =
-    max 1 (width // minColumnWidth)
+        Nothing ->
+            Html.text ""
 
 
 viewHeader : Html Msg
@@ -50,11 +52,22 @@ viewContent model =
         , HA.style "flex-direction" "row"
         ]
         (List.map
-            (\column ->
+            (\cards ->
                 Html.div
                     [ HA.style "width" "50%"
                     ]
-                    (List.map (viewCard model) column)
+                    (List.map
+                        (\card ->
+                            Html.div
+                                [ HAE.attributeIf
+                                    (Just card == model.ui.draggedCard)
+                                    (HA.style "opacity" "0.2")
+                                , HA.id (Ui.cardId card)
+                                ]
+                                [ viewCard model card ]
+                        )
+                        cards
+                    )
             )
             model.ui.columns
         )
@@ -62,21 +75,21 @@ viewContent model =
 
 viewCard : Model -> Ui.Card -> Html Msg
 viewCard model card =
-    let
-        label =
-            Ui.cardTitle card
-    in
     Html.div
         [ HA.class "card"
         ]
         [ Html.div
-            (List.append
-                [ Draggable.mouseTrigger label Msg.DragMsg
-                , HA.style "cursor" "move"
-                ]
-                (Draggable.touchTriggers label Msg.DragMsg)
-            )
-            [ Html.text label ]
+            []
+            [ Html.text (Ui.cardTitle card)
+            , Html.span
+                (List.append
+                    [ Draggable.mouseTrigger card Msg.DragMsg
+                    , HA.style "cursor" "move"
+                    ]
+                    (Draggable.touchTriggers card Msg.DragMsg)
+                )
+                [ Html.text "Drag" ]
+            ]
         , case card of
             Ui.C12cs ->
                 viewC12cs model

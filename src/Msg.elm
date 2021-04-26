@@ -3,6 +3,7 @@ module Msg exposing (Msg(..))
 import Character as Character
 import Draggable
 import File
+import Ui
 
 
 type Msg
@@ -28,5 +29,17 @@ type Msg
     | LoadString String
     | SetInformation String String
     | SetWindowSize Int Int
-    | SetDragDelta Draggable.Delta
-    | DragMsg (Draggable.Msg String)
+    | SetDragElement Ui.Card
+    | SetDragPosition Draggable.Delta
+    | DragMsg (Draggable.Msg Ui.Card)
+    | SetDragElementData Element
+    | ClearDragElementOnClick Ui.Card
+    | ClearDragElementOnDragEnd
+
+
+type alias Element =
+    { x : Float
+    , y : Float
+    , width : Float
+    , height : Float
+    }

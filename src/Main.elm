@@ -7,6 +7,7 @@ import Browser.Navigation
 import Character
 import Cmd.Extra
 import Draggable
+import Draggable.Events
 import File
 import File.Download
 import File.Select
@@ -41,9 +42,6 @@ main =
 init : flags -> Url.Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
 init flags url _ =
     { character = Character.emptyCharacter
-    , drag = Draggable.init
-    , position = ( 0, 0 )
-    , windowWidth = 0
     , ui = Ui.emptyUi
     }
         |> Cmd.Extra.withCmd
@@ -68,7 +66,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Browser.Events.onResize Msg.SetWindowSize
-        , Draggable.subscriptions Msg.DragMsg model.drag
+        , Draggable.subscriptions Msg.DragMsg model.ui.drag
         ]
 
 
@@ -378,29 +376,70 @@ update msg model =
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetWindowSize x y ->
-            { model | windowWidth = x }
+            x
+                |> asWindowWidthIn model.ui
+                |> asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.SetDragDelta ( dx, dy ) ->
+        Msg.SetDragPosition ( dx, dy ) ->
             let
                 ( x, y ) =
-                    model.position
+                    model.ui.position
             in
-            { model
-                | position =
-                    ( round (toFloat x + dx)
-                    , round (toFloat y + dy)
+            ( round (toFloat x + dx)
+            , round (toFloat y + dy)
+            )
+                |> asPositionIn model.ui
+                |> Ui.calculateColumns
+                |> asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetDragElement card ->
+            Just card
+                |> asDraggedCardIn model.ui
+                |> asUiIn model
+                |> Cmd.Extra.withCmd
+                    (Browser.Dom.getElement (Ui.cardId card)
+                        |> Task.map .element
+                        |> Task.attempt
+                            (Result.map (Msg.SetDragElementData)
+                                >> Result.withDefault Msg.NoOp
+                            )
                     )
-            }
+
+        Msg.SetDragElementData data ->
+            ( round (data.x)
+            , round (data.y)
+            )
+                |> asPositionIn model.ui
+                |> asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ClearDragElementOnClick _ ->
+            Nothing
+                |> asDraggedCardIn model.ui
+                |> asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ClearDragElementOnDragEnd ->
+            Nothing
+                |> asDraggedCardIn model.ui
+                |> asUiIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.DragMsg dragMsg ->
-            Draggable.update dragConfig dragMsg model
+            Draggable.update dragConfig dragMsg model.ui
+                |> Tuple.mapFirst (asUiIn model)
 
 
-dragConfig : Draggable.Config String Msg
+dragConfig : Draggable.Config Ui.Card Msg
 dragConfig =
-    Draggable.basicConfig Msg.SetDragDelta
+    Draggable.customConfig
+        [ Draggable.Events.onDragBy Msg.SetDragPosition
+        , Draggable.Events.onMouseDown Msg.SetDragElement
+        , Draggable.Events.onDragEnd Msg.ClearDragElementOnDragEnd
+        , Draggable.Events.onClick Msg.ClearDragElementOnClick
+        ]
 
 
 asCharacterIn : Model -> Character.Character -> Model
@@ -446,3 +485,23 @@ asExperienceIn character value =
 asInformationIn : Character.Character -> Character.Information -> Character.Character
 asInformationIn character info =
     { character | info = info }
+
+
+asUiIn : Model -> Ui.Ui -> Model
+asUiIn model ui =
+    { model | ui = ui }
+
+
+asWindowWidthIn : Ui.Ui -> Int -> Ui.Ui
+asWindowWidthIn ui width =
+    { ui | windowWidth = width }
+
+
+asPositionIn : Ui.Ui -> ( Int, Int ) -> Ui.Ui
+asPositionIn ui position =
+    { ui | position = position }
+
+
+asDraggedCardIn : Ui.Ui -> Maybe Ui.Card -> Ui.Ui
+asDraggedCardIn ui card =
+    { ui | draggedCard = card }
