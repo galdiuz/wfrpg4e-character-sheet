@@ -1,31 +1,27 @@
 module Ui exposing (..)
 
+import Dict exposing (Dict)
 import Draggable
 import List.Extra
 
 
 type alias Ui =
-    { columns : List (List Card)
+    { cardHeights : Dict String Int
+    , columns : List (List Card)
     , drag : Draggable.State Card
+    , dragPosition : ( Int, Int )
     , draggedCard : Maybe Card
-    , position : ( Int, Int )
     , windowWidth : Int
     }
 
 
+emptyUi : Ui
 emptyUi =
-    { columns =
-        [ [ Information
-          , C12cs
-          , Experience
-          ]
-        , [ Skills
-          , Talents
-          ]
-        ]
+    { cardHeights = Dict.empty
+    , columns = []
     , drag = Draggable.init
     , draggedCard = Nothing
-    , position = ( 0, 0 )
+    , dragPosition = ( 0, 0 )
     , windowWidth = 0
     }
 
@@ -36,6 +32,24 @@ type Card
     | Information
     | Skills
     | Talents
+
+
+allCards : List Card
+allCards =
+    [ C12cs
+    , Experience
+    , Information
+    , Skills
+    , Talents
+    ]
+
+
+type alias CardUi =
+    { card : Card
+    , height : Int
+    , preferredColumn : Int
+    , preferredRow : Int
+    }
 
 
 cardId : Card -> String
@@ -58,35 +72,61 @@ cardTitle card =
         Talents -> "Talents"
 
 
-calculateColumns : Ui -> Ui
-calculateColumns ui =
+calculateColumns : Int -> List (List Card)
+calculateColumns width =
+    List.Extra.indexedFoldl
+        (\index card columns ->
+            List.Extra.updateAt
+                (modBy (columnCount width) index)
+                (\cards ->
+                    List.append cards [ card ]
+                )
+                columns
+        )
+        (List.repeat (columnCount width) [])
+        allCards
+
+
+updateDraggedCard : Ui -> Ui
+updateDraggedCard ui =
     case ui.draggedCard of
         Just card ->
             let
                 ( x, y ) =
-                    ui.position
+                    ui.dragPosition
 
-                ind =
-                    getColumnIndex ui x
+                column =
+                    getColumnIndex ui (x + getColumnWidth ui // 2)
+                        |> max 0
+                        |> min (columnCount ui.windowWidth - 1)
             in
-            if cardColumn ui.columns card /= ind then
-                { ui
-                    | columns =
-                        List.indexedMap
-                            (\index cards ->
-                                if ind == index then
-                                    List.append
-                                        (List.Extra.remove card cards)
-                                        (List.singleton card)
-
-                                else
-                                    List.Extra.remove card cards
+            { ui
+                | columns =
+                    ui.columns
+                        |> List.map (List.filter ((/=) card))
+                        |> List.Extra.updateAt
+                            column
+                            (List.filter ((/=) card)
+                                >> List.foldl
+                                    (\c (totalHeight, list) ->
+                                        let
+                                            cardHeight =
+                                                Dict.get (cardId c) ui.cardHeights
+                                                    |> Maybe.withDefault 0
+                                        in
+                                        ( totalHeight + cardHeight
+                                        , List.append
+                                            list
+                                            [ ( totalHeight + cardHeight // 2, c ) ]
+                                        )
+                                    )
+                                    ( 0, [] )
+                                >> Tuple.second
+                                >> (::) ( y, card )
+                                >> List.sortBy Tuple.first
+                                >> List.map Tuple.second
                             )
-                            ui.columns
-                }
-
-            else
-                ui
+            }
 
         Nothing ->
             ui
@@ -118,3 +158,15 @@ getColumnIndex ui x =
 getColumnWidth : Ui -> Int
 getColumnWidth ui =
     ui.windowWidth // columnCount ui.windowWidth
+
+
+updateWindowWidth : Ui -> Int -> Ui
+updateWindowWidth ui width =
+    if ui.windowWidth == 0 || columnCount ui.windowWidth /= columnCount width then
+        { ui
+            | columns = calculateColumns width
+            , windowWidth = width
+        }
+
+    else
+        { ui | windowWidth = width }

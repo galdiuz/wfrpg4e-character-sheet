@@ -35,6 +35,7 @@ type Msg
     | SetDragElementData Element
     | ClearDragElementOnClick Ui.Card
     | ClearDragElementOnDragEnd
+    | SetCardData Ui.Card Element
 
 
 type alias Element =

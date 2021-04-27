@@ -6,6 +6,7 @@ import Browser.Events
 import Browser.Navigation
 import Character
 import Cmd.Extra
+import Dict
 import Draggable
 import Draggable.Events
 import File
@@ -376,42 +377,62 @@ update msg model =
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetWindowSize x y ->
-            x
-                |> asWindowWidthIn model.ui
+            Ui.updateWindowWidth model.ui x
                 |> asUiIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetDragPosition ( dx, dy ) ->
             let
                 ( x, y ) =
-                    model.ui.position
+                    model.ui.dragPosition
             in
             ( round (toFloat x + dx)
             , round (toFloat y + dy)
             )
-                |> asPositionIn model.ui
-                |> Ui.calculateColumns
+                |> asDragPositionIn model.ui
+                |> Ui.updateDraggedCard
                 |> asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.SetDragElement card ->
-            Just card
+        Msg.SetDragElement cardType ->
+            Just cardType
                 |> asDraggedCardIn model.ui
                 |> asUiIn model
                 |> Cmd.Extra.withCmd
-                    (Browser.Dom.getElement (Ui.cardId card)
+                    (Browser.Dom.getElement (Ui.cardId cardType)
                         |> Task.map .element
                         |> Task.attempt
                             (Result.map (Msg.SetDragElementData)
                                 >> Result.withDefault Msg.NoOp
                             )
                     )
+                |> Cmd.Extra.addCmds
+                    (List.map
+                        (\card ->
+                            Browser.Dom.getElement (Ui.cardId card)
+                                |> Task.map .element
+                                |> Task.attempt
+                                    (Result.map (Msg.SetCardData card)
+                                        >> Result.withDefault Msg.NoOp
+                                    )
+                        )
+                        Ui.allCards
+                    )
+
+        Msg.SetCardData card data ->
+            Dict.insert
+                (Ui.cardId card)
+                (round data.height)
+                model.ui.cardHeights
+                |> asCardHeightsIn model.ui
+                |> asUiIn model
+                |> Cmd.Extra.withNoCmd
 
         Msg.SetDragElementData data ->
             ( round (data.x)
             , round (data.y)
             )
-                |> asPositionIn model.ui
+                |> asDragPositionIn model.ui
                 |> asUiIn model
                 |> Cmd.Extra.withNoCmd
 
@@ -497,11 +518,15 @@ asWindowWidthIn ui width =
     { ui | windowWidth = width }
 
 
-asPositionIn : Ui.Ui -> ( Int, Int ) -> Ui.Ui
-asPositionIn ui position =
-    { ui | position = position }
+asDragPositionIn : Ui.Ui -> ( Int, Int ) -> Ui.Ui
+asDragPositionIn ui dragPosition =
+    { ui | dragPosition = dragPosition }
 
 
 asDraggedCardIn : Ui.Ui -> Maybe Ui.Card -> Ui.Ui
 asDraggedCardIn ui card =
     { ui | draggedCard = card }
+
+
+asCardHeightsIn ui cardHeights =
+    { ui | cardHeights = cardHeights }

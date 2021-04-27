@@ -28,8 +28,9 @@ viewDraggedCard model =
         Just card ->
             Html.div
                 [ HA.style "position" "absolute"
-                , HA.style "left" (String.fromInt (Tuple.first model.ui.position) ++ "px")
-                , HA.style "top" (String.fromInt (Tuple.second model.ui.position) ++ "px")
+                , HA.style "left" (String.fromInt (Tuple.first model.ui.dragPosition) ++ "px")
+                , HA.style "top" (String.fromInt (Tuple.second model.ui.dragPosition) ++ "px")
+                , HA.style "width" (String.fromInt (Ui.getColumnWidth model.ui) ++ "px")
                 ]
                 [ viewCard model card ]
 
@@ -54,7 +55,7 @@ viewContent model =
         (List.map
             (\cards ->
                 Html.div
-                    [ HA.style "width" "50%"
+                    [ HA.style "width" (String.fromInt (Ui.getColumnWidth model.ui) ++ "px")
                     ]
                     (List.map
                         (\card ->
@@ -77,6 +78,8 @@ viewCard : Model -> Ui.Card -> Html Msg
 viewCard model card =
     Html.div
         [ HA.class "card"
+        , HA.style "border" "solid"
+        , HA.style "border-width" "1px"
         ]
         [ Html.div
             []
