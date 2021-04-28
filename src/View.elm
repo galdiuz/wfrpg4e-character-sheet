@@ -108,6 +108,9 @@ viewCard model card =
 
             Ui.Talents ->
                 viewTalents model
+
+            Ui.Trappings ->
+                viewTrappings model
         ]
 
 
@@ -555,3 +558,50 @@ viewAdjustmentRow index adjustment =
                 }
             ]
         ]
+
+
+viewTrappings : Model -> Html Msg
+viewTrappings model =
+    Html.div
+        [ HA.style "display" "grid"
+        , HA.style "grid-template-columns" "[name] auto [enc] 40px"
+        ]
+        (List.concat
+            [ [ Html.div
+                [ HA.style "grid-column" "name" ]
+                [ Html.text "Name" ]
+              , Html.div
+                [ HA.style "grid-column" "enc" ]
+                [ Html.text "Enc" ]
+              ]
+            , (List.indexedMap
+                (\index trapping ->
+                    [ Html.div
+                        [ HA.style "grid-column" "name" ]
+                        [ viewTextInput
+                            { onInput = Msg.SetTrappingName index
+                            , value = trapping.name
+                            }
+                        ]
+                    , Html.div
+                        [ HA.style "grid-column" "enc" ]
+                        [ viewNumberInput
+                            { onInput = Msg.SetTrappingEncumbrance index
+                            , value = trapping.encumbrance
+                            }
+                        ]
+                    ]
+                )
+                model.character.trappings
+                |> List.concat
+              )
+            , [ Html.div
+                []
+                [ viewButton
+                    { onClick = Msg.AddTrapping
+                    , text = "Add"
+                    }
+                ]
+              ]
+            ]
+        )

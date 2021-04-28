@@ -36,6 +36,9 @@ type Msg
     | ClearDragElementOnClick Ui.Card
     | ClearDragElementOnDragEnd
     | SetCardData Ui.Card Element
+    | AddTrapping
+    | SetTrappingName Int String
+    | SetTrappingEncumbrance Int String
 
 
 type alias Element =

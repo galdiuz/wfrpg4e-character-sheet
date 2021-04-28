@@ -32,6 +32,7 @@ type Card
     | Information
     | Skills
     | Talents
+    | Trappings
 
 
 allCards : List Card
@@ -41,6 +42,7 @@ allCards =
     , Information
     , Skills
     , Talents
+    , Trappings
     ]
 
 
@@ -60,6 +62,7 @@ cardId card =
         Information -> "information"
         Skills -> "skills"
         Talents -> "talents"
+        Trappings -> "trappings"
 
 
 cardTitle : Card -> String
@@ -70,6 +73,7 @@ cardTitle card =
         Information -> "Information"
         Skills -> "Skills"
         Talents -> "Talents"
+        Trappings -> "Trappings"
 
 
 calculateColumns : Int -> List (List Card)
@@ -90,39 +94,32 @@ calculateColumns width =
 updateDraggedCard : Ui -> Ui
 updateDraggedCard ui =
     case ui.draggedCard of
-        Just card ->
-            let
-                ( x, y ) =
-                    ui.dragPosition
-
-                column =
-                    getColumnIndex ui (x + getColumnWidth ui // 2)
-                        |> max 0
-                        |> min (columnCount ui.windowWidth - 1)
-            in
+        Just draggedCard ->
             { ui
                 | columns =
                     ui.columns
-                        |> List.map (List.filter ((/=) card))
+                        |> List.map (List.filter ((/=) draggedCard))
                         |> List.Extra.updateAt
-                            column
-                            (List.filter ((/=) card)
-                                >> List.foldl
-                                    (\c (totalHeight, list) ->
-                                        let
-                                            cardHeight =
-                                                Dict.get (cardId c) ui.cardHeights
-                                                    |> Maybe.withDefault 0
-                                        in
-                                        ( totalHeight + cardHeight
-                                        , List.append
-                                            list
-                                            [ ( totalHeight + cardHeight // 2, c ) ]
-                                        )
+                            (getColumnIndex ui (Tuple.first ui.dragPosition + getColumnWidth ui // 2)
+                                |> max 0
+                                |> min (columnCount ui.windowWidth - 1)
+                            )
+                            (List.foldl
+                                (\card (totalHeight, list) ->
+                                    let
+                                        cardHeight =
+                                            Dict.get (cardId card) ui.cardHeights
+                                                |> Maybe.withDefault 0
+                                    in
+                                    ( totalHeight + cardHeight
+                                    , List.append
+                                        list
+                                        [ ( totalHeight + cardHeight // 2, card ) ]
                                     )
-                                    ( 0, [] )
+                                )
+                                ( 0, [] )
                                 >> Tuple.second
-                                >> (::) ( y, card )
+                                >> (::) ( Tuple.second ui.dragPosition, draggedCard )
                                 >> List.sortBy Tuple.first
                                 >> List.map Tuple.second
                             )

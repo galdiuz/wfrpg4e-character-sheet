@@ -6,7 +6,7 @@ import Browser.Events
 import Browser.Navigation
 import Character
 import Cmd.Extra
-import Dict
+import Dict exposing (Dict)
 import Draggable
 import Draggable.Events
 import File
@@ -452,6 +452,57 @@ update msg model =
             Draggable.update dragConfig dragMsg model.ui
                 |> Tuple.mapFirst (asUiIn model)
 
+        Msg.AddTrapping ->
+            List.append
+                model.character.trappings
+                [ Character.emptyTrapping ]
+                |> asTrappingsIn model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetTrappingName index str ->
+            List.Extra.updateAt
+                index
+                (\trapping ->
+                    { trapping | name = str }
+                )
+                model.character.trappings
+                |> asTrappingsIn model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetTrappingEncumbrance index str ->
+            case String.toInt str of
+                Just value ->
+                    if value >= 0 && value <= 99 then
+                        List.Extra.updateAt
+                            index
+                            (\trapping ->
+                                { trapping | encumbrance = value }
+                            )
+                            model.character.trappings
+                            |> asTrappingsIn model.character
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+                Nothing ->
+                    if String.isEmpty str then
+                        List.Extra.updateAt
+                            index
+                            (\trapping ->
+                                { trapping | encumbrance = 0 }
+                            )
+                            model.character.trappings
+                            |> asTrappingsIn model.character
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
 
 dragConfig : Draggable.Config Ui.Card Msg
 dragConfig =
@@ -528,5 +579,11 @@ asDraggedCardIn ui card =
     { ui | draggedCard = card }
 
 
+asCardHeightsIn : Ui.Ui -> Dict String Int -> Ui.Ui
 asCardHeightsIn ui cardHeights =
     { ui | cardHeights = cardHeights }
+
+
+asTrappingsIn : Character.Character -> List Character.Trapping -> Character.Character
+asTrappingsIn character trappings =
+    { character | trappings = trappings }

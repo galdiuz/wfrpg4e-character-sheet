@@ -10,6 +10,7 @@ type alias Character =
     , experience : Int
     , expAdjustments : List ExpAdjustment
     , info : Information
+    , trappings : List Trapping
     }
 
 
@@ -23,6 +24,7 @@ emptyCharacter =
     , experience = 0
     , expAdjustments = []
     , info = emptyInformation
+    , trappings = []
     }
 
 
@@ -494,3 +496,16 @@ spentExp character =
         , talentsCost character.talents
         , expAdjustmentsCost character.expAdjustments
         ]
+
+
+type alias Trapping =
+    { encumbrance : Int
+    , name : String
+    }
+
+
+emptyTrapping : Trapping
+emptyTrapping =
+    { encumbrance = 0
+    , name = ""
+    }

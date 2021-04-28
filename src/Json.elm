@@ -18,6 +18,7 @@ encodeCharacter character =
         , ( "experience", Encode.int character.experience )
         , ( "expAdjustments", Encode.list encodeExpAdjustment character.expAdjustments )
         , ( "info", encodeInformation character.info )
+        , ( "trappings", Encode.list encodeTrapping character.trappings )
         ]
 
 
@@ -79,6 +80,14 @@ encodeExpAdjustment adjustment =
         ]
 
 
+encodeTrapping : Character.Trapping -> Encode.Value
+encodeTrapping trapping =
+    Encode.object
+        [ ( "encumbrance", Encode.int trapping.encumbrance )
+        , ( "name", Encode.string trapping.name )
+        ]
+
+
 decodeCharacter : Decode.Decoder Character.Character
 decodeCharacter =
     Field.require "c12csInitial" decodeC12cs <| \c12csInitial ->
@@ -89,6 +98,7 @@ decodeCharacter =
     Field.require "experience" Decode.int <| \experience ->
     Field.require "expAdjustments" (Decode.list decodeExpAdjustment) <| \expAdjustments ->
     Field.require "info" decodeInformation <| \info ->
+    Field.require "trappings" (Decode.list decodeTrapping) <| \trappings ->
     Decode.succeed
         { c12csInitial = c12csInitial
         , c12csAdvances = c12csAdvances
@@ -98,6 +108,7 @@ decodeCharacter =
         , experience = experience
         , expAdjustments = expAdjustments
         , info = info
+        , trappings = trappings
         }
 
 
@@ -198,3 +209,15 @@ decodeExpAdjustment =
         )
         (Decode.field "description" Decode.string)
         (Decode.field "value" Decode.int)
+
+
+decodeTrapping : Decode.Decoder Character.Trapping
+decodeTrapping =
+    Decode.map2
+        (\encumbrance name ->
+            { encumbrance = encumbrance
+            , name = name
+            }
+        )
+        (Decode.field "encumbrance" Decode.int)
+        (Decode.field "name" Decode.string)
