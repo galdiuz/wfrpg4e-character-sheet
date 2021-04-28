@@ -19,6 +19,7 @@ encodeCharacter character =
         , ( "expAdjustments", Encode.list encodeExpAdjustment character.expAdjustments )
         , ( "info", encodeInformation character.info )
         , ( "trappings", Encode.list encodeTrapping character.trappings )
+        , ( "wealth", encodeWealth character.wealth )
         ]
 
 
@@ -88,6 +89,15 @@ encodeTrapping trapping =
         ]
 
 
+encodeWealth : Character.Wealth -> Encode.Value
+encodeWealth wealth =
+    Encode.object
+        [ ( "brass", Encode.int wealth.brass )
+        , ( "gold", Encode.int wealth.gold )
+        , ( "silver", Encode.int wealth.silver )
+        ]
+
+
 decodeCharacter : Decode.Decoder Character.Character
 decodeCharacter =
     Field.require "c12csInitial" decodeC12cs <| \c12csInitial ->
@@ -99,6 +109,7 @@ decodeCharacter =
     Field.require "expAdjustments" (Decode.list decodeExpAdjustment) <| \expAdjustments ->
     Field.require "info" decodeInformation <| \info ->
     Field.require "trappings" (Decode.list decodeTrapping) <| \trappings ->
+    Field.require "wealth" decodeWealth <| \wealth ->
     Decode.succeed
         { c12csInitial = c12csInitial
         , c12csAdvances = c12csAdvances
@@ -109,6 +120,7 @@ decodeCharacter =
         , expAdjustments = expAdjustments
         , info = info
         , trappings = trappings
+        , wealth = wealth
         }
 
 
@@ -221,3 +233,17 @@ decodeTrapping =
         )
         (Decode.field "encumbrance" Decode.int)
         (Decode.field "name" Decode.string)
+
+
+decodeWealth : Decode.Decoder Character.Wealth
+decodeWealth =
+    Decode.map3
+        (\brass gold silver ->
+            { brass = brass
+            , gold = gold
+            , silver = silver
+            }
+        )
+        (Decode.field "brass" Decode.int)
+        (Decode.field "gold" Decode.int)
+        (Decode.field "silver" Decode.int)

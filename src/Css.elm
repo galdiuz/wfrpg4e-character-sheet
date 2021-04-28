@@ -13,6 +13,6 @@ css =
 }
 
 .number-input {
-    width: 30px;
+    width: 40px;
 }
     """

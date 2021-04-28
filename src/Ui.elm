@@ -33,6 +33,7 @@ type Card
     | Skills
     | Talents
     | Trappings
+    | Wealth
 
 
 allCards : List Card
@@ -43,6 +44,7 @@ allCards =
     , Skills
     , Talents
     , Trappings
+    , Wealth
     ]
 
 
@@ -63,6 +65,7 @@ cardId card =
         Skills -> "skills"
         Talents -> "talents"
         Trappings -> "trappings"
+        Wealth -> "wealth"
 
 
 cardTitle : Card -> String
@@ -74,6 +77,7 @@ cardTitle card =
         Skills -> "Skills"
         Talents -> "Talents"
         Trappings -> "Trappings"
+        Wealth -> "Wealth"
 
 
 calculateColumns : Int -> List (List Card)

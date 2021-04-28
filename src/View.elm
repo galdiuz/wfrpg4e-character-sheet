@@ -111,6 +111,9 @@ viewCard model card =
 
             Ui.Trappings ->
                 viewTrappings model
+
+            Ui.Wealth ->
+                viewWealth model
         ]
 
 
@@ -605,3 +608,63 @@ viewTrappings model =
               ]
             ]
         )
+
+
+viewWealth : Model -> Html Msg
+viewWealth model =
+    Html.div
+        []
+        [ Html.div
+            []
+            [ Html.text "G"
+            , viewNumberInput
+                { onInput = Msg.SetWealthGold
+                , value = model.character.wealth.gold
+                }
+            , Html.text "/"
+            , viewNumberInput
+                { onInput = Msg.SetWealthSilver
+                , value = model.character.wealth.silver
+                }
+            , Html.text "d"
+            , viewNumberInput
+                { onInput = Msg.SetWealthBrass
+                , value = model.character.wealth.brass
+                }
+            ]
+        , Html.div
+            []
+            [ viewButton
+                { onClick = Msg.ConvertOneGoldToSilver
+                , text = ">"
+                }
+            , viewButton
+                { onClick = Msg.ConvertAllGoldToSilver
+                , text = ">>"
+                }
+            , viewButton
+                { onClick = Msg.ConvertAllSilverToGold
+                , text = "<<"
+                }
+            , viewButton
+                { onClick = Msg.ConvertOneSilverToGold
+                , text = "<"
+                }
+            , viewButton
+                { onClick = Msg.ConvertOneSilverToBrass
+                , text = ">"
+                }
+            , viewButton
+                { onClick = Msg.ConvertAllSilverToBrass
+                , text = ">>"
+                }
+            , viewButton
+                { onClick = Msg.ConvertAllBrassToSilver
+                , text = "<<"
+                }
+            , viewButton
+                { onClick = Msg.ConvertOneBrassToSilver
+                , text = "<"
+                }
+            ]
+        ]

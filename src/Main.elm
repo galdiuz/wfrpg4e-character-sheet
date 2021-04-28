@@ -503,6 +503,106 @@ update msg model =
                     else
                         Cmd.Extra.withNoCmd model
 
+        Msg.SetWealthGold str ->
+            case String.toInt str of
+                Just value ->
+                    if value >= 0 then
+                        Character.setGold model.character value
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+                Nothing ->
+                    if String.isEmpty str then
+                        Character.setGold model.character 0
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+        Msg.SetWealthSilver str ->
+            case String.toInt str of
+                Just value ->
+                    if value >= 0 then
+                        Character.setSilver model.character value
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+                Nothing ->
+                    if String.isEmpty str then
+                        Character.setSilver model.character 0
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+        Msg.SetWealthBrass str ->
+            case String.toInt str of
+                Just value ->
+                    if value >= 0 then
+                        Character.setBrass model.character value
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+                Nothing ->
+                    if String.isEmpty str then
+                        Character.setBrass model.character 0
+                            |> asCharacterIn model
+                            |> Cmd.Extra.withNoCmd
+
+                    else
+                        Cmd.Extra.withNoCmd model
+
+        Msg.ConvertAllSilverToGold ->
+            Character.convertAllSilverToGold model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ConvertOneSilverToGold ->
+            Character.convertOneSilverToGold model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ConvertAllSilverToBrass ->
+            Character.convertAllSilverToBrass model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ConvertOneSilverToBrass ->
+            Character.convertOneSilverToBrass model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ConvertAllGoldToSilver ->
+            Character.convertAllGoldToSilver model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ConvertOneGoldToSilver ->
+            Character.convertOneGoldToSilver model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ConvertAllBrassToSilver ->
+            Character.convertAllBrassToSilver model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ConvertOneBrassToSilver ->
+            Character.convertOneBrassToSilver model.character
+                |> asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
 
 dragConfig : Draggable.Config Ui.Card Msg
 dragConfig =

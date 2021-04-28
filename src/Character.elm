@@ -11,6 +11,7 @@ type alias Character =
     , expAdjustments : List ExpAdjustment
     , info : Information
     , trappings : List Trapping
+    , wealth : Wealth
     }
 
 
@@ -25,6 +26,7 @@ emptyCharacter =
     , expAdjustments = []
     , info = emptyInformation
     , trappings = []
+    , wealth = emptyWealth
     }
 
 
@@ -509,3 +511,128 @@ emptyTrapping =
     { encumbrance = 0
     , name = ""
     }
+
+
+type alias Wealth =
+    { brass : Int
+    , gold : Int
+    , silver : Int
+    }
+
+
+emptyWealth =
+    { brass = 0
+    , gold = 0
+    , silver = 0
+    }
+
+
+setGold : Character -> Int -> Character
+setGold ({ wealth } as character) value =
+    { wealth | gold = value }
+        |> setWealth character
+
+
+setSilver : Character -> Int -> Character
+setSilver ({ wealth } as character) value =
+    { wealth | silver = value }
+        |> setWealth character
+
+
+setBrass : Character -> Int -> Character
+setBrass ({ wealth } as character) value =
+    { wealth | brass = value }
+        |> setWealth character
+
+
+setWealth : Character -> Wealth -> Character
+setWealth character wealth =
+    { character | wealth = wealth }
+
+
+convertAllSilverToGold : Character -> Character
+convertAllSilverToGold ({ wealth } as character) =
+    { wealth
+        | gold = wealth.gold + wealth.silver // 20
+        , silver = modBy 20 wealth.silver
+    }
+        |> setWealth character
+
+
+convertOneSilverToGold : Character -> Character
+convertOneSilverToGold ({ wealth } as character) =
+    if wealth.silver >= 20 then
+        { wealth
+            | gold = wealth.gold + 1
+            , silver = wealth.silver - 20
+        }
+            |> setWealth character
+
+    else
+        character
+
+
+convertAllBrassToSilver : Character -> Character
+convertAllBrassToSilver ({ wealth } as character) =
+    { wealth
+        | brass = modBy 12 wealth.brass
+        , silver = wealth.silver + wealth.brass // 12
+    }
+        |> setWealth character
+
+
+convertOneBrassToSilver : Character -> Character
+convertOneBrassToSilver ({ wealth } as character) =
+    if wealth.brass >= 12 then
+        { wealth
+            | brass = wealth.brass - 12
+            , silver = wealth.silver + 1
+        }
+            |> setWealth character
+
+    else
+        character
+
+
+convertAllGoldToSilver : Character -> Character
+convertAllGoldToSilver ({ wealth } as character) =
+    { wealth
+        | gold = 0
+        , silver = wealth.silver + wealth.gold * 20
+    }
+        |> setWealth character
+
+
+convertOneGoldToSilver : Character -> Character
+convertOneGoldToSilver ({ wealth } as character) =
+    if wealth.gold >= 1 then
+        { wealth
+            | gold = wealth.gold - 1
+            , silver = wealth.silver + 20
+        }
+            |> setWealth character
+
+    else
+        character
+
+
+convertAllSilverToBrass : Character -> Character
+convertAllSilverToBrass ({ wealth } as character) =
+    { wealth
+        | brass = wealth.brass + wealth.silver * 12
+        , silver = 0
+    }
+        |> setWealth character
+
+
+convertOneSilverToBrass : Character -> Character
+convertOneSilverToBrass ({ wealth } as character) =
+    if wealth.silver >= 1 then
+        { wealth
+            | brass = wealth.brass + 12
+            , silver = wealth.silver - 1
+        }
+            |> setWealth character
+
+    else
+        character

@@ -39,6 +39,17 @@ type Msg
     | AddTrapping
     | SetTrappingName Int String
     | SetTrappingEncumbrance Int String
+    | SetWealthGold String
+    | SetWealthSilver String
+    | SetWealthBrass String
+    | ConvertAllSilverToGold
+    | ConvertOneSilverToGold
+    | ConvertAllSilverToBrass
+    | ConvertOneSilverToBrass
+    | ConvertAllBrassToSilver
+    | ConvertOneBrassToSilver
+    | ConvertAllGoldToSilver
+    | ConvertOneGoldToSilver
 
 
 type alias Element =
