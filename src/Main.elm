@@ -12,7 +12,6 @@ import Draggable.Events
 import File
 import File.Download
 import File.Select
-import Json
 import Json.Decode
 import Json.Encode
 import List.Extra
@@ -346,7 +345,7 @@ update msg model =
 
         Msg.Save ->
             ( model
-            , Json.Encode.encode 0 (Json.encodeCharacter model.character)
+            , Json.Encode.encode 0 (Character.encodeCharacter model.character)
                 |> File.Download.string "file.json" "application/json"
             )
 
@@ -361,7 +360,7 @@ update msg model =
             )
 
         Msg.LoadString str ->
-            case Json.Decode.decodeString Json.decodeCharacter str of
+            case Json.Decode.decodeString Character.decodeCharacter str of
                 Ok character ->
                     character
                         |> asCharacterIn model
