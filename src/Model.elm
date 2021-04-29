@@ -1,4 +1,4 @@
-module Model exposing (Model)
+module Model exposing (..)
 
 import Character
 import Ui
@@ -9,3 +9,13 @@ type alias Model =
     { character : Character.Character
     , ui : Ui.Ui
     }
+
+
+asCharacterIn : Model -> Character.Character -> Model
+asCharacterIn model character =
+    { model | character = character }
+
+
+asUiIn : Model -> Ui.Ui -> Model
+asUiIn model ui =
+    { model | ui = ui }

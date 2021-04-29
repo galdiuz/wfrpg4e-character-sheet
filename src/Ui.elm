@@ -171,3 +171,29 @@ updateWindowWidth ui width =
 
     else
         { ui | windowWidth = width }
+
+
+setWindowWidth : Int -> Ui ->  Ui
+setWindowWidth width ui =
+    { ui | windowWidth = width }
+
+
+setDragPosition : ( Int, Int ) -> Ui -> Ui
+setDragPosition dragPosition ui =
+    { ui | dragPosition = dragPosition }
+
+
+setDraggedCard : Maybe Card -> Ui -> Ui
+setDraggedCard card ui =
+    { ui | draggedCard = card }
+
+
+setCardHeight : Card -> Int -> Ui -> Ui
+setCardHeight card height ui =
+    { ui
+        | cardHeights =
+            Dict.insert
+                (cardId card)
+                height
+                ui.cardHeights
+    }

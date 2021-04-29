@@ -14,7 +14,6 @@ import File.Download
 import File.Select
 import Json.Decode
 import Json.Encode
-import List.Extra
 import Model exposing (Model)
 import Msg as Msg exposing (Msg)
 import Task
@@ -77,271 +76,119 @@ update msg model =
             Cmd.Extra.withNoCmd model
 
         Msg.SetC12csAdvances c12c str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 && value <= 99 then
-                        Character.setC12c value c12c model.character.c12csAdvances
-                            |> asC12csAdvancesIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    if String.isEmpty str then
-                        Character.setC12c 0 c12c model.character.c12csAdvances
-                            |> asC12csAdvancesIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Just 99
+                , string = str
+                , setter = Character.setC12csAdvances c12c
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.SetC12csInitial c12c str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 && value <= 99 then
-                        Character.setC12c value c12c model.character.c12csInitial
-                            |> asC12csInitialIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    if String.isEmpty str then
-                        Character.setC12c 0 c12c model.character.c12csInitial
-                            |> asC12csInitialIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Just 99
+                , string = str
+                , setter = Character.setC12csInitial c12c
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.SetAdvancedSkillAdvances index str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 && value <= 99 then
-                        List.Extra.updateAt
-                            index
-                            (\skill ->
-                                { skill | advances = value }
-                            )
-                            model.character.advancedSkills
-                            |> asAdvancedSkillsIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    if String.isEmpty str then
-                        List.Extra.updateAt
-                            index
-                            (\skill ->
-                                { skill | advances = 0 }
-                            )
-                            model.character.advancedSkills
-                            |> asAdvancedSkillsIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Just 99
+                , string = str
+                , setter = Character.setAdvancedSkillAdvances index
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.SetAdvancedSkillName index str ->
-            List.Extra.updateAt
-                index
-                (\skill ->
-                    { skill | name = str }
-                )
-                model.character.advancedSkills
-                |> asAdvancedSkillsIn model.character
-                |> asCharacterIn model
+            Character.setAdvancedSkillName index str model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetBasicSkillAdvances index str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 && value <= 99 then
-                        List.Extra.updateAt
-                            index
-                            (\skill ->
-                                { skill | advances = value }
-                            )
-                            model.character.basicSkills
-                            |> asBasicSkillsIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    if String.isEmpty str then
-                        List.Extra.updateAt
-                            index
-                            (\skill ->
-                                { skill | advances = 0 }
-                            )
-                            model.character.basicSkills
-                            |> asBasicSkillsIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Just 99
+                , string = str
+                , setter = Character.setBasicSkillAdvances index
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.AddAdvancedSkill ->
-            List.append
-                model.character.advancedSkills
-                [ Character.emptySkill ]
-                |> asAdvancedSkillsIn model.character
-                |> asCharacterIn model
+            Character.addAdvancedSkill model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetAdvancedSkillC12c index str ->
             case Character.c12cFromString str of
                 Ok c12c ->
-                    List.Extra.updateAt
-                        index
-                        (\skill ->
-                            { skill | c12c = c12c }
-                        )
-                        model.character.advancedSkills
-                        |> asAdvancedSkillsIn model.character
-                        |> asCharacterIn model
+                    Character.setAdvancedSkillC12c index c12c model.character
+                        |> Model.asCharacterIn model
                         |> Cmd.Extra.withNoCmd
 
                 Err _ ->
                     Cmd.Extra.withNoCmd model
 
         Msg.AddTalent ->
-            List.append
-                model.character.talents
-                [ Character.emptyTalent ]
-                |> asTalentsIn model.character
-                |> asCharacterIn model
+            Character.addTalent model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetTalentTimesTaken index str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 && value <= 99 then
-                        List.Extra.updateAt
-                            index
-                            (\talent ->
-                                { talent | timesTaken = value }
-                            )
-                            model.character.talents
-                            |> asTalentsIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    if String.isEmpty str then
-                        List.Extra.updateAt
-                            index
-                            (\talents ->
-                                { talents | timesTaken = 0 }
-                            )
-                            model.character.talents
-                            |> asTalentsIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Just 99
+                , string = str
+                , setter = Character.setTalentTimesTaken index
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.SetTalentName index str ->
-            List.Extra.updateAt
-                index
-                (\talent ->
-                    { talent | name = str }
-                )
-                model.character.talents
-                |> asTalentsIn model.character
-                |> asCharacterIn model
+            Character.setTalentName index str model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetTalentDescription index str ->
-            List.Extra.updateAt
-                index
-                (\talent ->
-                    { talent | description = str }
-                )
-                model.character.talents
-                |> asTalentsIn model.character
-                |> asCharacterIn model
+            Character.setTalentDescription index str model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetExperience str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 then
-                        value
-                            |> asExperienceIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Nothing
+                , string = str
+                , setter = Character.setExperience
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.AddExpAdjustment ->
-            List.append
-                model.character.expAdjustments
-                [ Character.emptyExpAdjustment ]
-                |> asExpAdjustmentsIn model.character
-                |> asCharacterIn model
+            Character.addExpAdjustment model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetExpAdjustmentDescription index str ->
-            List.Extra.updateAt
-                index
-                (\talent ->
-                    { talent | description = str }
-                )
-                model.character.expAdjustments
-                |> asExpAdjustmentsIn model.character
-                |> asCharacterIn model
+            Character.setExpAdjustmentDescription index str model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetExpAdjustmentValue index str ->
-            case String.toInt str of
-                Just value ->
-                    List.Extra.updateAt
-                        index
-                        (\adjustment ->
-                            { adjustment | value = value }
-                        )
-                        model.character.expAdjustments
-                        |> asExpAdjustmentsIn model.character
-                        |> asCharacterIn model
-                        |> Cmd.Extra.withNoCmd
-
-                Nothing ->
-                    if String.isEmpty str then
-                        List.Extra.updateAt
-                            index
-                            (\adjustment ->
-                                { adjustment | value = 0 }
-                            )
-                            model.character.expAdjustments
-                            |> asExpAdjustmentsIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Nothing
+                , max = Nothing
+                , string = str
+                , setter = Character.setExpAdjustmentValue index
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.Save ->
             ( model
@@ -363,21 +210,20 @@ update msg model =
             case Json.Decode.decodeString Character.decodeCharacter str of
                 Ok character ->
                     character
-                        |> asCharacterIn model
+                        |> Model.asCharacterIn model
                         |> Cmd.Extra.withNoCmd
 
                 Err err ->
                     Cmd.Extra.withNoCmd model
 
         Msg.SetInformation field value ->
-            Character.setInformation field value model.character.info
-                |> asInformationIn model.character
-                |> asCharacterIn model
+            Character.setInformation field value model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetWindowSize x y ->
             Ui.updateWindowWidth model.ui x
-                |> asUiIn model
+                |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetDragPosition ( dx, dy ) ->
@@ -385,18 +231,18 @@ update msg model =
                 ( x, y ) =
                     model.ui.dragPosition
             in
-            ( round (toFloat x + dx)
-            , round (toFloat y + dy)
-            )
-                |> asDragPositionIn model.ui
+            Ui.setDragPosition
+                ( round (toFloat x + dx)
+                , round (toFloat y + dy)
+                )
+                model.ui
                 |> Ui.updateDraggedCard
-                |> asUiIn model
+                |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetDragElement cardType ->
-            Just cardType
-                |> asDraggedCardIn model.ui
-                |> asUiIn model
+            Ui.setDraggedCard (Just cardType) model.ui
+                |> Model.asUiIn model
                 |> Cmd.Extra.withCmd
                     (Browser.Dom.getElement (Ui.cardId cardType)
                         |> Task.map .element
@@ -419,187 +265,121 @@ update msg model =
                     )
 
         Msg.SetCardData card data ->
-            Dict.insert
-                (Ui.cardId card)
-                (round data.height)
-                model.ui.cardHeights
-                |> asCardHeightsIn model.ui
-                |> asUiIn model
+            Ui.setCardHeight card (round data.height) model.ui
+                |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetDragElementData data ->
-            ( round (data.x)
-            , round (data.y)
-            )
-                |> asDragPositionIn model.ui
-                |> asUiIn model
+            Ui.setDragPosition
+                ( round (data.x)
+                , round (data.y)
+                )
+                model.ui
+                |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.ClearDragElementOnClick _ ->
-            Nothing
-                |> asDraggedCardIn model.ui
-                |> asUiIn model
+            Ui.setDraggedCard Nothing model.ui
+                |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.ClearDragElementOnDragEnd ->
-            Nothing
-                |> asDraggedCardIn model.ui
-                |> asUiIn model
+            Ui.setDraggedCard Nothing model.ui
+                |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.DragMsg dragMsg ->
             Draggable.update dragConfig dragMsg model.ui
-                |> Tuple.mapFirst (asUiIn model)
+                |> Tuple.mapFirst (Model.asUiIn model)
 
         Msg.AddTrapping ->
-            List.append
-                model.character.trappings
-                [ Character.emptyTrapping ]
-                |> asTrappingsIn model.character
-                |> asCharacterIn model
+            Character.addTrapping model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetTrappingName index str ->
-            List.Extra.updateAt
-                index
-                (\trapping ->
-                    { trapping | name = str }
-                )
-                model.character.trappings
-                |> asTrappingsIn model.character
-                |> asCharacterIn model
+            Character.setTrappingName index str model.character
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetTrappingEncumbrance index str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 && value <= 99 then
-                        List.Extra.updateAt
-                            index
-                            (\trapping ->
-                                { trapping | encumbrance = value }
-                            )
-                            model.character.trappings
-                            |> asTrappingsIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    if String.isEmpty str then
-                        List.Extra.updateAt
-                            index
-                            (\trapping ->
-                                { trapping | encumbrance = 0 }
-                            )
-                            model.character.trappings
-                            |> asTrappingsIn model.character
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Just 99
+                , string = str
+                , setter = Character.setTrappingEncumbrance index
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.SetWealthGold str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 then
-                        Character.setGold model.character value
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    if String.isEmpty str then
-                        Character.setGold model.character 0
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Nothing
+                , string = str
+                , setter = Character.setGold
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.SetWealthSilver str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 then
-                        Character.setSilver model.character value
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    if String.isEmpty str then
-                        Character.setSilver model.character 0
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Nothing
+                , string = str
+                , setter = Character.setSilver
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.SetWealthBrass str ->
-            case String.toInt str of
-                Just value ->
-                    if value >= 0 then
-                        Character.setBrass model.character value
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
-
-                Nothing ->
-                    if String.isEmpty str then
-                        Character.setBrass model.character 0
-                            |> asCharacterIn model
-                            |> Cmd.Extra.withNoCmd
-
-                    else
-                        Cmd.Extra.withNoCmd model
+            parseIntAndSet
+                { min = Just 0
+                , max = Nothing
+                , string = str
+                , setter = Character.setBrass
+                }
+                model
+                |> Cmd.Extra.withNoCmd
 
         Msg.ConvertAllSilverToGold ->
             Character.convertAllSilverToGold model.character
-                |> asCharacterIn model
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.ConvertOneSilverToGold ->
             Character.convertOneSilverToGold model.character
-                |> asCharacterIn model
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.ConvertAllSilverToBrass ->
             Character.convertAllSilverToBrass model.character
-                |> asCharacterIn model
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.ConvertOneSilverToBrass ->
             Character.convertOneSilverToBrass model.character
-                |> asCharacterIn model
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.ConvertAllGoldToSilver ->
             Character.convertAllGoldToSilver model.character
-                |> asCharacterIn model
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.ConvertOneGoldToSilver ->
             Character.convertOneGoldToSilver model.character
-                |> asCharacterIn model
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.ConvertAllBrassToSilver ->
             Character.convertAllBrassToSilver model.character
-                |> asCharacterIn model
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.ConvertOneBrassToSilver ->
             Character.convertOneBrassToSilver model.character
-                |> asCharacterIn model
+                |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
 
@@ -613,76 +393,43 @@ dragConfig =
         ]
 
 
-asCharacterIn : Model -> Character.Character -> Model
-asCharacterIn model character =
-    { model | character = character }
+parseIntAndSet :
+    { min : Maybe Int
+    , max : Maybe Int
+    , string : String
+    , setter : Int -> Character.Character -> Character.Character
+    }
+    -> Model
+    -> Model
+parseIntAndSet data model =
+    case String.toInt data.string of
+        Just value ->
+            let
+                condition =
+                    case ( data.min, data.max ) of
+                        ( Just min, Just max ) ->
+                            value >= min && value <= max
 
+                        ( Just min, Nothing ) ->
+                            value >= min
 
-asC12csAdvancesIn : Character.Character -> Character.C12cs -> Character.Character
-asC12csAdvancesIn character c12cs =
-    { character | c12csAdvances = c12cs }
+                        ( Nothing, Just max ) ->
+                            value <= max
 
+                        ( Nothing, Nothing ) ->
+                            True
+            in
+            if condition then
+                data.setter value model.character
+                    |> Model.asCharacterIn model
 
-asC12csInitialIn : Character.Character -> Character.C12cs -> Character.Character
-asC12csInitialIn character c12cs =
-    { character | c12csInitial = c12cs }
+            else
+                model
 
+        Nothing ->
+            if String.isEmpty data.string then
+                data.setter 0 model.character
+                    |> Model.asCharacterIn model
 
-asBasicSkillsIn : Character.Character -> List Character.Skill -> Character.Character
-asBasicSkillsIn character skills =
-    { character | basicSkills = skills }
-
-
-asAdvancedSkillsIn : Character.Character -> List Character.Skill -> Character.Character
-asAdvancedSkillsIn character skills =
-    { character | advancedSkills = skills }
-
-
-asTalentsIn : Character.Character -> List Character.Talent -> Character.Character
-asTalentsIn character talents =
-    { character | talents = talents }
-
-
-asExpAdjustmentsIn : Character.Character -> List Character.ExpAdjustment -> Character.Character
-asExpAdjustmentsIn character adjustments =
-    { character | expAdjustments = adjustments }
-
-
-asExperienceIn : Character.Character -> Int -> Character.Character
-asExperienceIn character value =
-    { character | experience = value }
-
-
-asInformationIn : Character.Character -> Character.Information -> Character.Character
-asInformationIn character info =
-    { character | info = info }
-
-
-asUiIn : Model -> Ui.Ui -> Model
-asUiIn model ui =
-    { model | ui = ui }
-
-
-asWindowWidthIn : Ui.Ui -> Int -> Ui.Ui
-asWindowWidthIn ui width =
-    { ui | windowWidth = width }
-
-
-asDragPositionIn : Ui.Ui -> ( Int, Int ) -> Ui.Ui
-asDragPositionIn ui dragPosition =
-    { ui | dragPosition = dragPosition }
-
-
-asDraggedCardIn : Ui.Ui -> Maybe Ui.Card -> Ui.Ui
-asDraggedCardIn ui card =
-    { ui | draggedCard = card }
-
-
-asCardHeightsIn : Ui.Ui -> Dict String Int -> Ui.Ui
-asCardHeightsIn ui cardHeights =
-    { ui | cardHeights = cardHeights }
-
-
-asTrappingsIn : Character.Character -> List Character.Trapping -> Character.Character
-asTrappingsIn character trappings =
-    { character | trappings = trappings }
+            else
+                model

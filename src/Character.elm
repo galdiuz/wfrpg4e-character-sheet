@@ -4,6 +4,7 @@ import Json.Decode as Decode
 import Json.Decode.Extra
 import Json.Decode.Field as Field
 import Json.Encode as Encode
+import List.Extra
 
 
 type alias Character =
@@ -276,6 +277,16 @@ c12cCost value =
         230 * (value - 45) + 3825
 
 
+setC12csAdvances : C12c -> Int -> Character -> Character
+setC12csAdvances c12c value character =
+    { character | c12csAdvances = setC12c value c12c character.c12csAdvances }
+
+
+setC12csInitial : C12c -> Int -> Character -> Character
+setC12csInitial c12c value character =
+    { character | c12csInitial = setC12c value c12c character.c12csInitial }
+
+
 encodeC12cs : C12cs -> Encode.Value
 encodeC12cs c12cs =
     Encode.object
@@ -365,6 +376,42 @@ spentExp character =
         ]
 
 
+addExpAdjustment : Character -> Character
+addExpAdjustment character =
+    { character | expAdjustments = character.expAdjustments ++ [ emptyExpAdjustment ] }
+
+
+setExperience : Int -> Character -> Character
+setExperience value character =
+    { character | experience = value }
+
+
+setExpAdjustmentDescription : Int -> String -> Character -> Character
+setExpAdjustmentDescription index value character =
+    { character
+        | expAdjustments =
+            List.Extra.updateAt
+                index
+                (\expAdjustment ->
+                    { expAdjustment | description = value }
+                )
+                character.expAdjustments
+    }
+
+
+setExpAdjustmentValue : Int -> Int -> Character -> Character
+setExpAdjustmentValue index value character =
+    { character
+        | expAdjustments =
+            List.Extra.updateAt
+                index
+                (\expAdjustment ->
+                    { expAdjustment | value = value }
+                )
+                character.expAdjustments
+    }
+
+
 encodeExpAdjustment : ExpAdjustment -> Encode.Value
 encodeExpAdjustment adjustment =
     Encode.object
@@ -417,20 +464,23 @@ emptyInformation =
     }
 
 
-setInformation : String -> String -> Information -> Information
-setInformation field value info =
-    case field of
-        "age" -> { info | age = value }
-        "career" -> { info | career = value }
-        "careerPath" -> { info | careerPath = value }
-        "class" -> { info | class = value }
-        "eyes" -> { info | eyes = value }
-        "hair" -> { info | hair = value }
-        "height" -> { info | height = value }
-        "name" -> { info | name = value }
-        "species" -> { info | species = value }
-        "status" -> { info | status = value }
-        _ -> info
+setInformation : String -> String -> Character -> Character
+setInformation field value ({ info } as character) =
+    { character
+        | info =
+            case field of
+                "age" -> { info | age = value }
+                "career" -> { info | career = value }
+                "careerPath" -> { info | careerPath = value }
+                "class" -> { info | class = value }
+                "eyes" -> { info | eyes = value }
+                "hair" -> { info | hair = value }
+                "height" -> { info | height = value }
+                "name" -> { info | name = value }
+                "species" -> { info | species = value }
+                "status" -> { info | status = value }
+                _ -> info
+    }
 
 
 encodeInformation : Information -> Encode.Value
@@ -646,6 +696,63 @@ skillsCost skills =
         skills
 
 
+addAdvancedSkill : Character -> Character
+addAdvancedSkill character =
+    { character | advancedSkills = character.advancedSkills ++ [ emptySkill ] }
+
+
+setAdvancedSkillAdvances : Int -> Int -> Character -> Character
+setAdvancedSkillAdvances index value character =
+    { character
+        | advancedSkills =
+            List.Extra.updateAt
+                index
+                (\skill ->
+                    { skill | advances = value }
+                )
+                character.advancedSkills
+    }
+
+
+setAdvancedSkillC12c : Int -> C12c -> Character -> Character
+setAdvancedSkillC12c index value character =
+    { character
+        | advancedSkills =
+            List.Extra.updateAt
+                index
+                (\skill ->
+                    { skill | c12c = value }
+                )
+                character.advancedSkills
+    }
+
+
+setAdvancedSkillName : Int -> String -> Character -> Character
+setAdvancedSkillName index value character =
+    { character
+        | advancedSkills =
+            List.Extra.updateAt
+                index
+                (\skill ->
+                    { skill | name = value }
+                )
+                character.advancedSkills
+    }
+
+
+setBasicSkillAdvances : Int -> Int -> Character -> Character
+setBasicSkillAdvances index value character =
+    { character
+        | basicSkills =
+            List.Extra.updateAt
+                index
+                (\skill ->
+                    { skill | advances = value }
+                )
+                character.basicSkills
+    }
+
+
 encodeSkill : Skill -> Encode.Value
 encodeSkill skill =
     Encode.object
@@ -697,6 +804,50 @@ talentsCost talents =
         talents
 
 
+addTalent : Character -> Character
+addTalent character =
+    { character | talents = character.talents ++ [ emptyTalent ] }
+
+
+setTalentDescription : Int -> String -> Character -> Character
+setTalentDescription index value character =
+    { character
+        | talents =
+            List.Extra.updateAt
+                index
+                (\talent ->
+                    { talent | description = value }
+                )
+                character.talents
+    }
+
+
+setTalentName : Int -> String -> Character -> Character
+setTalentName index value character =
+    { character
+        | talents =
+            List.Extra.updateAt
+                index
+                (\talent ->
+                    { talent | name = value }
+                )
+                character.talents
+    }
+
+
+setTalentTimesTaken : Int -> Int -> Character -> Character
+setTalentTimesTaken index value character =
+    { character
+        | talents =
+            List.Extra.updateAt
+                index
+                (\talent ->
+                    { talent | timesTaken = value }
+                )
+                character.talents
+    }
+
+
 encodeTalent : Talent -> Encode.Value
 encodeTalent talent =
     Encode.object
@@ -733,6 +884,37 @@ emptyTrapping : Trapping
 emptyTrapping =
     { encumbrance = 0
     , name = ""
+    }
+
+
+addTrapping : Character -> Character
+addTrapping character =
+    { character | trappings = character.trappings ++ [ emptyTrapping ] }
+
+
+setTrappingEncumbrance : Int -> Int -> Character -> Character
+setTrappingEncumbrance index value character =
+    { character
+        | trappings =
+            List.Extra.updateAt
+                index
+                (\trapping ->
+                    { trapping | encumbrance = value }
+                )
+                character.trappings
+    }
+
+
+setTrappingName : Int -> String -> Character -> Character
+setTrappingName index value character =
+    { character
+        | trappings =
+            List.Extra.updateAt
+                index
+                (\trapping ->
+                    { trapping | name = value }
+                )
+                character.trappings
     }
 
 
@@ -774,26 +956,26 @@ emptyWealth =
     }
 
 
-setGold : Character -> Int -> Character
-setGold ({ wealth } as character) value =
+setGold : Int -> Character -> Character
+setGold value ({ wealth } as character) =
     { wealth | gold = value }
-        |> setWealth character
+        |> asWealthIn character
 
 
-setSilver : Character -> Int -> Character
-setSilver ({ wealth } as character) value =
+setSilver : Int -> Character -> Character
+setSilver value ({ wealth } as character) =
     { wealth | silver = value }
-        |> setWealth character
+        |> asWealthIn character
 
 
-setBrass : Character -> Int -> Character
-setBrass ({ wealth } as character) value =
+setBrass : Int -> Character -> Character
+setBrass value ({ wealth } as character) =
     { wealth | brass = value }
-        |> setWealth character
+        |> asWealthIn character
 
 
-setWealth : Character -> Wealth -> Character
-setWealth character wealth =
+asWealthIn : Character -> Wealth -> Character
+asWealthIn character wealth =
     { character | wealth = wealth }
 
 
@@ -803,7 +985,7 @@ convertAllSilverToGold ({ wealth } as character) =
         | gold = wealth.gold + wealth.silver // 20
         , silver = modBy 20 wealth.silver
     }
-        |> setWealth character
+        |> asWealthIn character
 
 
 convertOneSilverToGold : Character -> Character
@@ -813,7 +995,7 @@ convertOneSilverToGold ({ wealth } as character) =
             | gold = wealth.gold + 1
             , silver = wealth.silver - 20
         }
-            |> setWealth character
+            |> asWealthIn character
 
     else
         character
@@ -825,7 +1007,7 @@ convertAllBrassToSilver ({ wealth } as character) =
         | brass = modBy 12 wealth.brass
         , silver = wealth.silver + wealth.brass // 12
     }
-        |> setWealth character
+        |> asWealthIn character
 
 
 convertOneBrassToSilver : Character -> Character
@@ -835,7 +1017,7 @@ convertOneBrassToSilver ({ wealth } as character) =
             | brass = wealth.brass - 12
             , silver = wealth.silver + 1
         }
-            |> setWealth character
+            |> asWealthIn character
 
     else
         character
@@ -847,7 +1029,7 @@ convertAllGoldToSilver ({ wealth } as character) =
         | gold = 0
         , silver = wealth.silver + wealth.gold * 20
     }
-        |> setWealth character
+        |> asWealthIn character
 
 
 convertOneGoldToSilver : Character -> Character
@@ -857,7 +1039,7 @@ convertOneGoldToSilver ({ wealth } as character) =
             | gold = wealth.gold - 1
             , silver = wealth.silver + 20
         }
-            |> setWealth character
+            |> asWealthIn character
 
     else
         character
@@ -869,7 +1051,7 @@ convertAllSilverToBrass ({ wealth } as character) =
         | brass = wealth.brass + wealth.silver * 12
         , silver = 0
     }
-        |> setWealth character
+        |> asWealthIn character
 
 
 convertOneSilverToBrass : Character -> Character
@@ -879,7 +1061,7 @@ convertOneSilverToBrass ({ wealth } as character) =
             | brass = wealth.brass + 12
             , silver = wealth.silver - 1
         }
-            |> setWealth character
+            |> asWealthIn character
 
     else
         character
