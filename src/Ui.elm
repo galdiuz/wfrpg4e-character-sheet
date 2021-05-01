@@ -27,7 +27,8 @@ emptyUi =
 
 
 type Card
-    = C12cs
+    = Armour
+    | C12cs
     | Experience
     | Information
     | Skills
@@ -39,7 +40,8 @@ type Card
 
 allCards : List Card
 allCards =
-    [ C12cs
+    [ Armour
+    , C12cs
     , Experience
     , Information
     , Skills
@@ -61,6 +63,7 @@ type alias CardUi =
 cardId : Card -> String
 cardId card =
     case card of
+        Armour -> "armour"
         C12cs -> "characteristics"
         Experience -> "experience"
         Information -> "information"
@@ -74,6 +77,7 @@ cardId card =
 cardTitle : Card -> String
 cardTitle card =
     case card of
+        Armour -> "Armour"
         C12cs -> "Characteristics"
         Experience -> "Experience"
         Information -> "Information"

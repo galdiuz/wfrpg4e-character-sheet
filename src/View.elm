@@ -94,6 +94,9 @@ viewCard model card =
                 [ Html.text "Drag" ]
             ]
         , case card of
+            Ui.Armour ->
+                viewArmour model
+
             Ui.C12cs ->
                 viewC12cs model
 
@@ -196,28 +199,48 @@ viewC12cs : Model -> Html Msg
 viewC12cs model =
     Html.div
         [ HA.style "display" "grid"
-        , HA.style "flex-wrap" "wrap"
+        , HA.style "grid-template-columns" "auto auto auto auto"
         ]
-        (List.map (viewC12c model) Character.allC12cs)
-
-
-viewC12c model c12c =
-    Html.div
-        []
-        [ Html.text (Character.c12cToFullString c12c)
-        , viewNumberInput
-            { onInput = Msg.SetC12csInitial c12c
-            , value = Character.getC12c c12c model.character.c12csInitial
-            }
-        , viewNumberInput
-            { onInput = Msg.SetC12csAdvances c12c
-            , value = Character.getC12c c12c model.character.c12csAdvances
-            }
-        , Character.getC12cs model.character
-            |> Character.getC12c c12c
-            |> String.fromInt
-            |> Html.text
-        ]
+        (List.concat
+            [ [ Html.span
+                []
+                [ Html.text "Characteristic" ]
+              , Html.span
+                []
+                [ Html.text "Initial" ]
+              , Html.span
+                []
+                [ Html.text "Advances" ]
+              , Html.span
+                []
+                [ Html.text "Current" ]
+              ]
+            , List.map
+                (\c12c ->
+                    [ Html.span
+                        []
+                        [ Html.text (Character.c12cToFullString c12c) ]
+                    , viewNumberInput
+                        { onInput = Msg.SetC12csInitial c12c
+                        , value = Character.getC12c c12c model.character.c12csInitial
+                        }
+                    , viewNumberInput
+                        { onInput = Msg.SetC12csAdvances c12c
+                        , value = Character.getC12c c12c model.character.c12csAdvances
+                        }
+                    , Html.span
+                        []
+                        [ Character.getC12cs model.character
+                            |> Character.getC12c c12c
+                            |> String.fromInt
+                            |> Html.text
+                        ]
+                    ]
+                )
+                Character.allC12cs
+                |> List.concat
+            ]
+        )
 
 
 type alias TextInputData msg =
@@ -685,7 +708,6 @@ viewWeapons model =
                         -- Group Enc Qualities
                         [ HA.style "display" "flex"
                         , HA.style "flex-flow" "row wrap"
-                        , HA.style "width" "100%"
                         ]
                         [ Html.div
                             [ HA.style "width" "50%"
@@ -747,6 +769,50 @@ viewWeapons model =
               )
             , [ viewButton
                 { onClick = Msg.AddWeapon
+                , text = "Add"
+                }
+              ]
+            ]
+        )
+
+
+viewArmour : Model -> Html Msg
+viewArmour model =
+    Html.div
+        []
+        (List.concat
+            [ (List.indexedMap
+                (\index armour ->
+                    Html.div
+                        [ HA.style "display" "flex"
+                        -- , HA.style "flex-flow" "row wrap"
+                        ]
+                        [ viewTextInput
+                            { onInput = Msg.SetArmourName index
+                            , value = armour.name
+                            }
+                        , viewTextInput
+                            { onInput = Msg.SetArmourLocations index
+                            , value = armour.locations
+                            }
+                        , viewNumberInput
+                            { onInput = Msg.SetArmourEncumbrance index
+                            , value = armour.encumbrance
+                            }
+                        , viewNumberInput
+                            { onInput = Msg.SetArmourAp index
+                            , value = armour.ap
+                            }
+                        , viewTextInput
+                            { onInput = Msg.SetArmourQualities index
+                            , value = armour.qualities
+                            }
+                        ]
+                )
+                model.character.armour
+              )
+            , [ viewButton
+                { onClick = Msg.AddArmour
                 , text = "Add"
                 }
               ]

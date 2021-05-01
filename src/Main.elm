@@ -398,6 +398,42 @@ update msg model =
                 |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
+        Msg.AddArmour ->
+            Character.addArmour model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetArmourAp index str ->
+            parseIntAndSet
+                { string = str
+                , setter = Character.setArmourAp index
+                }
+                model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetArmourEncumbrance index str ->
+            parseIntAndSet
+                { string = str
+                , setter = Character.setArmourEncumbrance index
+                }
+                model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetArmourLocations index str ->
+            Character.setArmourLocations index str model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetArmourName index str ->
+            Character.setArmourName index str model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetArmourQualities index str ->
+            Character.setArmourQualities index str model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
 
 dragConfig : Draggable.Config Ui.Card Msg
 dragConfig =

@@ -9,6 +9,7 @@ import List.Extra
 
 type alias Character =
     { advancedSkills : List Skill
+    , armour : List Armour
     , basicSkills : List Skill
     , c12csAdvances : C12cs
     , c12csInitial : C12cs
@@ -25,6 +26,7 @@ type alias Character =
 emptyCharacter : Character
 emptyCharacter =
     { advancedSkills = []
+    , armour = []
     , basicSkills = basicSkillsList
     , c12csAdvances = emptyC12cs
     , c12csInitial = emptyC12cs
@@ -42,6 +44,7 @@ encodeCharacter : Character -> Encode.Value
 encodeCharacter character =
     Encode.object
         [ ( "advancedSkills", Encode.list encodeSkill character.advancedSkills )
+        , ( "armour", Encode.list encodeArmour character.armour )
         , ( "basicSkills", Encode.list encodeSkill character.basicSkills )
         , ( "c12csAdvances", encodeC12cs character.c12csAdvances )
         , ( "c12csInitial", encodeC12cs character.c12csInitial )
@@ -58,6 +61,7 @@ encodeCharacter character =
 decodeCharacter : Decode.Decoder Character
 decodeCharacter =
     Field.require "advancedSkills" (Decode.list decodeSkill) <| \advancedSkills ->
+    Field.require "armour" (Decode.list decodeArmour) <| \armour ->
     Field.require "basicSkills" (Decode.list decodeSkill) <| \basicSkills ->
     Field.require "c12csAdvances" decodeC12cs <| \c12csAdvances ->
     Field.require "c12csInitial" decodeC12cs <| \c12csInitial ->
@@ -70,6 +74,7 @@ decodeCharacter =
     Field.require "weapons" (Decode.list decodeWeapon) <| \weapons ->
     Decode.succeed
         { advancedSkills = advancedSkills
+        , armour = armour
         , basicSkills = basicSkills
         , c12csAdvances = c12csAdvances
         , c12csInitial = c12csInitial
@@ -86,6 +91,127 @@ decodeCharacter =
 minMax : Int -> Int -> Int -> Int
 minMax min max value =
     Basics.min max (Basics.max min value)
+
+------------
+-- Armour --
+------------
+
+type alias Armour =
+    { ap : Int
+    , encumbrance : Int
+    , locations : String
+    , name : String
+    , qualities : String
+    }
+
+
+emptyArmour : Armour
+emptyArmour =
+    { ap = 0
+    , encumbrance = 0
+    , locations = ""
+    , name = ""
+    , qualities = ""
+    }
+
+
+addArmour : Character -> Character
+addArmour character =
+    { character | armour = character.armour ++ [ emptyArmour ] }
+
+
+setArmourAp : Int -> Int -> Character -> Character
+setArmourAp index value character =
+    { character |
+        armour =
+            List.Extra.updateAt
+                index
+                (\armour ->
+                    { armour | ap = max 0 value }
+                )
+                character.armour
+    }
+
+
+setArmourEncumbrance : Int -> Int -> Character -> Character
+setArmourEncumbrance index value character =
+    { character |
+        armour =
+            List.Extra.updateAt
+                index
+                (\armour ->
+                    { armour | encumbrance = max 0 value }
+                )
+                character.armour
+    }
+
+
+setArmourLocations : Int -> String -> Character -> Character
+setArmourLocations index value character =
+    { character |
+        armour =
+            List.Extra.updateAt
+                index
+                (\armour ->
+                    { armour | locations = value }
+                )
+                character.armour
+    }
+
+
+setArmourName : Int -> String -> Character -> Character
+setArmourName index value character =
+    { character |
+        armour =
+            List.Extra.updateAt
+                index
+                (\armour ->
+                    { armour | name = value }
+                )
+                character.armour
+    }
+
+
+setArmourQualities : Int -> String -> Character -> Character
+setArmourQualities index value character =
+    { character |
+        armour =
+            List.Extra.updateAt
+                index
+                (\armour ->
+                    { armour | qualities = value }
+                )
+                character.armour
+    }
+
+
+encodeArmour : Armour -> Encode.Value
+encodeArmour armour =
+    Encode.object
+        [ ( "ap", Encode.int armour.ap )
+        , ( "encumbrance", Encode.int armour.encumbrance )
+        , ( "locations", Encode.string armour.locations )
+        , ( "name", Encode.string armour.name )
+        , ( "qualities", Encode.string armour.qualities )
+        ]
+
+
+decodeArmour : Decode.Decoder Armour
+decodeArmour =
+    Decode.map5
+        (\ap encumbrance locations name qualities ->
+            { ap = ap
+            , encumbrance = encumbrance
+            , locations = locations
+            , name = name
+            , qualities = qualities
+            }
+        )
+        (Decode.field "ap" Decode.int)
+        (Decode.field "encumbrance" Decode.int)
+        (Decode.field "locations" Decode.string)
+        (Decode.field "name" Decode.string)
+        (Decode.field "qualities" Decode.string)
 
 ---------------------
 -- Characteristics --
@@ -1217,6 +1343,7 @@ encodeWeapon weapon =
         , ( "qualities", Encode.string weapon.qualities )
         , ( "range", Encode.string weapon.range )
         ]
+
 
 decodeWeapon : Decode.Decoder Weapon
 decodeWeapon =

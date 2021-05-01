@@ -57,6 +57,12 @@ type Msg
     | SetWeaponName Int String
     | SetWeaponQualities Int String
     | SetWeaponRange Int String
+    | AddArmour
+    | SetArmourAp Int String
+    | SetArmourEncumbrance Int String
+    | SetArmourLocations Int String
+    | SetArmourName Int String
+    | SetArmourQualities Int String
 
 
 type alias Element =
