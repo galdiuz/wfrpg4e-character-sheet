@@ -114,6 +114,9 @@ viewCard model card =
 
             Ui.Wealth ->
                 viewWealth model
+
+            Ui.Weapons ->
+                viewWeapons model
         ]
 
 
@@ -668,3 +671,84 @@ viewWealth model =
                 }
             ]
         ]
+
+
+viewWeapons : Model -> Html Msg
+viewWeapons model =
+    Html.div
+        []
+        (List.concat
+            [ (List.indexedMap
+                  (\index weapon ->
+                    Html.div
+                        -- Name     Damage Range
+                        -- Group Enc Qualities
+                        [ HA.style "display" "flex"
+                        , HA.style "flex-flow" "row wrap"
+                        , HA.style "width" "100%"
+                        ]
+                        [ Html.div
+                            [ HA.style "width" "50%"
+                            ]
+                            [ Html.text "Name"
+                            , viewTextInput
+                                { onInput = Msg.SetWeaponName index
+                                , value = weapon.name
+                                }
+                            ]
+                        , Html.div
+                            [ HA.style "width" "25%"
+                            ]
+                            [ Html.text "Damage"
+                            , viewTextInput
+                                { onInput = Msg.SetWeaponDamage index
+                                , value = weapon.damage
+                                }
+                            ]
+                        , Html.div
+                            [ HA.style "width" "25%"
+                            ]
+                            [ Html.text "Group"
+                            , viewTextInput
+                                { onInput = Msg.SetWeaponGroup index
+                                , value = weapon.group
+                                }
+                            ]
+                        , Html.div
+                            [ HA.style "width" "25%"
+                            ]
+                            [ Html.text "Encumbrance"
+                            , viewNumberInput
+                                { onInput = Msg.SetWeaponEncumbrance index
+                                , value = weapon.encumbrance
+                                }
+                            ]
+                        , Html.div
+                            [ HA.style "width" "25%"
+                            ]
+                            [ Html.text "Range/Reach"
+                            , viewTextInput
+                                { onInput = Msg.SetWeaponRange index
+                                , value = weapon.range
+                                }
+                            ]
+                        , Html.div
+                            [ HA.style "width" "50%"
+                            ]
+                            [ Html.text "Qualities"
+                            , viewTextInput
+                                { onInput = Msg.SetWeaponQualities index
+                                , value = weapon.qualities
+                                }
+                            ]
+                        ]
+                  )
+                model.character.weapons
+              )
+            , [ viewButton
+                { onClick = Msg.AddWeapon
+                , text = "Add"
+                }
+              ]
+            ]
+        )

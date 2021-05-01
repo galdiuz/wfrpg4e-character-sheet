@@ -77,9 +77,7 @@ update msg model =
 
         Msg.SetC12csAdvances c12c str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Just 99
-                , string = str
+                { string = str
                 , setter = Character.setC12csAdvances c12c
                 }
                 model
@@ -87,9 +85,7 @@ update msg model =
 
         Msg.SetC12csInitial c12c str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Just 99
-                , string = str
+                { string = str
                 , setter = Character.setC12csInitial c12c
                 }
                 model
@@ -97,9 +93,7 @@ update msg model =
 
         Msg.SetAdvancedSkillAdvances index str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Just 99
-                , string = str
+                { string = str
                 , setter = Character.setAdvancedSkillAdvances index
                 }
                 model
@@ -112,9 +106,7 @@ update msg model =
 
         Msg.SetBasicSkillAdvances index str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Just 99
-                , string = str
+                { string = str
                 , setter = Character.setBasicSkillAdvances index
                 }
                 model
@@ -142,9 +134,7 @@ update msg model =
 
         Msg.SetTalentTimesTaken index str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Just 99
-                , string = str
+                { string = str
                 , setter = Character.setTalentTimesTaken index
                 }
                 model
@@ -162,9 +152,7 @@ update msg model =
 
         Msg.SetExperience str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Nothing
-                , string = str
+                { string = str
                 , setter = Character.setExperience
                 }
                 model
@@ -182,9 +170,7 @@ update msg model =
 
         Msg.SetExpAdjustmentValue index str ->
             parseIntAndSet
-                { min = Nothing
-                , max = Nothing
-                , string = str
+                { string = str
                 , setter = Character.setExpAdjustmentValue index
                 }
                 model
@@ -304,9 +290,7 @@ update msg model =
 
         Msg.SetTrappingEncumbrance index str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Just 99
-                , string = str
+                { string = str
                 , setter = Character.setTrappingEncumbrance index
                 }
                 model
@@ -314,9 +298,7 @@ update msg model =
 
         Msg.SetWealthGold str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Nothing
-                , string = str
+                { string = str
                 , setter = Character.setGold
                 }
                 model
@@ -324,9 +306,7 @@ update msg model =
 
         Msg.SetWealthSilver str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Nothing
-                , string = str
+                { string = str
                 , setter = Character.setSilver
                 }
                 model
@@ -334,9 +314,7 @@ update msg model =
 
         Msg.SetWealthBrass str ->
             parseIntAndSet
-                { min = Just 0
-                , max = Nothing
-                , string = str
+                { string = str
                 , setter = Character.setBrass
                 }
                 model
@@ -382,6 +360,44 @@ update msg model =
                 |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
+        Msg.AddWeapon ->
+            Character.addWeapon model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetWeaponDamage index str ->
+            Character.setWeaponDamage index str model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetWeaponEncumbrance index str ->
+            parseIntAndSet
+                { string = str
+                , setter = Character.setWeaponEncumbrance index
+                }
+                model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetWeaponGroup index str ->
+            Character.setWeaponGroup index str model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetWeaponName index str ->
+            Character.setWeaponName index str model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetWeaponQualities index str ->
+            Character.setWeaponQualities index str model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetWeaponRange index str ->
+            Character.setWeaponRange index str model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
 
 dragConfig : Draggable.Config Ui.Card Msg
 dragConfig =
@@ -394,9 +410,7 @@ dragConfig =
 
 
 parseIntAndSet :
-    { min : Maybe Int
-    , max : Maybe Int
-    , string : String
+    { string : String
     , setter : Int -> Character.Character -> Character.Character
     }
     -> Model
@@ -404,27 +418,8 @@ parseIntAndSet :
 parseIntAndSet data model =
     case String.toInt data.string of
         Just value ->
-            let
-                condition =
-                    case ( data.min, data.max ) of
-                        ( Just min, Just max ) ->
-                            value >= min && value <= max
-
-                        ( Just min, Nothing ) ->
-                            value >= min
-
-                        ( Nothing, Just max ) ->
-                            value <= max
-
-                        ( Nothing, Nothing ) ->
-                            True
-            in
-            if condition then
-                data.setter value model.character
-                    |> Model.asCharacterIn model
-
-            else
-                model
+            data.setter value model.character
+                |> Model.asCharacterIn model
 
         Nothing ->
             if String.isEmpty data.string then

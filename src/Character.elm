@@ -18,6 +18,7 @@ type alias Character =
     , talents : List Talent
     , trappings : List Trapping
     , wealth : Wealth
+    , weapons : List Weapon
     }
 
 
@@ -33,6 +34,7 @@ emptyCharacter =
     , talents = []
     , trappings = []
     , wealth = emptyWealth
+    , weapons = []
     }
 
 
@@ -49,6 +51,7 @@ encodeCharacter character =
         , ( "talents", Encode.list encodeTalent character.talents )
         , ( "trappings", Encode.list encodeTrapping character.trappings )
         , ( "wealth", encodeWealth character.wealth )
+        , ( "weapons", Encode.list encodeWeapon character.weapons )
         ]
 
 
@@ -64,6 +67,7 @@ decodeCharacter =
     Field.require "talents" (Decode.list decodeTalent) <| \talents ->
     Field.require "trappings" (Decode.list decodeTrapping) <| \trappings ->
     Field.require "wealth" decodeWealth <| \wealth ->
+    Field.require "weapons" (Decode.list decodeWeapon) <| \weapons ->
     Decode.succeed
         { advancedSkills = advancedSkills
         , basicSkills = basicSkills
@@ -75,7 +79,13 @@ decodeCharacter =
         , talents = talents
         , trappings = trappings
         , wealth = wealth
+        , weapons = weapons
         }
+
+
+minMax : Int -> Int -> Int -> Int
+minMax min max value =
+    Basics.min max (Basics.max min value)
 
 ---------------------
 -- Characteristics --
@@ -279,12 +289,12 @@ c12cCost value =
 
 setC12csAdvances : C12c -> Int -> Character -> Character
 setC12csAdvances c12c value character =
-    { character | c12csAdvances = setC12c value c12c character.c12csAdvances }
+    { character | c12csAdvances = setC12c (minMax 0 99 value) c12c character.c12csAdvances }
 
 
 setC12csInitial : C12c -> Int -> Character -> Character
 setC12csInitial c12c value character =
-    { character | c12csInitial = setC12c value c12c character.c12csInitial }
+    { character | c12csInitial = setC12c (minMax 0 99 value) c12c character.c12csInitial }
 
 
 encodeC12cs : C12cs -> Encode.Value
@@ -383,7 +393,7 @@ addExpAdjustment character =
 
 setExperience : Int -> Character -> Character
 setExperience value character =
-    { character | experience = value }
+    { character | experience = max 0 value }
 
 
 setExpAdjustmentDescription : Int -> String -> Character -> Character
@@ -708,7 +718,7 @@ setAdvancedSkillAdvances index value character =
             List.Extra.updateAt
                 index
                 (\skill ->
-                    { skill | advances = value }
+                    { skill | advances = minMax 0 99 value }
                 )
                 character.advancedSkills
     }
@@ -747,7 +757,7 @@ setBasicSkillAdvances index value character =
             List.Extra.updateAt
                 index
                 (\skill ->
-                    { skill | advances = value }
+                    { skill | advances = minMax 0 99 value }
                 )
                 character.basicSkills
     }
@@ -842,7 +852,7 @@ setTalentTimesTaken index value character =
             List.Extra.updateAt
                 index
                 (\talent ->
-                    { talent | timesTaken = value }
+                    { talent | timesTaken = minMax 0 99 value }
                 )
                 character.talents
     }
@@ -899,7 +909,7 @@ setTrappingEncumbrance index value character =
             List.Extra.updateAt
                 index
                 (\trapping ->
-                    { trapping | encumbrance = value }
+                    { trapping | encumbrance = minMax 0 99 value }
                 )
                 character.trappings
     }
@@ -958,19 +968,19 @@ emptyWealth =
 
 setGold : Int -> Character -> Character
 setGold value ({ wealth } as character) =
-    { wealth | gold = value }
+    { wealth | gold = max 0 value }
         |> asWealthIn character
 
 
 setSilver : Int -> Character -> Character
 setSilver value ({ wealth } as character) =
-    { wealth | silver = value }
+    { wealth | silver = max 0 value }
         |> asWealthIn character
 
 
 setBrass : Int -> Character -> Character
 setBrass value ({ wealth } as character) =
-    { wealth | brass = value }
+    { wealth | brass = max 0 value }
         |> asWealthIn character
 
 
@@ -1088,3 +1098,141 @@ decodeWealth =
         (Decode.field "brass" Decode.int)
         (Decode.field "gold" Decode.int)
         (Decode.field "silver" Decode.int)
+
+-------------
+-- Weapons --
+-------------
+
+type alias Weapon =
+    { damage : String
+    , encumbrance : Int
+    , group : String
+    , name : String
+    , qualities : String
+    , range : String
+    }
+
+
+emptyWeapon : Weapon
+emptyWeapon =
+    { damage = ""
+    , encumbrance = 0
+    , group = ""
+    , name = ""
+    , qualities = ""
+    , range = ""
+    }
+
+
+addWeapon : Character -> Character
+addWeapon character =
+    { character | weapons = character.weapons ++ [ emptyWeapon ] }
+
+
+setWeaponDamage : Int -> String -> Character -> Character
+setWeaponDamage index value character =
+    { character |
+        weapons =
+            List.Extra.updateAt
+                index
+                (\weapon ->
+                    { weapon | damage = value }
+                )
+                character.weapons
+    }
+
+
+setWeaponEncumbrance : Int -> Int -> Character -> Character
+setWeaponEncumbrance index value character =
+    { character |
+        weapons =
+            List.Extra.updateAt
+                index
+                (\weapon ->
+                    { weapon | encumbrance = minMax 0 99 value }
+                )
+                character.weapons
+    }
+
+
+setWeaponGroup : Int -> String -> Character -> Character
+setWeaponGroup index value character =
+    { character |
+        weapons =
+            List.Extra.updateAt
+                index
+                (\weapon ->
+                    { weapon | group = value }
+                )
+                character.weapons
+    }
+
+
+setWeaponName : Int -> String -> Character -> Character
+setWeaponName index value character =
+    { character |
+        weapons =
+            List.Extra.updateAt
+                index
+                (\weapon ->
+                    { weapon | name = value }
+                )
+                character.weapons
+    }
+
+
+setWeaponQualities : Int -> String -> Character -> Character
+setWeaponQualities index value character =
+    { character |
+        weapons =
+            List.Extra.updateAt
+                index
+                (\weapon ->
+                    { weapon | qualities = value }
+                )
+                character.weapons
+    }
+
+
+setWeaponRange : Int -> String -> Character -> Character
+setWeaponRange index value character =
+    { character |
+        weapons =
+            List.Extra.updateAt
+                index
+                (\weapon ->
+                    { weapon | range = value }
+                )
+                character.weapons
+    }
+
+
+encodeWeapon : Weapon -> Encode.Value
+encodeWeapon weapon =
+    Encode.object
+        [ ( "damage", Encode.string weapon.damage )
+        , ( "encumbrance", Encode.int weapon.encumbrance )
+        , ( "group", Encode.string weapon.group )
+        , ( "name", Encode.string weapon.name )
+        , ( "qualities", Encode.string weapon.qualities )
+        , ( "range", Encode.string weapon.range )
+        ]
+
+decodeWeapon : Decode.Decoder Weapon
+decodeWeapon =
+    Decode.map6
+        (\damage encumbrance group name qualities range ->
+            { damage = damage
+            , encumbrance = encumbrance
+            , group = group
+            , name = name
+            , qualities = qualities
+            , range = range
+            }
+        )
+        (Decode.field "damage" Decode.string)
+        (Decode.field "encumbrance" Decode.int)
+        (Decode.field "group" Decode.string)
+        (Decode.field "name" Decode.string)
+        (Decode.field "qualities" Decode.string)
+        (Decode.field "range" Decode.string)

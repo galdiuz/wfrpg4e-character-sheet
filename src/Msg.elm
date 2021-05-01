@@ -50,6 +50,13 @@ type Msg
     | ConvertOneBrassToSilver
     | ConvertAllGoldToSilver
     | ConvertOneGoldToSilver
+    | AddWeapon
+    | SetWeaponDamage Int String
+    | SetWeaponEncumbrance Int String
+    | SetWeaponGroup Int String
+    | SetWeaponName Int String
+    | SetWeaponQualities Int String
+    | SetWeaponRange Int String
 
 
 type alias Element =
