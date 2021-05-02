@@ -50,12 +50,12 @@ viewContent : Model -> Html Msg
 viewContent model =
     Html.div
         [ HA.class "content"
-        , HA.style "flex-direction" "row"
         ]
         (List.map
             (\cards ->
                 Html.div
-                    [ HA.style "width" (String.fromInt (Ui.getColumnWidth model.ui) ++ "px")
+                    [ HA.class "content-column"
+                    , HA.style "width" (String.fromInt (Ui.getColumnWidth model.ui) ++ "px")
                     ]
                     (List.map
                         (\card ->
@@ -82,59 +82,63 @@ viewCard model card =
         , HA.style "border-width" "1px"
         ]
         [ Html.div
-            []
-            [ Html.text (Ui.cardTitle card)
-            , Html.span
-                (List.append
-                    [ Draggable.mouseTrigger card Msg.DragMsg
-                    , HA.style "cursor" "move"
-                    ]
-                    (Draggable.touchTriggers card Msg.DragMsg)
-                )
-                [ Html.text "Drag" ]
+            [ HA.class "card-title"
+            , Draggable.mouseTrigger card Msg.DragMsg
             ]
-        , case card of
-            Ui.Armour ->
-                viewArmour model
+            [ Html.text (Ui.cardTitle card)
+            ]
+        , Html.div
+            [ HA.class "card-content"
+            ]
+            [ case card of
+                Ui.Armour ->
+                    viewArmour model
 
-            Ui.C12cs ->
-                viewC12cs model
+                Ui.C12cs ->
+                    viewC12cs model
 
-            Ui.Experience ->
-                viewExperience model
+                Ui.Experience ->
+                    viewExperience model
 
-            Ui.Information ->
-                viewInformation model
+                Ui.Information ->
+                    viewInformation model
 
-            Ui.Skills ->
-                viewSkills model
+                Ui.Skills ->
+                    viewSkills model
 
-            Ui.Talents ->
-                viewTalents model
+                Ui.Talents ->
+                    viewTalents model
 
-            Ui.Trappings ->
-                viewTrappings model
+                Ui.Trappings ->
+                    viewTrappings model
 
-            Ui.Wealth ->
-                viewWealth model
+                Ui.Wealth ->
+                    viewWealth model
 
-            Ui.Weapons ->
-                viewWeapons model
+                Ui.Weapons ->
+                    viewWeapons model
+            ]
         ]
 
 
 viewFile : Html Msg
 viewFile =
     Html.div
-        []
-        [ viewButton
-            { onClick = Msg.Save
-            , text = "Save"
-            }
-        , viewButton
-            { onClick = Msg.Load
-            , text = "Load"
-            }
+        [ HA.style "display" "flex" ]
+        [ Html.div
+            [ HA.style "width" "50px" ]
+            [ viewButton
+                { onClick = Msg.Save
+                , text = "Save"
+                }
+            ]
+        , Html.div
+            [ HA.style "width" "50px" ]
+            [ viewButton
+                { onClick = Msg.Load
+                , text = "Load"
+                }
+            ]
         ]
 
 
@@ -199,7 +203,7 @@ viewC12cs : Model -> Html Msg
 viewC12cs model =
     Html.div
         [ HA.style "display" "grid"
-        , HA.style "grid-template-columns" "auto auto auto auto"
+        , HA.style "grid-template-columns" "40% 20% 20% 20%"
         ]
         (List.concat
             [ [ Html.span
@@ -253,7 +257,6 @@ viewTextInput : TextInputData msg -> Html msg
 viewTextInput data =
     Html.input
         [ HA.type_ "text"
-        , HA.class "text-input"
         , HA.value data.value
         , Events.onInput data.onInput
         ]
@@ -263,9 +266,8 @@ viewTextInput data =
 viewTextareaInput : TextInputData msg -> Html msg
 viewTextareaInput data =
     Html.textarea
-        [ HA.class "textarea-input"
+        [ HA.attribute "rows" "1"
         , HA.value data.value
-        , HA.attribute "rows" "1"
         , Events.onInput data.onInput
         ]
         []
@@ -281,7 +283,6 @@ viewNumberInput : NumberInputData msg -> Html msg
 viewNumberInput data =
     Html.input
         [ HA.type_ "number"
-        , HA.class "number-input"
         , HA.value (String.fromInt data.value)
         , Events.onInput data.onInput
         ]
@@ -298,6 +299,7 @@ viewButton : ButtonData msg -> Html msg
 viewButton data =
     Html.button
         [ Events.onClick data.onClick
+        , HA.style "width" "100%"
         ]
         [ Html.text data.text ]
 
@@ -349,73 +351,114 @@ viewExperienceTable model =
 viewSkills : Model -> Html Msg
 viewSkills model =
     Html.div
-        []
-        [ viewBasicSkills model
-        , viewAdvancedSkills model
+        [ HA.style "display" "grid"
+        , HA.style "grid-template-columns" "[name] auto [c12c] 15% [c12c-value] 15% [adv] 20% [skill] 10%"
         ]
-
-
-viewBasicSkills : Model -> Html Msg
-viewBasicSkills model =
-    Html.table
-        []
-        (List.append
-            [ Html.tr
-                []
-                [ Html.th [] [ Html.text "Name" ]
-                , Html.th [ HA.colspan 2 ] [ Html.text "Characteristic" ]
-                , Html.th [] [ Html.text "Adv" ]
-                , Html.th [] [ Html.text "Skill" ]
-                ]
-            ]
-            (List.indexedMap (viewBasicSkillRow model) model.character.basicSkills)
-        )
-
-
-viewBasicSkillRow : Model -> Int -> Character.Skill -> Html Msg
-viewBasicSkillRow model index skill =
-    Html.tr
-        []
-        [ Html.td
-            []
-            [ Html.text skill.name ]
-        , Html.td
-            []
-            [ Html.text (Character.c12cToString skill.c12c) ]
-        , Html.td
-            []
-            [ Character.getC12cs model.character
-                |> Character.getC12c skill.c12c
-                |> String.fromInt
-                |> Html.text
-            ]
-        , viewNumberInput
-            { onInput = Msg.SetBasicSkillAdvances index
-            , value = skill.advances
-            }
-        , Html.td
-            []
-            [ Character.skillValue model.character skill
-                |> String.fromInt
-                |> Html.text
-            ]
-        ]
-
-
-viewAdvancedSkills : Model -> Html Msg
-viewAdvancedSkills model =
-    Html.table
-        []
         (List.concat
-            [ [ Html.tr
-                []
-                [ Html.th [] [ Html.text "Name" ]
-                , Html.th [ HA.colspan 2 ] [ Html.text "Characteristic" ]
-                , Html.th [] [ Html.text "Adv" ]
-                , Html.th [] [ Html.text "Skill" ]
+            [ [ Html.span
+                [ HA.style "font-size" "18px"
+                , HA.style "grid-column" "span 5"
                 ]
+                [ Html.text "Basic skills" ]
               ]
-            , (List.indexedMap (viewAdvancedSkillRow model) model.character.advancedSkills)
+            , [ Html.span
+                []
+                [ Html.text "Name" ]
+              , Html.span
+                [ HA.style "grid-column" "span 2"
+                ]
+                [ Html.text "Characteristic" ]
+              , Html.span
+                []
+                [ Html.text "Advances" ]
+              , Html.span
+                []
+                [ Html.text "Skill" ]
+              ]
+            , List.indexedMap
+                (\index skill ->
+                    [ Html.span
+                        []
+                        [ Html.text skill.name ]
+                    , Html.span
+                        []
+                        [ Html.text (Character.c12cToString skill.c12c) ]
+                    , Html.span
+                        []
+                        [ Character.getC12cs model.character
+                            |> Character.getC12c skill.c12c
+                            |> String.fromInt
+                            |> Html.text
+                        ]
+                    , viewNumberInput
+                        { onInput = Msg.SetBasicSkillAdvances index
+                        , value = skill.advances
+                        }
+                    , Html.span
+                        []
+                        [ Character.skillValue model.character skill
+                            |> String.fromInt
+                            |> Html.text
+                        ]
+                    ]
+                )
+                model.character.basicSkills
+                |> List.concat
+            , [ Html.span
+                [ HA.style "grid-column" "span 5"
+                , HA.style "margin-top" "10px"
+                , HA.style "font-size" "18px"
+                ]
+                [ Html.text "Grouped & Advanced Skills" ]
+              ]
+            , [ Html.span
+                []
+                [ Html.text "Name" ]
+              , Html.span
+                [ HA.style "grid-column" "span 2"
+                ]
+                [ Html.text "Characteristic" ]
+              , Html.span
+                []
+                [ Html.text "Advances" ]
+              , Html.span
+                []
+                [ Html.text "Skill" ]
+              ]
+            , List.indexedMap
+                (\index skill ->
+                    [ Html.span
+                        []
+                        [ viewTextInput
+                            { onInput = Msg.SetAdvancedSkillName index
+                            , value = skill.name
+                            }
+                        ]
+                    , Html.div
+                        []
+                        [ viewC12cSelect index skill
+                        ]
+                    , Html.span
+                        []
+                        [ Character.getC12cs model.character
+                            |> Character.getC12c skill.c12c
+                            |> String.fromInt
+                            |> Html.text
+                        ]
+                    , viewNumberInput
+                        { onInput = Msg.SetAdvancedSkillAdvances index
+                        , value = skill.advances
+                        }
+                    , Html.span
+                        []
+                        [ Character.skillValue model.character skill
+                            |> String.fromInt
+                            |> Html.text
+                        ]
+                    ]
+                )
+                model.character.advancedSkills
+                |> List.concat
             , [ viewButton
                 { onClick = Msg.AddAdvancedSkill
                 , text = "Add"
@@ -423,41 +466,6 @@ viewAdvancedSkills model =
               ]
             ]
         )
-
-
-viewAdvancedSkillRow : Model -> Int -> Character.Skill -> Html Msg
-viewAdvancedSkillRow model index skill =
-    Html.tr
-        []
-        [ Html.td
-            []
-            [ viewTextInput
-                { onInput = Msg.SetAdvancedSkillName index
-                , value = skill.name
-                }
-            ]
-        , Html.td
-            []
-            [ viewC12cSelect index skill
-            ]
-        , Html.td
-            []
-            [ Character.getC12cs model.character
-                |> Character.getC12c skill.c12c
-                |> String.fromInt
-                |> Html.text
-            ]
-        , viewNumberInput
-            { onInput = Msg.SetAdvancedSkillAdvances index
-            , value = skill.advances
-            }
-        , Html.td
-            []
-            [ Character.skillValue model.character skill
-                |> String.fromInt
-                |> Html.text
-            ]
-        ]
 
 
 viewC12cSelect : Int -> Character.Skill -> Html Msg
@@ -499,17 +507,39 @@ viewSelect data =
 
 viewTalents : Model -> Html Msg
 viewTalents model =
-    Html.table
-        []
+    Html.div
+        [ HA.style "display" "grid"
+        , HA.style "grid-template-columns" "[name] 35% [times-taken] 25% [description] auto"
+        ]
         (List.concat
-            [ [ Html.tr
+            [ [ Html.span
                 []
-                [ Html.th [] [ Html.text "Name" ]
-                , Html.th [] [ Html.text "Times taken" ]
-                , Html.th [] [ Html.text "Description" ]
-                ]
+                [ Html.text "Name" ]
+              , Html.span
+                []
+                [ Html.text "Times taken" ]
+              , Html.span
+                []
+                [ Html.text "Description" ]
               ]
-            , List.indexedMap viewTalentRow model.character.talents
+            , List.indexedMap
+                (\index talent ->
+                    [ viewTextInput
+                        { onInput = Msg.SetTalentName index
+                        , value = talent.name
+                        }
+                    , viewNumberInput
+                        { onInput = Msg.SetTalentTimesTaken index
+                        , value = talent.timesTaken
+                        }
+                    , viewTextareaInput
+                        { onInput = Msg.SetTalentDescription index
+                        , value = talent.description
+                        }
+                    ]
+                )
+                model.character.talents
+                |> List.concat
             , [ viewButton
                 { onClick = Msg.AddTalent
                 , text = "Add"
@@ -517,34 +547,6 @@ viewTalents model =
               ]
             ]
         )
-
-
-viewTalentRow : Int -> Character.Talent -> Html Msg
-viewTalentRow index talent =
-    Html.tr
-        []
-        [ Html.td
-            []
-            [ viewTextInput
-                { onInput = Msg.SetTalentName index
-                , value = talent.name
-                }
-            ]
-        , Html.td
-            []
-            [ viewNumberInput
-                { onInput = Msg.SetTalentTimesTaken index
-                , value = talent.timesTaken
-                }
-            ]
-        , Html.td
-            []
-            [ viewTextareaInput
-                { onInput = Msg.SetTalentDescription index
-                , value = talent.description
-                }
-            ]
-        ]
 
 
 viewAdjustments : Model -> Html Msg
@@ -639,60 +641,69 @@ viewTrappings model =
 viewWealth : Model -> Html Msg
 viewWealth model =
     Html.div
-        []
+        [ HA.style "display" "grid"
+        , HA.style "grid-template-columns" "2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 2fr"
+        ]
         [ Html.div
-            []
+            [ HA.style "grid-column" "span 3" ]
             [ Html.text "G"
             , viewNumberInput
                 { onInput = Msg.SetWealthGold
                 , value = model.character.wealth.gold
                 }
-            , Html.text "/"
+            ]
+        , Html.div
+            [ HA.style "grid-column" "span 4" ]
+            [ Html.text "/"
             , viewNumberInput
                 { onInput = Msg.SetWealthSilver
                 , value = model.character.wealth.silver
                 }
-            , Html.text "d"
+            ]
+        , Html.div
+            [ HA.style "grid-column" "span 3" ]
+            [ Html.text "d"
             , viewNumberInput
                 { onInput = Msg.SetWealthBrass
                 , value = model.character.wealth.brass
                 }
             ]
         , Html.div
-            []
+            [ HA.style "grid-column" "2"
+            ]
             [ viewButton
                 { onClick = Msg.ConvertOneGoldToSilver
                 , text = ">"
                 }
-            , viewButton
-                { onClick = Msg.ConvertAllGoldToSilver
-                , text = ">>"
-                }
-            , viewButton
-                { onClick = Msg.ConvertAllSilverToGold
-                , text = "<<"
-                }
-            , viewButton
-                { onClick = Msg.ConvertOneSilverToGold
-                , text = "<"
-                }
-            , viewButton
-                { onClick = Msg.ConvertOneSilverToBrass
-                , text = ">"
-                }
-            , viewButton
-                { onClick = Msg.ConvertAllSilverToBrass
-                , text = ">>"
-                }
-            , viewButton
-                { onClick = Msg.ConvertAllBrassToSilver
-                , text = "<<"
-                }
-            , viewButton
-                { onClick = Msg.ConvertOneBrassToSilver
-                , text = "<"
-                }
             ]
+        , viewButton
+            { onClick = Msg.ConvertAllGoldToSilver
+            , text = ">>"
+            }
+        , viewButton
+            { onClick = Msg.ConvertAllSilverToGold
+            , text = "<<"
+            }
+        , viewButton
+            { onClick = Msg.ConvertOneSilverToGold
+            , text = "<"
+            }
+        , viewButton
+            { onClick = Msg.ConvertOneSilverToBrass
+            , text = ">"
+            }
+        , viewButton
+            { onClick = Msg.ConvertAllSilverToBrass
+            , text = ">>"
+            }
+        , viewButton
+            { onClick = Msg.ConvertAllBrassToSilver
+            , text = "<<"
+            }
+        , viewButton
+            { onClick = Msg.ConvertOneBrassToSilver
+            , text = "<"
+            }
         ]
 
 
