@@ -17,6 +17,7 @@ view model =
     Html.div
         []
         [ Html.node "style" [] [ Html.text Css.css ]
+        , Html.node "style" [] [ Html.text Css.dark ]
         , viewHeader
         , viewContent model
         , viewDraggedCard model
@@ -315,30 +316,32 @@ viewExperience model =
 
 viewExperienceTable : Model -> Html Msg
 viewExperienceTable model =
-    Html.table
-        []
-        [ Html.tr
-            []
-            [ Html.th [] [ Html.text "Total" ]
-            , Html.th [] [ Html.text "Spent" ]
-            , Html.th [] [ Html.text "Current" ]
+    Html.div
+        [ HA.style "display" "flex" ]
+        [ Html.div
+            [ HA.style "width" "33%" ]
+            [ Html.text "Total"
+            , viewNumberInput
+                { onInput = Msg.SetExperience
+                , value = model.character.experience
+                }
             ]
-        , Html.tr
-            []
-            [ Html.td
+        , Html.div
+            [ HA.style "width" "33%" ]
+            [ Html.div
                 []
-                [ viewNumberInput
-                    { onInput = Msg.SetExperience
-                    , value = model.character.experience
-                    }
-                ]
-            , Html.td
+                [ Html.text "Spent" ]
+            , Html.div
                 []
                 [ Character.spentExp model.character
                     |> String.fromInt
                     |> Html.text
                 ]
-            , Html.td
+            ]
+        , Html.div
+            [ HA.style "width" "33%" ]
+            [ Html.text "Current"
+            , Html.div
                 []
                 [ Character.currentExp model.character
                     |> String.fromInt
@@ -459,10 +462,14 @@ viewSkills model =
                 )
                 model.character.advancedSkills
                 |> List.concat
-            , [ viewButton
-                { onClick = Msg.AddAdvancedSkill
-                , text = "Add"
-                }
+            , [ Html.div
+                [ HA.style "grid-column" "span 5"
+                ]
+                [ viewButton
+                    { onClick = Msg.AddAdvancedSkill
+                    , text = "Add"
+                    }
+                ]
               ]
             ]
         )
@@ -540,10 +547,13 @@ viewTalents model =
                 )
                 model.character.talents
                 |> List.concat
-            , [ viewButton
-                { onClick = Msg.AddTalent
-                , text = "Add"
-                }
+            , [ Html.div
+                [ HA.style "grid-column" "span 3" ]
+                [ viewButton
+                    { onClick = Msg.AddTalent
+                    , text = "Add"
+                    }
+                ]
               ]
             ]
         )
@@ -551,44 +561,43 @@ viewTalents model =
 
 viewAdjustments : Model -> Html Msg
 viewAdjustments model =
-    Html.table
-        []
+    Html.div
+        [ HA.style "display" "grid"
+        , HA.style "grid-template-columns" "[value] 20% [description] auto"
+        ]
         (List.concat
-            [ [ Html.tr
+            [ [ Html.span
                 []
-                [ Html.th [] [ Html.text "Value" ]
-                , Html.th [] [ Html.text "Description" ]
-                ]
+                [ Html.text "Value" ]
+              , Html.span
+                []
+                [ Html.text "Description" ]
               ]
-            , List.indexedMap viewAdjustmentRow model.character.expAdjustments
-            , [ viewButton
-                { onClick = Msg.AddExpAdjustment
-                , text = "Add"
-                }
+            , List.indexedMap
+                (\index adjustment ->
+                    [ viewNumberInput
+                        { onInput = Msg.SetExpAdjustmentValue index
+                        , value = adjustment.value
+                        }
+                    , viewTextareaInput
+                        { onInput = Msg.SetExpAdjustmentDescription index
+                        , value = adjustment.description
+                        }
+                    ]
+                )
+                model.character.expAdjustments
+                |> List.concat
+            , [ Html.div
+                [ HA.style "grid-column" "span 2"
+                ]
+                [ viewButton
+                    { onClick = Msg.AddExpAdjustment
+                    , text = "Add"
+                    }
+                ]
               ]
             ]
         )
-
-
-viewAdjustmentRow : Int -> Character.ExpAdjustment -> Html Msg
-viewAdjustmentRow index adjustment =
-    Html.tr
-        []
-        [ Html.td
-            []
-            [ viewNumberInput
-                { onInput = Msg.SetExpAdjustmentValue index
-                , value = adjustment.value
-                }
-            ]
-        , Html.td
-            []
-            [ viewTextareaInput
-                { onInput = Msg.SetExpAdjustmentDescription index
-                , value = adjustment.description
-                }
-            ]
-        ]
 
 
 viewTrappings : Model -> Html Msg
@@ -627,7 +636,7 @@ viewTrappings model =
                 |> List.concat
               )
             , [ Html.div
-                []
+                [ HA.style "grid-column" "span 2" ]
                 [ viewButton
                     { onClick = Msg.AddTrapping
                     , text = "Add"
@@ -790,42 +799,60 @@ viewWeapons model =
 viewArmour : Model -> Html Msg
 viewArmour model =
     Html.div
-        []
+        [ HA.style "display" "grid"
+        , HA.style "grid-template-columns" "[name] auto [locations] auto [enc] 40px [ap] 40px [qualities] auto"
+        ]
         (List.concat
-            [ (List.indexedMap
+            [ [ Html.span
+                []
+                [ Html.text "Name" ]
+              , Html.span
+                []
+                [ Html.text "Locations" ]
+              , Html.span
+                []
+                [ Html.text "Enc" ]
+              , Html.span
+                []
+                [ Html.text "AP" ]
+              , Html.span
+                []
+                [ Html.text "Qualities" ]
+              ]
+            , (List.indexedMap
                 (\index armour ->
-                    Html.div
-                        [ HA.style "display" "flex"
-                        -- , HA.style "flex-flow" "row wrap"
-                        ]
-                        [ viewTextInput
-                            { onInput = Msg.SetArmourName index
-                            , value = armour.name
-                            }
-                        , viewTextInput
-                            { onInput = Msg.SetArmourLocations index
-                            , value = armour.locations
-                            }
-                        , viewNumberInput
-                            { onInput = Msg.SetArmourEncumbrance index
-                            , value = armour.encumbrance
-                            }
-                        , viewNumberInput
-                            { onInput = Msg.SetArmourAp index
-                            , value = armour.ap
-                            }
-                        , viewTextInput
-                            { onInput = Msg.SetArmourQualities index
-                            , value = armour.qualities
-                            }
-                        ]
+                    [ viewTextInput
+                        { onInput = Msg.SetArmourName index
+                        , value = armour.name
+                        }
+                    , viewTextInput
+                        { onInput = Msg.SetArmourLocations index
+                        , value = armour.locations
+                        }
+                    , viewNumberInput
+                        { onInput = Msg.SetArmourEncumbrance index
+                        , value = armour.encumbrance
+                        }
+                    , viewNumberInput
+                        { onInput = Msg.SetArmourAp index
+                        , value = armour.ap
+                        }
+                    , viewTextInput
+                        { onInput = Msg.SetArmourQualities index
+                        , value = armour.qualities
+                        }
+                    ]
                 )
                 model.character.armour
+                |> List.concat
               )
-            , [ viewButton
-                { onClick = Msg.AddArmour
-                , text = "Add"
-                }
+            , [ Html.div
+                [ HA.style "grid-column" "span 5" ]
+                [ viewButton
+                    { onClick = Msg.AddArmour
+                    , text = "Add"
+                    }
+                ]
               ]
             ]
         )

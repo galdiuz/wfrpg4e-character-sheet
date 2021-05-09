@@ -1,4 +1,4 @@
-module Css exposing (css)
+module Css exposing (css, dark)
 
 css : String
 css =
@@ -34,6 +34,12 @@ input {
     box-sizing: border-box;
     padding: 1px;
     width: 100%;
+    border-width: 0px 0px 1px;
+    border-style: dashed;
+}
+
+input:focus-visible {
+    outline: 0;
 }
 
 textarea {
@@ -48,5 +54,15 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+    """
+
+
+dark : String
+dark =
+    """
+body, button, input, select, textarea {
+    color: #ddd;
+    background-color: #282828;
 }
     """
