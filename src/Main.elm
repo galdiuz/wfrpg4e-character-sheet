@@ -434,6 +434,22 @@ update msg model =
                 |> Model.asCharacterIn model
                 |> Cmd.Extra.withNoCmd
 
+        Msg.SetCurrentWounds str ->
+            parseIntAndSet
+                { string = str
+                , setter = Character.setCurrentWounds
+                }
+                model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetExtraWounds str ->
+            parseIntAndSet
+                { string = str
+                , setter = Character.setExtraWounds
+                }
+                model
+                |> Cmd.Extra.withNoCmd
+
 
 dragConfig : Draggable.Config Ui.Card Msg
 dragConfig =

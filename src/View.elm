@@ -118,6 +118,9 @@ viewCard model card =
 
                 Ui.Weapons ->
                     viewWeapons model
+
+                Ui.Wounds ->
+                    viewWounds model
             ]
         ]
 
@@ -856,3 +859,91 @@ viewArmour model =
               ]
             ]
         )
+
+
+viewWounds : Model -> Html Msg
+viewWounds model =
+    Html.div
+        [ HA.style "display" "flex"
+        , HA.style "flex-flow" "row"
+        , HA.style "justify-content" "space-between"
+        , HA.style "align-items" "flex-end"
+        ]
+        [ Html.div
+            []
+            [ Html.div
+                []
+                [ Html.text "SB" ]
+            , Character.getC12cs model.character
+                |> Character.getC12c Character.S
+                |> Character.getBonus
+                |> String.fromInt
+                |> Html.text
+            ]
+        , Html.div
+            []
+            [ Html.text "+" ]
+        , Html.div
+            []
+            [ Html.div
+                []
+                [ Html.text "TBx2" ]
+            , Character.getC12cs model.character
+                |> Character.getC12c Character.T
+                |> Character.getBonus
+                |> (*) 2
+                |> String.fromInt
+                |> Html.text
+            ]
+        , Html.div
+            []
+            [ Html.text "+" ]
+        , Html.div
+            []
+            [ Html.div
+                []
+                [ Html.text "WP" ]
+            , Character.getC12cs model.character
+                |> Character.getC12c Character.WP
+                |> Character.getBonus
+                |> String.fromInt
+                |> Html.text
+            ]
+        , Html.div
+            []
+            [ Html.text "+" ]
+        , Html.div
+            []
+            [ Html.text "Extra"
+            , Html.div
+                [ HA.style "width" "40px" ]
+                [ viewNumberInput
+                    { onInput = Msg.SetExtraWounds
+                    , value = model.character.extraWounds
+                    }
+                ]
+            ]
+        , Html.div
+            []
+            [ Html.text "=" ]
+        , Html.div
+            []
+            [ Html.div
+                []
+                [ Html.text "Total" ]
+            , Character.getWounds model.character
+                |> String.fromInt
+                |> Html.text
+            ]
+        , Html.div
+            []
+            [ Html.text "Current"
+            , Html.div
+                [ HA.style "width" "40px" ]
+                [ viewNumberInput
+                    { onInput = Msg.SetCurrentWounds
+                    , value = model.character.currentWounds
+                    }
+                ]
+            ]
+        ]

@@ -13,8 +13,10 @@ type alias Character =
     , basicSkills : List Skill
     , c12csAdvances : C12cs
     , c12csInitial : C12cs
+    , currentWounds : Int
     , expAdjustments : List ExpAdjustment
     , experience : Int
+    , extraWounds : Int
     , info : Information
     , talents : List Talent
     , trappings : List Trapping
@@ -30,8 +32,10 @@ emptyCharacter =
     , basicSkills = basicSkillsList
     , c12csAdvances = emptyC12cs
     , c12csInitial = emptyC12cs
+    , currentWounds = 0
     , expAdjustments = []
     , experience = 0
+    , extraWounds = 0
     , info = emptyInformation
     , talents = []
     , trappings = []
@@ -48,8 +52,10 @@ encodeCharacter character =
         , ( "basicSkills", Encode.list encodeSkill character.basicSkills )
         , ( "c12csAdvances", encodeC12cs character.c12csAdvances )
         , ( "c12csInitial", encodeC12cs character.c12csInitial )
+        , ( "currentWounds", Encode.int character.currentWounds )
         , ( "expAdjustments", Encode.list encodeExpAdjustment character.expAdjustments )
         , ( "experience", Encode.int character.experience )
+        , ( "extraWounds", Encode.int character.extraWounds )
         , ( "info", encodeInformation character.info )
         , ( "talents", Encode.list encodeTalent character.talents )
         , ( "trappings", Encode.list encodeTrapping character.trappings )
@@ -65,8 +71,10 @@ decodeCharacter =
     Field.require "basicSkills" (Decode.list decodeSkill) <| \basicSkills ->
     Field.require "c12csAdvances" decodeC12cs <| \c12csAdvances ->
     Field.require "c12csInitial" decodeC12cs <| \c12csInitial ->
+    Field.require "currentWounds" Decode.int <| \currentWounds ->
     Field.require "expAdjustments" (Decode.list decodeExpAdjustment) <| \expAdjustments ->
     Field.require "experience" Decode.int <| \experience ->
+    Field.require "extraWounds" Decode.int <| \extraWounds ->
     Field.require "info" decodeInformation <| \info ->
     Field.require "talents" (Decode.list decodeTalent) <| \talents ->
     Field.require "trappings" (Decode.list decodeTrapping) <| \trappings ->
@@ -78,8 +86,10 @@ decodeCharacter =
         , basicSkills = basicSkills
         , c12csAdvances = c12csAdvances
         , c12csInitial = c12csInitial
+        , currentWounds = currentWounds
         , expAdjustments = expAdjustments
         , experience = experience
+        , extraWounds = extraWounds
         , info = info
         , talents = talents
         , trappings = trappings
@@ -91,6 +101,11 @@ decodeCharacter =
 minMax : Int -> Int -> Int -> Int
 minMax min max value =
     Basics.min max (Basics.max min value)
+
+
+getBonus : Int -> Int
+getBonus value =
+    value // 10
 
 ------------
 -- Armour --
@@ -1363,3 +1378,25 @@ decodeWeapon =
         (Decode.field "name" Decode.string)
         (Decode.field "qualities" Decode.string)
         (Decode.field "range" Decode.string)
+
+------------
+-- Wounds --
+------------
+
+getWounds : Character -> Int
+getWounds character =
+    let
+        c12cBonus c12c =
+            getBonus (getC12c c12c (getC12cs character))
+    in
+    c12cBonus S + c12cBonus T * 2 + c12cBonus WP + character.extraWounds
+
+
+setCurrentWounds : Int -> Character -> Character
+setCurrentWounds value character =
+    { character | currentWounds = max 0 value }
+
+
+setExtraWounds : Int -> Character -> Character
+setExtraWounds value character =
+    { character | extraWounds = max 0 value }

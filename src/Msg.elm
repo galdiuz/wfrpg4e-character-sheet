@@ -63,6 +63,8 @@ type Msg
     | SetArmourLocations Int String
     | SetArmourName Int String
     | SetArmourQualities Int String
+    | SetExtraWounds String
+    | SetCurrentWounds String
 
 
 type alias Element =
