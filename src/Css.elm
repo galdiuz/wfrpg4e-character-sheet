@@ -19,15 +19,32 @@ css =
 }
 
 .card-content {
+    border-top: solid 1px;
     padding: 2px;
 }
 
 .card-title {
-    border-bottom: solid 1px;
-    cursor: move;
     font-size: 20px;
     font-weight: 700;
     padding: 2px;
+}
+
+button {
+    border-width: 2px;
+    border-style: outset;
+    border-color: #767676;
+    padding: 1px 6px;
+    font-size: 16px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.button-style {
+    border-width: 2px;
+    border-style: outset;
+    border-color: #767676;
+    padding: 1px 6px;
+    font-size: 16px;
 }
 
 input {

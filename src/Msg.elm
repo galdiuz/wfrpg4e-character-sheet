@@ -65,6 +65,9 @@ type Msg
     | SetArmourQualities Int String
     | SetExtraWounds String
     | SetCurrentWounds String
+    | ToggleCardState Ui.Card
+    | CollapseAllCards
+    | ExpandAllCards
 
 
 type alias Element =

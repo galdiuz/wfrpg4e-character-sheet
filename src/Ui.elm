@@ -7,6 +7,7 @@ import List.Extra
 
 type alias Ui =
     { cardHeights : Dict String Int
+    , cardStates : Dict String CardState
     , columns : List (List Card)
     , drag : Draggable.State Card
     , dragPosition : ( Int, Int )
@@ -18,6 +19,7 @@ type alias Ui =
 emptyUi : Ui
 emptyUi =
     { cardHeights = Dict.empty
+    , cardStates = Dict.empty
     , columns = []
     , drag = Draggable.init
     , draggedCard = Nothing
@@ -54,14 +56,6 @@ allCards =
     ]
 
 
-type alias CardUi =
-    { card : Card
-    , height : Int
-    , preferredColumn : Int
-    , preferredRow : Int
-    }
-
-
 cardId : Card -> String
 cardId card =
     case card of
@@ -90,6 +84,11 @@ cardTitle card =
         Wealth -> "Wealth"
         Weapons -> "Weapons"
         Wounds -> "Wounds"
+
+
+type CardState
+    = Collapsed
+    | Open
 
 
 calculateColumns : Int -> List (List Card)
@@ -133,7 +132,7 @@ updateDraggedCard ui =
                                         [ ( totalHeight + cardHeight // 2, card ) ]
                                     )
                                 )
-                                ( 0, [] )
+                                ( 24, [] )
                                 >> Tuple.second
                                 >> (::) ( Tuple.second ui.dragPosition, draggedCard )
                                 >> List.sortBy Tuple.first
@@ -170,7 +169,7 @@ getColumnIndex ui x =
 
 getColumnWidth : Ui -> Int
 getColumnWidth ui =
-    ui.windowWidth // columnCount ui.windowWidth
+    ui.windowWidth // columnCount ui.windowWidth - 4
 
 
 updateWindowWidth : Ui -> Int -> Ui
@@ -209,3 +208,46 @@ setCardHeight card height ui =
                 height
                 ui.cardHeights
     }
+
+
+getCardState : Card -> Ui -> CardState
+getCardState card ui =
+    Dict.get (cardId card) ui.cardStates
+        |> Maybe.withDefault Open
+
+
+setCardState : CardState -> Card -> Ui -> Ui
+setCardState state card ui =
+    { ui
+        | cardStates =
+            Dict.insert
+                (cardId card)
+                state
+                ui.cardStates
+    }
+
+
+toggleCardState : Card -> Ui -> Ui
+toggleCardState card ui =
+    case getCardState card ui of
+        Open ->
+            setCardState Collapsed card ui
+
+        Collapsed ->
+            setCardState Open card ui
+
+
+collapseAllCards : Ui -> Ui
+collapseAllCards ui =
+    List.foldl
+        (setCardState Collapsed)
+        ui
+        allCards
+
+
+expandAllCards : Ui -> Ui
+expandAllCards ui =
+    List.foldl
+        (setCardState Open)
+        ui
+        allCards

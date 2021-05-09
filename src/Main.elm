@@ -450,6 +450,21 @@ update msg model =
                 model
                 |> Cmd.Extra.withNoCmd
 
+        Msg.ToggleCardState card ->
+            Ui.toggleCardState card model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.CollapseAllCards ->
+            Ui.collapseAllCards model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ExpandAllCards ->
+            Ui.expandAllCards model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
 
 dragConfig : Draggable.Config Ui.Card Msg
 dragConfig =

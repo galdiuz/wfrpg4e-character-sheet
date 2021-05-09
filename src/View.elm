@@ -1,15 +1,21 @@
 module View exposing (view)
 
-import Model exposing (Model)
-import Css
 import Character as Character
-import Msg as Msg exposing (Msg)
-import Ui
+import Css
 import Draggable
+import FontAwesome.Styles
+import FontAwesome.Icon as FA
+import FontAwesome.Regular
+import FontAwesome.Solid
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Attributes.Extra as HAE
 import Html.Events as Events
+import Model exposing (Model)
+import Msg as Msg exposing (Msg)
+import Ui
+import Json.Decode as Decode
+
 
 
 view : Model -> Html Msg
@@ -18,6 +24,7 @@ view model =
         []
         [ Html.node "style" [] [ Html.text Css.css ]
         , Html.node "style" [] [ Html.text Css.dark ]
+        , FontAwesome.Styles.css
         , viewHeader
         , viewContent model
         , viewDraggedCard model
@@ -42,8 +49,21 @@ viewDraggedCard model =
 viewHeader : Html Msg
 viewHeader =
     Html.div
-        []
+        [ HA.style "display" "flex"
+        , HA.style "justify-content" "space-between"
+        ]
         [ viewFile
+        , Html.div
+            [ HA.style "display" "flex" ]
+            [ viewButton
+                { onClick = Msg.CollapseAllCards
+                , text = "Collapse all"
+                }
+            , viewButton
+                { onClick = Msg.ExpandAllCards
+                , text = "Expand all"
+                }
+            ]
         ]
 
 
@@ -84,44 +104,77 @@ viewCard model card =
         ]
         [ Html.div
             [ HA.class "card-title"
-            , Draggable.mouseTrigger card Msg.DragMsg
+            , HA.style "display" "flex"
+            , HA.style "justify-content" "space-between"
             ]
-            [ Html.text (Ui.cardTitle card)
+            [ Html.span
+                []
+                [ Html.text (Ui.cardTitle card)
+                ]
+            , Html.div
+                [ HA.style "display" "flex"
+                , HA.style "cursor" "move"
+                ]
+                [ Html.div
+                    [ Draggable.mouseTrigger card Msg.DragMsg
+                    , HA.class "button-style"
+                    , HA.style "margin-right" "2px"
+                    ]
+                    [ FA.viewIcon FontAwesome.Solid.arrowsAlt ]
+                , Html.div
+                    []
+                    [ Html.button
+                        [ Events.onClick (Msg.ToggleCardState card)
+                        ]
+                        [ case Ui.getCardState card model.ui of
+                            Ui.Open ->
+                                FA.viewIcon FontAwesome.Regular.windowMinimize
+
+                            Ui.Collapsed ->
+                                FA.viewIcon FontAwesome.Regular.windowMaximize
+                        ]
+                    ]
+                ]
             ]
-        , Html.div
-            [ HA.class "card-content"
-            ]
-            [ case card of
-                Ui.Armour ->
-                    viewArmour model
+        , case Ui.getCardState card model.ui of
+            Ui.Open ->
+                Html.div
+                    [ HA.class "card-content"
+                    ]
+                    [ case card of
+                        Ui.Armour ->
+                            viewArmour model
 
-                Ui.C12cs ->
-                    viewC12cs model
+                        Ui.C12cs ->
+                            viewC12cs model
 
-                Ui.Experience ->
-                    viewExperience model
+                        Ui.Experience ->
+                            viewExperience model
 
-                Ui.Information ->
-                    viewInformation model
+                        Ui.Information ->
+                            viewInformation model
 
-                Ui.Skills ->
-                    viewSkills model
+                        Ui.Skills ->
+                            viewSkills model
 
-                Ui.Talents ->
-                    viewTalents model
+                        Ui.Talents ->
+                            viewTalents model
 
-                Ui.Trappings ->
-                    viewTrappings model
+                        Ui.Trappings ->
+                            viewTrappings model
 
-                Ui.Wealth ->
-                    viewWealth model
+                        Ui.Wealth ->
+                            viewWealth model
 
-                Ui.Weapons ->
-                    viewWeapons model
+                        Ui.Weapons ->
+                            viewWeapons model
 
-                Ui.Wounds ->
-                    viewWounds model
-            ]
+                        Ui.Wounds ->
+                            viewWounds model
+                    ]
+
+            Ui.Collapsed ->
+                Html.text ""
         ]
 
 
