@@ -16,17 +16,51 @@ css =
 }
 
 .card {
+    border: solid;
+    border-width: 1px;
+    margin: 4px 0px 4px 8px;
 }
 
 .card-content {
     border-top: solid 1px;
+    padding: 8px 4px 4px;
+}
+
+.card-header {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    font-size: 20px;
+    font-weight: 700;
+    height: 32px;
+    justify-content: space-between;
     padding: 2px;
 }
 
-.card-title {
-    font-size: 20px;
-    font-weight: 700;
-    padding: 2px;
+.card-header-title {
+    margin-left: 38px;
+}
+
+.card-header-buttons {
+    display: flex;
+}
+
+.card-header-buttons > div:nth-last-child(n+2) {
+    margin-right: 4px;
+}
+
+.card-header-icon {
+    align-items: center;
+    border-radius: 50%;
+    border-style: solid;
+    border-width: 1px;
+    display: flex;
+    font-size: 34px;
+    height: 42px;
+    justify-content: center;
+    margin-left: -11px;
+    position: absolute;
+    width: 42px;
 }
 
 button {
@@ -78,7 +112,7 @@ input::-webkit-inner-spin-button {
 dark : String
 dark =
     """
-body, button, input, select, textarea {
+body, button, input, select, textarea, .card-header-icon {
     color: #ddd;
     background-color: #282828;
 }

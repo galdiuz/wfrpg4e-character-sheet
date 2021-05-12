@@ -11,10 +11,13 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Attributes.Extra as HAE
 import Html.Events as Events
+import Icons
 import Model exposing (Model)
 import Msg as Msg exposing (Msg)
 import Ui
 import Json.Decode as Decode
+import Svg
+import Svg.Attributes as SA
 
 
 
@@ -98,27 +101,22 @@ viewContent model =
 viewCard : Model -> Ui.Card -> Html Msg
 viewCard model card =
     Html.div
-        [ HA.class "card"
-        , HA.style "border" "solid"
-        , HA.style "border-width" "1px"
-        ]
+        [ HA.class "card" ]
         [ Html.div
-            [ HA.class "card-title"
-            , HA.style "display" "flex"
-            , HA.style "justify-content" "space-between"
-            ]
-            [ Html.span
-                []
+            [ HA.class "card-header" ]
+            [ Html.div
+                [ HA.class "card-header-icon" ]
+                [ Icons.view (Ui.cardIcon card) ]
+            , Html.span
+                [ HA.class "card-header-title" ]
                 [ Html.text (Ui.cardTitle card)
                 ]
             , Html.div
-                [ HA.style "display" "flex"
-                , HA.style "cursor" "move"
-                ]
+                [ HA.class "card-header-buttons" ]
                 [ Html.div
                     [ Draggable.mouseTrigger card Msg.DragMsg
                     , HA.class "button-style"
-                    , HA.style "margin-right" "2px"
+                    , HA.style "cursor" "move"
                     ]
                     [ FA.viewIcon FontAwesome.Solid.arrowsAlt ]
                 , Html.div
@@ -202,57 +200,86 @@ viewFile =
 viewInformation : Model -> Html Msg
 viewInformation model =
     Html.div
-        []
+        [ HA.style "display" "flex"
+        , HA.style "flex-flow" "row wrap"
+        ]
         [ Html.text "Name"
         , viewTextInput
             { onInput = Msg.SetInformation "name"
             , value = model.character.info.name
             }
-        , Html.text "Species"
-        , viewTextInput
-            { onInput = Msg.SetInformation "species"
-            , value = model.character.info.species
-            }
-        , Html.text "Class"
-        , viewTextInput
-            { onInput = Msg.SetInformation "class"
-            , value = model.character.info.class
-            }
-        , Html.text "Career Path"
-        , viewTextInput
-            { onInput = Msg.SetInformation "careerPath"
-            , value = model.character.info.careerPath
-            }
-        , Html.text "Career"
-        , viewTextInput
-            { onInput = Msg.SetInformation "career"
-            , value = model.character.info.career
-            }
-        , Html.text "Status"
-        , viewTextInput
-            { onInput = Msg.SetInformation "status"
-            , value = model.character.info.status
-            }
-        , Html.text "Age"
-        , viewTextInput
-            { onInput = Msg.SetInformation "age"
-            , value = model.character.info.age
-            }
-        , Html.text "Height"
-        , viewTextInput
-            { onInput = Msg.SetInformation "height"
-            , value = model.character.info.height
-            }
-        , Html.text "Hair"
-        , viewTextInput
-            { onInput = Msg.SetInformation "hair"
-            , value = model.character.info.hair
-            }
-        , Html.text "Eyes"
-        , viewTextInput
-            { onInput = Msg.SetInformation "eyes"
-            , value = model.character.info.eyes
-            }
+        , Html.div
+            [ HA.style "width" "50%" ]
+            [ Html.text "Species"
+            , viewTextInput
+                { onInput = Msg.SetInformation "species"
+                , value = model.character.info.species
+                }
+            ]
+        , Html.div
+            [ HA.style "width" "50%" ]
+            [ Html.text "Class"
+            , viewTextInput
+                { onInput = Msg.SetInformation "class"
+                , value = model.character.info.class
+                }
+            ]
+        , Html.div
+            [ HA.style "width" "33%" ]
+            [ Html.text "Career Path"
+            , viewTextInput
+                { onInput = Msg.SetInformation "careerPath"
+                , value = model.character.info.careerPath
+                }
+            ]
+        , Html.div
+            [ HA.style "width" "33%" ]
+            [ Html.text "Career"
+            , viewTextInput
+                { onInput = Msg.SetInformation "career"
+                , value = model.character.info.career
+                }
+            ]
+        , Html.div
+            [ HA.style "width" "33%" ]
+            [ Html.text "Status"
+            , viewTextInput
+                { onInput = Msg.SetInformation "status"
+                , value = model.character.info.status
+                }
+            ]
+        , Html.div
+            [ HA.style "width" "20%" ]
+            [ Html.text "Age"
+            , viewTextInput
+                { onInput = Msg.SetInformation "age"
+                , value = model.character.info.age
+                }
+            ]
+        , Html.div
+            [ HA.style "width" "20%" ]
+            [ Html.text "Height"
+            , viewTextInput
+                { onInput = Msg.SetInformation "height"
+                , value = model.character.info.height
+                }
+            ]
+        , Html.div
+            [ HA.style "width" "30%" ]
+            [ Html.text "Hair"
+            , viewTextInput
+                { onInput = Msg.SetInformation "hair"
+                , value = model.character.info.hair
+                }
+            ]
+        , Html.div
+            [ HA.style "width" "30%" ]
+            [ Html.text "Eyes"
+            , viewTextInput
+                { onInput = Msg.SetInformation "eyes"
+                , value = model.character.info.eyes
+                }
+            ]
         ]
 
 

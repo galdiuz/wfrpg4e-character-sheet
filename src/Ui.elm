@@ -2,6 +2,7 @@ module Ui exposing (..)
 
 import Dict exposing (Dict)
 import Draggable
+import Icons
 import List.Extra
 
 
@@ -84,6 +85,21 @@ cardTitle card =
         Wealth -> "Wealth"
         Weapons -> "Weapons"
         Wounds -> "Wounds"
+
+
+cardIcon : Card -> String
+cardIcon card =
+    case card of
+        Armour -> Icons.breastplate
+        C12cs -> Icons.skills
+        Experience -> Icons.wisdom
+        Information -> Icons.character
+        Skills -> Icons.graduateCap
+        Talents -> Icons.ribbonMedal
+        Trappings -> Icons.bag
+        Wealth -> Icons.coins
+        Weapons -> Icons.axeSword
+        Wounds -> Icons.wound
 
 
 type CardState
