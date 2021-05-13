@@ -10,6 +10,7 @@ import List.Extra
 type alias Character =
     { advancedSkills : List Skill
     , armour : List Armour
+    , ap : ApLocations
     , basicSkills : List Skill
     , c12csAdvances : C12cs
     , c12csInitial : C12cs
@@ -29,6 +30,7 @@ emptyCharacter : Character
 emptyCharacter =
     { advancedSkills = []
     , armour = []
+    , ap = emptyApLocations
     , basicSkills = basicSkillsList
     , c12csAdvances = emptyC12cs
     , c12csInitial = emptyC12cs
@@ -49,6 +51,7 @@ encodeCharacter character =
     Encode.object
         [ ( "advancedSkills", Encode.list encodeSkill character.advancedSkills )
         , ( "armour", Encode.list encodeArmour character.armour )
+        , ( "ap", encodeAp character.ap )
         , ( "basicSkills", Encode.list encodeSkill character.basicSkills )
         , ( "c12csAdvances", encodeC12cs character.c12csAdvances )
         , ( "c12csInitial", encodeC12cs character.c12csInitial )
@@ -68,6 +71,7 @@ decodeCharacter : Decode.Decoder Character
 decodeCharacter =
     Field.require "advancedSkills" (Decode.list decodeSkill) <| \advancedSkills ->
     Field.require "armour" (Decode.list decodeArmour) <| \armour ->
+    Field.require "ap" decodeAp <| \ap ->
     Field.require "basicSkills" (Decode.list decodeSkill) <| \basicSkills ->
     Field.require "c12csAdvances" decodeC12cs <| \c12csAdvances ->
     Field.require "c12csInitial" decodeC12cs <| \c12csInitial ->
@@ -83,6 +87,7 @@ decodeCharacter =
     Decode.succeed
         { advancedSkills = advancedSkills
         , armour = armour
+        , ap = ap
         , basicSkills = basicSkills
         , c12csAdvances = c12csAdvances
         , c12csInitial = c12csInitial
@@ -130,9 +135,57 @@ emptyArmour =
     }
 
 
+type ApLocation
+    = Body
+    | Head
+    | LeftArm
+    | LeftLeg
+    | RightArm
+    | RightLeg
+    | Shield
+
+
+type alias ApLocations =
+    { body : Int
+    , head : Int
+    , leftArm : Int
+    , leftLeg : Int
+    , rightArm : Int
+    , rightLeg : Int
+    , shield : Int
+    }
+
+
+emptyApLocations : ApLocations
+emptyApLocations =
+    { body = 0
+    , head = 0
+    , leftArm = 0
+    , leftLeg = 0
+    , rightArm = 0
+    , rightLeg = 0
+    , shield = 0
+    }
+
+
 addArmour : Character -> Character
 addArmour character =
     { character | armour = character.armour ++ [ emptyArmour ] }
+
+
+setAp : ApLocation -> Int -> Character -> Character
+setAp apLocation value ({ ap } as character) =
+    { character
+        | ap =
+            case apLocation of
+                Body -> { ap | body = value }
+                Head -> { ap | head = value }
+                LeftArm -> { ap | leftArm = value }
+                LeftLeg -> { ap | leftLeg = value }
+                RightArm -> { ap | rightArm = value }
+                RightLeg -> { ap | rightLeg = value }
+                Shield -> { ap | shield = value }
+    }
 
 
 setArmourAp : Int -> Int -> Character -> Character
@@ -211,6 +264,19 @@ encodeArmour armour =
         ]
 
 
+encodeAp : ApLocations -> Encode.Value
+encodeAp ap =
+    Encode.object
+        [ ( "body", Encode.int ap.body )
+        , ( "head", Encode.int ap.head )
+        , ( "leftArm", Encode.int ap.leftArm )
+        , ( "leftLeg", Encode.int ap.leftLeg )
+        , ( "rightArm", Encode.int ap.rightArm )
+        , ( "rightLeg", Encode.int ap.rightLeg )
+        , ( "shield", Encode.int ap.shield )
+        ]
+
+
 decodeArmour : Decode.Decoder Armour
 decodeArmour =
     Decode.map5
@@ -227,6 +293,28 @@ decodeArmour =
         (Decode.field "locations" Decode.string)
         (Decode.field "name" Decode.string)
         (Decode.field "qualities" Decode.string)
+
+
+decodeAp : Decode.Decoder ApLocations
+decodeAp =
+    Decode.map7
+        (\body head leftArm leftLeg rightArm rightLeg shield ->
+            { body = body
+            , head = head
+            , leftArm = leftArm
+            , leftLeg = leftLeg
+            , rightArm = rightArm
+            , rightLeg = rightLeg
+            , shield = shield
+            }
+        )
+        (Decode.field "body" Decode.int)
+        (Decode.field "head" Decode.int)
+        (Decode.field "leftArm" Decode.int)
+        (Decode.field "leftLeg" Decode.int)
+        (Decode.field "rightArm" Decode.int)
+        (Decode.field "rightLeg" Decode.int)
+        (Decode.field "shield" Decode.int)
 
 ---------------------
 -- Characteristics --
@@ -615,22 +703,34 @@ emptyInformation =
     }
 
 
-setInformation : String -> String -> Character -> Character
+type InformationField
+    = Age
+    | Career
+    | CareerPath
+    | Class
+    | Eyes
+    | Hair
+    | Height
+    | Name
+    | Species
+    | Status
+
+
+setInformation : InformationField -> String -> Character -> Character
 setInformation field value ({ info } as character) =
     { character
         | info =
             case field of
-                "age" -> { info | age = value }
-                "career" -> { info | career = value }
-                "careerPath" -> { info | careerPath = value }
-                "class" -> { info | class = value }
-                "eyes" -> { info | eyes = value }
-                "hair" -> { info | hair = value }
-                "height" -> { info | height = value }
-                "name" -> { info | name = value }
-                "species" -> { info | species = value }
-                "status" -> { info | status = value }
-                _ -> info
+                Age -> { info | age = value }
+                Career -> { info | career = value }
+                CareerPath -> { info | careerPath = value }
+                Class -> { info | class = value }
+                Eyes -> { info | eyes = value }
+                Hair -> { info | hair = value }
+                Height -> { info | height = value }
+                Name -> { info | name = value }
+                Species -> { info | species = value }
+                Status -> { info | status = value }
     }
 
 
