@@ -49,11 +49,11 @@ viewHeader =
         , Html.div
             [ HA.style "display" "flex" ]
             [ viewButton
-                { onClick = Msg.CollapseAllCards
+                { onClick = Msg.CollapseAllCardsPressed
                 , text = "Collapse all"
                 }
             , viewButton
-                { onClick = Msg.ExpandAllCards
+                { onClick = Msg.ExpandAllCardsPressed
                 , text = "Expand all"
                 }
             ]
@@ -127,7 +127,7 @@ viewCard model card =
             , Html.div
                 [ HA.class "card-header-buttons" ]
                 [ Html.div
-                    [ Draggable.mouseTrigger card Msg.DragMsg
+                    [ Draggable.mouseTrigger card Msg.DragMsgReceived
                     , HA.class "button-style"
                     , HA.style "cursor" "move"
                     ]
@@ -135,7 +135,7 @@ viewCard model card =
                 , Html.div
                     []
                     [ Html.button
-                        [ Events.onClick (Msg.ToggleCardState card)
+                        [ Events.onClick (Msg.ToggleCardStatePressed card)
                         ]
                         [ case Ui.getCardState card model.ui of
                             Ui.Open ->
@@ -196,14 +196,14 @@ viewFile =
         [ Html.div
             [ HA.style "width" "50px" ]
             [ viewButton
-                { onClick = Msg.Save
+                { onClick = Msg.SavePressed
                 , text = "Save"
                 }
             ]
         , Html.div
             [ HA.style "width" "50px" ]
             [ viewButton
-                { onClick = Msg.Load
+                { onClick = Msg.LoadPressed
                 , text = "Load"
                 }
             ]
@@ -221,7 +221,7 @@ viewInformation model =
             []
             [ Html.text "Name"
             , viewTextInput
-                { onInput = Msg.SetInformation "name"
+                { onInput = Msg.TextFieldChanged (Character.setInformation "name")
                 , value = model.character.info.name
                 }
             ]
@@ -234,7 +234,7 @@ viewInformation model =
                 []
                 [ Html.text "Species"
                 , viewTextInput
-                    { onInput = Msg.SetInformation "species"
+                    { onInput = Msg.TextFieldChanged (Character.setInformation "species")
                     , value = model.character.info.species
                     }
                 ]
@@ -242,7 +242,7 @@ viewInformation model =
                 []
                 [ Html.text "Class"
                 , viewTextInput
-                    { onInput = Msg.SetInformation "class"
+                    { onInput = Msg.TextFieldChanged (Character.setInformation "class")
                     , value = model.character.info.class
                     }
                 ]
@@ -256,7 +256,7 @@ viewInformation model =
                 []
                 [ Html.text "Career Path"
                 , viewTextInput
-                    { onInput = Msg.SetInformation "careerPath"
+                    { onInput = Msg.TextFieldChanged (Character.setInformation "careerPath")
                     , value = model.character.info.careerPath
                     }
                 ]
@@ -264,7 +264,7 @@ viewInformation model =
                 []
                 [ Html.text "Career"
                 , viewTextInput
-                    { onInput = Msg.SetInformation "career"
+                    { onInput = Msg.TextFieldChanged (Character.setInformation "career")
                     , value = model.character.info.career
                     }
                 ]
@@ -272,7 +272,7 @@ viewInformation model =
                 []
                 [ Html.text "Status"
                 , viewTextInput
-                    { onInput = Msg.SetInformation "status"
+                    { onInput = Msg.TextFieldChanged (Character.setInformation "status")
                     , value = model.character.info.status
                     }
                 ]
@@ -286,7 +286,7 @@ viewInformation model =
                 [ HA.style "flex" "20" ]
                 [ Html.text "Age"
                 , viewTextInput
-                    { onInput = Msg.SetInformation "age"
+                    { onInput = Msg.TextFieldChanged (Character.setInformation "age")
                     , value = model.character.info.age
                     }
                 ]
@@ -294,7 +294,7 @@ viewInformation model =
                 [ HA.style "flex" "20" ]
                 [ Html.text "Height"
                 , viewTextInput
-                    { onInput = Msg.SetInformation "height"
+                    { onInput = Msg.TextFieldChanged (Character.setInformation "height")
                     , value = model.character.info.height
                     }
                 ]
@@ -302,7 +302,7 @@ viewInformation model =
                 [ HA.style "flex" "30" ]
                 [ Html.text "Hair"
                 , viewTextInput
-                    { onInput = Msg.SetInformation "hair"
+                    { onInput = Msg.TextFieldChanged (Character.setInformation "hair")
                     , value = model.character.info.hair
                     }
                 ]
@@ -310,7 +310,7 @@ viewInformation model =
                 [ HA.style "flex" "30" ]
                 [ Html.text "Eyes"
                 , viewTextInput
-                    { onInput = Msg.SetInformation "eyes"
+                    { onInput = Msg.TextFieldChanged (Character.setInformation "eyes")
                     , value = model.character.info.eyes
                     }
                 ]
@@ -344,11 +344,11 @@ viewC12cs model =
                         []
                         [ Html.text (Character.c12cToFullString c12c) ]
                     , viewNumberInput
-                        { onInput = Msg.SetC12csInitial c12c
+                        { onInput = Msg.NumberFieldChanged (Character.setC12csInitial c12c)
                         , value = Character.getC12c c12c model.character.c12csInitial
                         }
                     , viewNumberInput
-                        { onInput = Msg.SetC12csAdvances c12c
+                        { onInput = Msg.NumberFieldChanged (Character.setC12csAdvances c12c)
                         , value = Character.getC12c c12c model.character.c12csAdvances
                         }
                     , Html.span
@@ -442,7 +442,7 @@ viewExperienceTable model =
             [ HA.style "flex" "1" ]
             [ Html.text "Total"
             , viewNumberInput
-                { onInput = Msg.SetExperience
+                { onInput = Msg.NumberFieldChanged (Character.setExperience)
                 , value = model.character.experience
                 }
             ]
@@ -514,7 +514,7 @@ viewSkills model =
                             |> Html.text
                         ]
                     , viewNumberInput
-                        { onInput = Msg.SetBasicSkillAdvances index
+                        { onInput = Msg.NumberFieldChanged (Character.setBasicSkillAdvances index)
                         , value = skill.advances
                         }
                     , Html.span
@@ -553,7 +553,7 @@ viewSkills model =
                     [ Html.span
                         []
                         [ viewTextInput
-                            { onInput = Msg.SetAdvancedSkillName index
+                            { onInput = Msg.TextFieldChanged (Character.setAdvancedSkillName index)
                             , value = skill.name
                             }
                         ]
@@ -569,7 +569,7 @@ viewSkills model =
                             |> Html.text
                         ]
                     , viewNumberInput
-                        { onInput = Msg.SetAdvancedSkillAdvances index
+                        { onInput = Msg.NumberFieldChanged (Character.setAdvancedSkillAdvances index)
                         , value = skill.advances
                         }
                     , Html.span
@@ -586,7 +586,7 @@ viewSkills model =
                 [ HA.style "grid-column" "span 5"
                 ]
                 [ viewButton
-                    { onClick = Msg.AddAdvancedSkill
+                    { onClick = Msg.ButtonPressed (Character.addAdvancedSkill)
                     , text = "Add"
                     }
                 ]
@@ -602,7 +602,7 @@ viewC12cSelect index skill =
         , label = Character.c12cToString
         , value = Character.c12cToString
         , selected = Just skill.c12c
-        , onInput = Msg.SetAdvancedSkillC12c index
+        , onInput = Msg.TextFieldChanged (Character.setAdvancedSkillC12cFromString index)
         }
 
 
@@ -652,15 +652,15 @@ viewTalents model =
             , List.indexedMap
                 (\index talent ->
                     [ viewTextInput
-                        { onInput = Msg.SetTalentName index
+                        { onInput = Msg.TextFieldChanged (Character.setTalentName index)
                         , value = talent.name
                         }
                     , viewNumberInput
-                        { onInput = Msg.SetTalentTimesTaken index
+                        { onInput = Msg.NumberFieldChanged (Character.setTalentTimesTaken index)
                         , value = talent.timesTaken
                         }
                     , viewTextareaInput
-                        { onInput = Msg.SetTalentDescription index
+                        { onInput = Msg.TextFieldChanged (Character.setTalentDescription index)
                         , value = talent.description
                         }
                     ]
@@ -670,7 +670,7 @@ viewTalents model =
             , [ Html.div
                 [ HA.style "grid-column" "span 3" ]
                 [ viewButton
-                    { onClick = Msg.AddTalent
+                    { onClick = Msg.ButtonPressed (Character.addTalent)
                     , text = "Add"
                     }
                 ]
@@ -696,11 +696,11 @@ viewAdjustments model =
             , List.indexedMap
                 (\index adjustment ->
                     [ viewNumberInput
-                        { onInput = Msg.SetExpAdjustmentValue index
+                        { onInput = Msg.NumberFieldChanged (Character.setExpAdjustmentValue index)
                         , value = adjustment.value
                         }
                     , viewTextareaInput
-                        { onInput = Msg.SetExpAdjustmentDescription index
+                        { onInput = Msg.TextFieldChanged (Character.setExpAdjustmentDescription index)
                         , value = adjustment.description
                         }
                     ]
@@ -711,7 +711,7 @@ viewAdjustments model =
                 [ HA.style "grid-column" "span 2"
                 ]
                 [ viewButton
-                    { onClick = Msg.AddExpAdjustment
+                    { onClick = Msg.ButtonPressed (Character.addExpAdjustment)
                     , text = "Add"
                     }
                 ]
@@ -739,14 +739,14 @@ viewTrappings model =
                     [ Html.div
                         [ HA.style "grid-column" "name" ]
                         [ viewTextInput
-                            { onInput = Msg.SetTrappingName index
+                            { onInput = Msg.TextFieldChanged (Character.setTrappingName index)
                             , value = trapping.name
                             }
                         ]
                     , Html.div
                         [ HA.style "grid-column" "enc" ]
                         [ viewNumberInput
-                            { onInput = Msg.SetTrappingEncumbrance index
+                            { onInput = Msg.NumberFieldChanged (Character.setTrappingEncumbrance index)
                             , value = trapping.encumbrance
                             }
                         ]
@@ -758,7 +758,7 @@ viewTrappings model =
             , [ Html.div
                 [ HA.style "grid-column" "span 2" ]
                 [ viewButton
-                    { onClick = Msg.AddTrapping
+                    { onClick = Msg.ButtonPressed (Character.addTrapping)
                     , text = "Add"
                     }
                 ]
@@ -777,7 +777,7 @@ viewWealth model =
             [ HA.style "grid-column" "span 3" ]
             [ Html.text "Gold Crowns"
             , viewNumberInput
-                { onInput = Msg.SetWealthGold
+                { onInput = Msg.NumberFieldChanged (Character.setGold)
                 , value = model.character.wealth.gold
                 }
             ]
@@ -785,7 +785,7 @@ viewWealth model =
             [ HA.style "grid-column" "span 4" ]
             [ Html.text "Silver Shillings"
             , viewNumberInput
-                { onInput = Msg.SetWealthSilver
+                { onInput = Msg.NumberFieldChanged (Character.setSilver)
                 , value = model.character.wealth.silver
                 }
             ]
@@ -793,7 +793,7 @@ viewWealth model =
             [ HA.style "grid-column" "span 3" ]
             [ Html.text "Brass Pennies"
             , viewNumberInput
-                { onInput = Msg.SetWealthBrass
+                { onInput = Msg.NumberFieldChanged (Character.setBrass)
                 , value = model.character.wealth.brass
                 }
             ]
@@ -801,36 +801,36 @@ viewWealth model =
             [ HA.style "grid-column" "2"
             ]
             [ viewButton
-                { onClick = Msg.ConvertOneGoldToSilver
+                { onClick = Msg.ButtonPressed (Character.convertOneGoldToSilver)
                 , text = ">"
                 }
             ]
         , viewButton
-            { onClick = Msg.ConvertAllGoldToSilver
+            { onClick = Msg.ButtonPressed (Character.convertAllGoldToSilver)
             , text = ">>"
             }
         , viewButton
-            { onClick = Msg.ConvertAllSilverToGold
+            { onClick = Msg.ButtonPressed (Character.convertAllSilverToGold)
             , text = "<<"
             }
         , viewButton
-            { onClick = Msg.ConvertOneSilverToGold
+            { onClick = Msg.ButtonPressed (Character.convertOneSilverToGold)
             , text = "<"
             }
         , viewButton
-            { onClick = Msg.ConvertOneSilverToBrass
+            { onClick = Msg.ButtonPressed (Character.convertOneSilverToBrass)
             , text = ">"
             }
         , viewButton
-            { onClick = Msg.ConvertAllSilverToBrass
+            { onClick = Msg.ButtonPressed (Character.convertAllSilverToBrass)
             , text = ">>"
             }
         , viewButton
-            { onClick = Msg.ConvertAllBrassToSilver
+            { onClick = Msg.ButtonPressed (Character.convertAllBrassToSilver)
             , text = "<<"
             }
         , viewButton
-            { onClick = Msg.ConvertOneBrassToSilver
+            { onClick = Msg.ButtonPressed (Character.convertOneBrassToSilver)
             , text = "<"
             }
         ]
@@ -854,7 +854,7 @@ viewWeapons model =
                             ]
                             [ Html.text "Name"
                             , viewTextInput
-                                { onInput = Msg.SetWeaponName index
+                                { onInput = Msg.TextFieldChanged (Character.setWeaponName index)
                                 , value = weapon.name
                                 }
                             ]
@@ -863,7 +863,7 @@ viewWeapons model =
                             ]
                             [ Html.text "Damage"
                             , viewTextInput
-                                { onInput = Msg.SetWeaponDamage index
+                                { onInput = Msg.TextFieldChanged (Character.setWeaponDamage index)
                                 , value = weapon.damage
                                 }
                             ]
@@ -872,7 +872,7 @@ viewWeapons model =
                             ]
                             [ Html.text "Group"
                             , viewTextInput
-                                { onInput = Msg.SetWeaponGroup index
+                                { onInput = Msg.TextFieldChanged (Character.setWeaponGroup index)
                                 , value = weapon.group
                                 }
                             ]
@@ -881,7 +881,7 @@ viewWeapons model =
                             ]
                             [ Html.text "Encumbrance"
                             , viewNumberInput
-                                { onInput = Msg.SetWeaponEncumbrance index
+                                { onInput = Msg.NumberFieldChanged (Character.setWeaponEncumbrance index)
                                 , value = weapon.encumbrance
                                 }
                             ]
@@ -890,7 +890,7 @@ viewWeapons model =
                             ]
                             [ Html.text "Range/Reach"
                             , viewTextInput
-                                { onInput = Msg.SetWeaponRange index
+                                { onInput = Msg.TextFieldChanged (Character.setWeaponRange index)
                                 , value = weapon.range
                                 }
                             ]
@@ -899,7 +899,7 @@ viewWeapons model =
                             ]
                             [ Html.text "Qualities"
                             , viewTextInput
-                                { onInput = Msg.SetWeaponQualities index
+                                { onInput = Msg.TextFieldChanged (Character.setWeaponQualities index)
                                 , value = weapon.qualities
                                 }
                             ]
@@ -908,7 +908,7 @@ viewWeapons model =
                 model.character.weapons
               )
             , [ viewButton
-                { onClick = Msg.AddWeapon
+                { onClick = Msg.ButtonPressed (Character.addWeapon)
                 , text = "Add"
                 }
               ]
@@ -942,23 +942,23 @@ viewArmour model =
             , (List.indexedMap
                 (\index armour ->
                     [ viewTextInput
-                        { onInput = Msg.SetArmourName index
+                        { onInput = Msg.TextFieldChanged (Character.setArmourName index)
                         , value = armour.name
                         }
                     , viewTextInput
-                        { onInput = Msg.SetArmourLocations index
+                        { onInput = Msg.TextFieldChanged (Character.setArmourLocations index)
                         , value = armour.locations
                         }
                     , viewNumberInput
-                        { onInput = Msg.SetArmourEncumbrance index
+                        { onInput = Msg.NumberFieldChanged (Character.setArmourEncumbrance index)
                         , value = armour.encumbrance
                         }
                     , viewNumberInput
-                        { onInput = Msg.SetArmourAp index
+                        { onInput = Msg.NumberFieldChanged (Character.setArmourAp index)
                         , value = armour.ap
                         }
                     , viewTextInput
-                        { onInput = Msg.SetArmourQualities index
+                        { onInput = Msg.TextFieldChanged (Character.setArmourQualities index)
                         , value = armour.qualities
                         }
                     ]
@@ -969,7 +969,7 @@ viewArmour model =
             , [ Html.div
                 [ HA.style "grid-column" "span 5" ]
                 [ viewButton
-                    { onClick = Msg.AddArmour
+                    { onClick = Msg.ButtonPressed (Character.addArmour)
                     , text = "Add"
                     }
                 ]
@@ -1035,7 +1035,7 @@ viewWounds model =
             , Html.div
                 [ HA.style "width" "40px" ]
                 [ viewNumberInput
-                    { onInput = Msg.SetExtraWounds
+                    { onInput = Msg.NumberFieldChanged (Character.setExtraWounds)
                     , value = model.character.extraWounds
                     }
                 ]
@@ -1058,7 +1058,7 @@ viewWounds model =
             , Html.div
                 [ HA.style "width" "40px" ]
                 [ viewNumberInput
-                    { onInput = Msg.SetCurrentWounds
+                    { onInput = Msg.NumberFieldChanged (Character.setCurrentWounds)
                     , value = model.character.currentWounds
                     }
                 ]

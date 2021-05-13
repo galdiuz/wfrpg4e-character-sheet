@@ -47,7 +47,7 @@ init flags url _ =
         |> Cmd.Extra.withCmd
             (Task.perform
                 (\viewport ->
-                    Msg.SetWindowSize
+                    Msg.WindowSizeReceived
                         (floor viewport.scene.width)
                         (floor viewport.scene.height)
                 )
@@ -65,8 +65,8 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Browser.Events.onResize Msg.SetWindowSize
-        , Draggable.subscriptions Msg.DragMsg model.ui.drag
+        [ Browser.Events.onResize Msg.WindowSizeReceived
+        , Draggable.subscriptions Msg.DragMsgReceived model.ui.drag
         ]
 
 
@@ -76,124 +76,23 @@ update msg model =
         Msg.NoOp ->
             Cmd.Extra.withNoCmd model
 
-        Msg.SetC12csAdvances c12c str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setC12csAdvances c12c
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetC12csInitial c12c str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setC12csInitial c12c
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetAdvancedSkillAdvances index str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setAdvancedSkillAdvances index
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetAdvancedSkillName index str ->
-            Character.setAdvancedSkillName index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetBasicSkillAdvances index str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setBasicSkillAdvances index
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.AddAdvancedSkill ->
-            Character.addAdvancedSkill model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetAdvancedSkillC12c index str ->
-            case Character.c12cFromString str of
-                Ok c12c ->
-                    Character.setAdvancedSkillC12c index c12c model.character
-                        |> Model.asCharacterIn model
-                        |> Cmd.Extra.withNoCmd
-
-                Err _ ->
-                    Cmd.Extra.withNoCmd model
-
-        Msg.AddTalent ->
-            Character.addTalent model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetTalentTimesTaken index str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setTalentTimesTaken index
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetTalentName index str ->
-            Character.setTalentName index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetTalentDescription index str ->
-            Character.setTalentDescription index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetExperience str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setExperience
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.AddExpAdjustment ->
-            Character.addExpAdjustment model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetExpAdjustmentDescription index str ->
-            Character.setExpAdjustmentDescription index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetExpAdjustmentValue index str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setExpAdjustmentValue index
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.Save ->
+        Msg.SavePressed ->
             ( model
             , Json.Encode.encode 0 (Character.encodeCharacter model.character)
                 |> File.Download.string "file.json" "application/json"
             )
 
-        Msg.Load ->
+        Msg.LoadPressed ->
             ( model
-            , File.Select.file [ "application/json" ] Msg.LoadFile
+            , File.Select.file [ "application/json" ] Msg.FileLoaded
             )
 
-        Msg.LoadFile file ->
+        Msg.FileLoaded file ->
             ( model
-            , Task.perform Msg.LoadString (File.toString file)
+            , Task.perform Msg.FileParsed (File.toString file)
             )
 
-        Msg.LoadString str ->
+        Msg.FileParsed str ->
             case Json.Decode.decodeString Character.decodeCharacter str of
                 Ok character ->
                     character
@@ -203,17 +102,12 @@ update msg model =
                 Err err ->
                     Cmd.Extra.withNoCmd model
 
-        Msg.SetInformation field value ->
-            Character.setInformation field value model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWindowSize x y ->
+        Msg.WindowSizeReceived x y ->
             Ui.updateWindowWidth model.ui x
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.SetDragPosition ( dx, dy ) ->
+        Msg.ElementDragged ( dx, dy ) ->
             let
                 ( x, y ) =
                     model.ui.dragPosition
@@ -227,52 +121,33 @@ update msg model =
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.SetDragElement cardType ->
+        Msg.DragStarted draggedCard ->
             model
                 |> Cmd.Extra.withCmd
-                    (Browser.Dom.getElement (Ui.cardId cardType)
-                        |> Task.map .element
-                        |> Task.attempt
-                            (Result.map (Msg.SetDragElementData cardType)
-                                >> Result.withDefault Msg.NoOp
-                            )
+                    (getElementPositionAndSize
+                        (Ui.cardId draggedCard)
+                        (Msg.DraggedElementPositionAndSizeReceived draggedCard)
                     )
                 |> Cmd.Extra.addCmds
                     (List.map
                         (\card ->
-                            Browser.Dom.getElement (Ui.cardId card)
-                                |> Task.map .element
-                                |> Task.attempt
-                                    (Result.map (Msg.SetCardData card)
-                                        >> Result.withDefault Msg.NoOp
-                                    )
+                            getElementPositionAndSize
+                                (Ui.cardId card)
+                                (Msg.CardPositionAndSizeReceived card)
                         )
                         Ui.allCards
                     )
                 |> Cmd.Extra.addCmds
                     (List.indexedMap
                         (\index _ ->
-                            Browser.Dom.getElement (Ui.columnId index)
-                                |> Task.map .element
-                                |> Task.attempt
-                                    (Result.map (Msg.SetColumnData index)
-                                        >> Result.withDefault Msg.NoOp
-                                    )
+                            getElementPositionAndSize
+                                (Ui.columnId index)
+                                (Msg.ColumnPositionAndSizeReceived index)
                         )
                         model.ui.columns
                     )
 
-        Msg.SetCardData card data ->
-            Ui.setCardHeight card (round data.height) model.ui
-                |> Model.asUiIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetColumnData index data ->
-            Ui.setColumnPosition index ( round data.x, round data.y ) model.ui
-                |> Model.asUiIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetDragElementData card data ->
+        Msg.DraggedElementPositionAndSizeReceived card data ->
             model.ui
                 |> Ui.setDraggedCard (Just card)
                 |> Ui.setDragPosition
@@ -282,28 +157,35 @@ update msg model =
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.ClearDragElementOnClick _ ->
+        Msg.CardPositionAndSizeReceived card data ->
+            Ui.setCardHeight card (round data.height) model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ColumnPositionAndSizeReceived index data ->
+            Ui.setColumnPosition index ( round data.x, round data.y ) model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.DragElementClicked _ ->
             Ui.setDraggedCard Nothing model.ui
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.ClearDragElementOnDragEnd ->
+        Msg.DragStopped ->
             model
                 |> Cmd.Extra.withCmd
                     (case model.ui.draggedCard of
                         Just card ->
-                            Browser.Dom.getElement (Ui.cardId card)
-                                |> Task.map .element
-                                |> Task.attempt
-                                    (Result.map (Msg.GotElement card)
-                                        >> Result.withDefault Msg.NoOp
-                                    )
+                            getElementPositionAndSize
+                                (Ui.cardId card)
+                                (Msg.DragStoppedElementPositionAndSizeReceived card)
 
                         Nothing ->
                             Cmd.none
                     )
 
-        Msg.GotElement card data ->
+        Msg.DragStoppedElementPositionAndSizeReceived card data ->
             model.ui
                 |> Ui.setMovingCard card ( round data.x, round data.y )
                 |> Ui.setDraggedCard Nothing
@@ -311,213 +193,59 @@ update msg model =
                 |> Model.asUiIn model
                 |> Cmd.Extra.withCmd
                     (Process.sleep 1000
-                        |> Task.perform (\_ -> Msg.RemoveMovingCard card)
+                        |> Task.perform (\_ -> Msg.CardFinishedMoving card)
                     )
 
-        Msg.RemoveMovingCard card ->
+        Msg.CardFinishedMoving card ->
             Ui.removeMovingCard card model.ui
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.DragMsg dragMsg ->
+        Msg.DragMsgReceived dragMsg ->
             Draggable.update dragConfig dragMsg model.ui
                 |> Tuple.mapFirst (Model.asUiIn model)
 
-        Msg.AddTrapping ->
-            Character.addTrapping model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetTrappingName index str ->
-            Character.setTrappingName index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetTrappingEncumbrance index str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setTrappingEncumbrance index
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWealthGold str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setGold
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWealthSilver str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setSilver
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWealthBrass str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setBrass
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.ConvertAllSilverToGold ->
-            Character.convertAllSilverToGold model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.ConvertOneSilverToGold ->
-            Character.convertOneSilverToGold model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.ConvertAllSilverToBrass ->
-            Character.convertAllSilverToBrass model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.ConvertOneSilverToBrass ->
-            Character.convertOneSilverToBrass model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.ConvertAllGoldToSilver ->
-            Character.convertAllGoldToSilver model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.ConvertOneGoldToSilver ->
-            Character.convertOneGoldToSilver model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.ConvertAllBrassToSilver ->
-            Character.convertAllBrassToSilver model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.ConvertOneBrassToSilver ->
-            Character.convertOneBrassToSilver model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.AddWeapon ->
-            Character.addWeapon model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWeaponDamage index str ->
-            Character.setWeaponDamage index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWeaponEncumbrance index str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setWeaponEncumbrance index
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWeaponGroup index str ->
-            Character.setWeaponGroup index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWeaponName index str ->
-            Character.setWeaponName index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWeaponQualities index str ->
-            Character.setWeaponQualities index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetWeaponRange index str ->
-            Character.setWeaponRange index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.AddArmour ->
-            Character.addArmour model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetArmourAp index str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setArmourAp index
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetArmourEncumbrance index str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setArmourEncumbrance index
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetArmourLocations index str ->
-            Character.setArmourLocations index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetArmourName index str ->
-            Character.setArmourName index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetArmourQualities index str ->
-            Character.setArmourQualities index str model.character
-                |> Model.asCharacterIn model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetCurrentWounds str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setCurrentWounds
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.SetExtraWounds str ->
-            parseIntAndSet
-                { string = str
-                , setter = Character.setExtraWounds
-                }
-                model
-                |> Cmd.Extra.withNoCmd
-
-        Msg.ToggleCardState card ->
+        Msg.ToggleCardStatePressed card ->
             Ui.toggleCardState card model.ui
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.CollapseAllCards ->
+        Msg.CollapseAllCardsPressed ->
             Ui.collapseAllCards model.ui
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.ExpandAllCards ->
+        Msg.ExpandAllCardsPressed ->
             Ui.expandAllCards model.ui
                 |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ButtonPressed fn ->
+            fn model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.TextFieldChanged setter str ->
+            setter str model.character
+                |> Model.asCharacterIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.NumberFieldChanged setter str ->
+            parseIntAndSet
+                { string = str
+                , setter = setter
+                }
+                model
                 |> Cmd.Extra.withNoCmd
 
 
 dragConfig : Draggable.Config Ui.Card Msg
 dragConfig =
     Draggable.customConfig
-        [ Draggable.Events.onDragBy Msg.SetDragPosition
-        , Draggable.Events.onMouseDown Msg.SetDragElement
-        , Draggable.Events.onDragEnd Msg.ClearDragElementOnDragEnd
-        , Draggable.Events.onClick Msg.ClearDragElementOnClick
+        [ Draggable.Events.onDragBy Msg.ElementDragged
+        , Draggable.Events.onMouseDown Msg.DragStarted
+        , Draggable.Events.onDragEnd Msg.DragStopped
+        , Draggable.Events.onClick Msg.DragElementClicked
         ]
 
 
@@ -540,3 +268,11 @@ parseIntAndSet data model =
 
             else
                 model
+
+
+getElementPositionAndSize : String -> (Msg.PositionAndSize -> Msg) -> Cmd Msg
+getElementPositionAndSize id toMsg =
+    Browser.Dom.getElement id
+        |> Task.map .element
+        |> Task.attempt
+            (Result.map toMsg >> Result.withDefault Msg.NoOp)

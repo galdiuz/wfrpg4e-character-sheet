@@ -878,6 +878,16 @@ setAdvancedSkillC12c index value character =
     }
 
 
+setAdvancedSkillC12cFromString : Int -> String -> Character -> Character
+setAdvancedSkillC12cFromString index str character =
+    case c12cFromString str of
+        Ok c12c ->
+            setAdvancedSkillC12c index c12c character
+
+        Err _ ->
+            character
+
+
 setAdvancedSkillName : Int -> String -> Character -> Character
 setAdvancedSkillName index value character =
     { character

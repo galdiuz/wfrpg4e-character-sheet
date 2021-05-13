@@ -160,7 +160,13 @@ input {
     border-bottom-color: #666
 }
 
+input:hover {
+    border-color: #555;
+    border-bottom-color: #888;
+}
+
 input:focus {
-    border-color: #ddd;
+    border-color: #999;
+    border-bottom-color: #bbb;
 }
     """
