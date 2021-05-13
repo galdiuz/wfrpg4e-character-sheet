@@ -32,10 +32,13 @@ type Msg
     | SetDragElement Ui.Card
     | SetDragPosition Draggable.Delta
     | DragMsg (Draggable.Msg Ui.Card)
-    | SetDragElementData Element
+    | SetDragElementData Ui.Card Element
     | ClearDragElementOnClick Ui.Card
     | ClearDragElementOnDragEnd
+    | GotElement Ui.Card Element
+    | RemoveMovingCard Ui.Card
     | SetCardData Ui.Card Element
+    | SetColumnData Int Element
     | AddTrapping
     | SetTrappingName Int String
     | SetTrappingEncumbrance Int String

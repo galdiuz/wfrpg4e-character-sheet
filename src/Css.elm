@@ -6,19 +6,44 @@ css =
 .content {
     display: flex;
     flex-direction: row;
+    gap: 4px;
 }
 
 .content-column {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 4px;
-    padding: 2px;
+    position: relative;
 }
 
 .card {
+    background-color: #fff;
     border: solid;
     border-width: 1px;
+    border-radius: 4px;
     margin: 4px 0px 4px 8px;
+}
+
+.card-container-fading {
+    opacity: 0.0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.card-container-floating {
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+}
+
+.card-container-transparent {
+    opacity: 0.2;
+}
+
+.card-container-moving {
+    transition-duration: 1s;
+    transition-property: top, left;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .card-content {
@@ -37,20 +62,14 @@ css =
     padding: 2px;
 }
 
-.card-header-title {
-    margin-left: 38px;
-}
-
 .card-header-buttons {
     display: flex;
-}
-
-.card-header-buttons > div:nth-last-child(n+2) {
-    margin-right: 4px;
+    gap: 4px;
 }
 
 .card-header-icon {
     align-items: center;
+    background-color: #fff;
     border-radius: 50%;
     border-style: solid;
     border-width: 1px;
@@ -58,9 +77,19 @@ css =
     font-size: 34px;
     height: 42px;
     justify-content: center;
-    margin-left: -11px;
+    left: 0px;
     position: absolute;
     width: 42px;
+}
+
+.card-header-title {
+    margin-left: 38px;
+}
+
+.grid {
+    display: grid;
+    column-gap: 8px;
+    row-gap: 2px;
 }
 
 button {
@@ -85,8 +114,17 @@ input {
     box-sizing: border-box;
     padding: 1px;
     width: 100%;
-    border-width: 0px 0px 1px;
-    border-style: dashed;
+    border-width: 1px;
+    border-style: solid;
+    border-bottom-style: dashed;
+    border-radius: 2px;
+    transition: border-color 0.15s ease-in-out;
+}
+
+input:focus {
+    border-style: solid;
+    border-bottom-style: dashed;
+    border-width: 1px;
 }
 
 input:focus-visible {
@@ -112,8 +150,17 @@ input::-webkit-inner-spin-button {
 dark : String
 dark =
     """
-body, button, input, select, textarea, .card-header-icon {
+body, button, input, select, textarea, .card, .card-header-icon {
     color: #ddd;
     background-color: #282828;
+}
+
+input {
+    border-color: #333;
+    border-bottom-color: #666
+}
+
+input:focus {
+    border-color: #ddd;
 }
     """

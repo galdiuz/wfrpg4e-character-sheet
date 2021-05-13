@@ -2,6 +2,7 @@ module View exposing (view)
 
 import Character as Character
 import Css
+import Dict
 import Draggable
 import FontAwesome.Styles
 import FontAwesome.Icon as FA
@@ -26,27 +27,16 @@ view model =
     Html.div
         []
         [ Html.node "style" [] [ Html.text Css.css ]
-        , Html.node "style" [] [ Html.text Css.dark ]
+        , case model.ui.theme of
+            Ui.Light ->
+                Html.text ""
+
+            Ui.Dark ->
+                Html.node "style" [] [ Html.text Css.dark ]
         , FontAwesome.Styles.css
         , viewHeader
         , viewContent model
-        , viewDraggedCard model
         ]
-
-
-viewDraggedCard model =
-    case model.ui.draggedCard of
-        Just card ->
-            Html.div
-                [ HA.style "position" "absolute"
-                , HA.style "left" (String.fromInt (Tuple.first model.ui.dragPosition) ++ "px")
-                , HA.style "top" (String.fromInt (Tuple.second model.ui.dragPosition) ++ "px")
-                , HA.style "width" (String.fromInt (Ui.getColumnWidth model.ui) ++ "px")
-                ]
-                [ viewCard model card ]
-
-        Nothing ->
-            Html.text ""
 
 
 viewHeader : Html Msg
@@ -75,23 +65,46 @@ viewContent model =
     Html.div
         [ HA.class "content"
         ]
-        (List.map
-            (\cards ->
+        (List.indexedMap
+            (\index cards ->
                 Html.div
                     [ HA.class "content-column"
-                    , HA.style "width" (String.fromInt (Ui.getColumnWidth model.ui) ++ "px")
+                    , HA.id (Ui.columnId index)
                     ]
                     (List.map
                         (\card ->
-                            Html.div
+                            [ Html.div
                                 [ HAE.attributeIf
                                     (Just card == model.ui.draggedCard)
-                                    (HA.style "opacity" "0.2")
+                                    (HA.class  "card-container-transparent")
+                                , HAE.attributeIf
+                                    (Dict.member (Ui.cardId card) model.ui.movingCards)
+                                    (HA.class  "card-container-fading")
                                 , HA.id (Ui.cardId card)
                                 ]
                                 [ viewCard model card ]
+
+                            , if Ui.isCardFloating model.ui card then
+                                let
+                                    ( left, top ) =
+                                        Ui.getFloatingCardPosition model.ui card index
+                                in
+                                Html.div
+                                    [ HA.class "card-container-floating"
+                                    , HAE.attributeIf
+                                        (Dict.member (Ui.cardId card) model.ui.movingCards)
+                                        (HA.class "card-container-moving")
+                                    , HA.style "left" (String.fromInt left ++ "px")
+                                    , HA.style "top" (String.fromInt top ++ "px")
+                                    ]
+                                    [ viewCard model card ]
+
+                              else
+                                  Html.text ""
+                            ]
                         )
                         cards
+                        |> List.concat
                     )
             )
             model.ui.columns
@@ -201,84 +214,106 @@ viewInformation : Model -> Html Msg
 viewInformation model =
     Html.div
         [ HA.style "display" "flex"
-        , HA.style "flex-flow" "row wrap"
+        , HA.style "flex-flow" "column"
+        , HA.style "gap" "8px"
         ]
-        [ Html.text "Name"
-        , viewTextInput
-            { onInput = Msg.SetInformation "name"
-            , value = model.character.info.name
-            }
-        , Html.div
-            [ HA.style "width" "50%" ]
-            [ Html.text "Species"
+        [ Html.div
+            []
+            [ Html.text "Name"
             , viewTextInput
-                { onInput = Msg.SetInformation "species"
-                , value = model.character.info.species
+                { onInput = Msg.SetInformation "name"
+                , value = model.character.info.name
                 }
             ]
         , Html.div
-            [ HA.style "width" "50%" ]
-            [ Html.text "Class"
-            , viewTextInput
-                { onInput = Msg.SetInformation "class"
-                , value = model.character.info.class
-                }
+            [ HA.style "display" "flex"
+            , HA.style "flex-flow" "row"
+            , HA.style "gap" "8px"
+            ]
+            [ Html.div
+                []
+                [ Html.text "Species"
+                , viewTextInput
+                    { onInput = Msg.SetInformation "species"
+                    , value = model.character.info.species
+                    }
+                ]
+            , Html.div
+                []
+                [ Html.text "Class"
+                , viewTextInput
+                    { onInput = Msg.SetInformation "class"
+                    , value = model.character.info.class
+                    }
+                ]
             ]
         , Html.div
-            [ HA.style "width" "33%" ]
-            [ Html.text "Career Path"
-            , viewTextInput
-                { onInput = Msg.SetInformation "careerPath"
-                , value = model.character.info.careerPath
-                }
+            [ HA.style "display" "flex"
+            , HA.style "flex-flow" "row"
+            , HA.style "gap" "8px"
+            ]
+            [ Html.div
+                []
+                [ Html.text "Career Path"
+                , viewTextInput
+                    { onInput = Msg.SetInformation "careerPath"
+                    , value = model.character.info.careerPath
+                    }
+                ]
+            , Html.div
+                []
+                [ Html.text "Career"
+                , viewTextInput
+                    { onInput = Msg.SetInformation "career"
+                    , value = model.character.info.career
+                    }
+                ]
+            , Html.div
+                []
+                [ Html.text "Status"
+                , viewTextInput
+                    { onInput = Msg.SetInformation "status"
+                    , value = model.character.info.status
+                    }
+                ]
             ]
         , Html.div
-            [ HA.style "width" "33%" ]
-            [ Html.text "Career"
-            , viewTextInput
-                { onInput = Msg.SetInformation "career"
-                , value = model.character.info.career
-                }
+            [ HA.style "display" "flex"
+            , HA.style "flex-flow" "row"
+            , HA.style "gap" "8px"
             ]
-        , Html.div
-            [ HA.style "width" "33%" ]
-            [ Html.text "Status"
-            , viewTextInput
-                { onInput = Msg.SetInformation "status"
-                , value = model.character.info.status
-                }
-            ]
-        , Html.div
-            [ HA.style "width" "20%" ]
-            [ Html.text "Age"
-            , viewTextInput
-                { onInput = Msg.SetInformation "age"
-                , value = model.character.info.age
-                }
-            ]
-        , Html.div
-            [ HA.style "width" "20%" ]
-            [ Html.text "Height"
-            , viewTextInput
-                { onInput = Msg.SetInformation "height"
-                , value = model.character.info.height
-                }
-            ]
-        , Html.div
-            [ HA.style "width" "30%" ]
-            [ Html.text "Hair"
-            , viewTextInput
-                { onInput = Msg.SetInformation "hair"
-                , value = model.character.info.hair
-                }
-            ]
-        , Html.div
-            [ HA.style "width" "30%" ]
-            [ Html.text "Eyes"
-            , viewTextInput
-                { onInput = Msg.SetInformation "eyes"
-                , value = model.character.info.eyes
-                }
+            [ Html.div
+                [ HA.style "flex" "20" ]
+                [ Html.text "Age"
+                , viewTextInput
+                    { onInput = Msg.SetInformation "age"
+                    , value = model.character.info.age
+                    }
+                ]
+            , Html.div
+                [ HA.style "flex" "20" ]
+                [ Html.text "Height"
+                , viewTextInput
+                    { onInput = Msg.SetInformation "height"
+                    , value = model.character.info.height
+                    }
+                ]
+            , Html.div
+                [ HA.style "flex" "30" ]
+                [ Html.text "Hair"
+                , viewTextInput
+                    { onInput = Msg.SetInformation "hair"
+                    , value = model.character.info.hair
+                    }
+                ]
+            , Html.div
+                [ HA.style "flex" "30" ]
+                [ Html.text "Eyes"
+                , viewTextInput
+                    { onInput = Msg.SetInformation "eyes"
+                    , value = model.character.info.eyes
+                    }
+                ]
             ]
         ]
 
@@ -286,8 +321,8 @@ viewInformation model =
 viewC12cs : Model -> Html Msg
 viewC12cs model =
     Html.div
-        [ HA.style "display" "grid"
-        , HA.style "grid-template-columns" "40% 20% 20% 20%"
+        [ HA.class "grid"
+        , HA.style "grid-template-columns" "2fr 1fr 1fr 1fr"
         ]
         (List.concat
             [ [ Html.span
@@ -400,9 +435,11 @@ viewExperience model =
 viewExperienceTable : Model -> Html Msg
 viewExperienceTable model =
     Html.div
-        [ HA.style "display" "flex" ]
+        [ HA.style "display" "flex"
+        , HA.style "gap" "8px"
+        ]
         [ Html.div
-            [ HA.style "width" "33%" ]
+            [ HA.style "flex" "1" ]
             [ Html.text "Total"
             , viewNumberInput
                 { onInput = Msg.SetExperience
@@ -410,7 +447,7 @@ viewExperienceTable model =
                 }
             ]
         , Html.div
-            [ HA.style "width" "33%" ]
+            [ HA.style "flex" "1" ]
             [ Html.div
                 []
                 [ Html.text "Spent" ]
@@ -422,7 +459,7 @@ viewExperienceTable model =
                 ]
             ]
         , Html.div
-            [ HA.style "width" "33%" ]
+            [ HA.style "flex" "1" ]
             [ Html.text "Current"
             , Html.div
                 []
@@ -437,7 +474,7 @@ viewExperienceTable model =
 viewSkills : Model -> Html Msg
 viewSkills model =
     Html.div
-        [ HA.style "display" "grid"
+        [ HA.class "grid"
         , HA.style "grid-template-columns" "[name] auto [c12c] 15% [c12c-value] 15% [adv] 20% [skill] 10%"
         ]
         (List.concat
@@ -598,7 +635,7 @@ viewSelect data =
 viewTalents : Model -> Html Msg
 viewTalents model =
     Html.div
-        [ HA.style "display" "grid"
+        [ HA.class "grid"
         , HA.style "grid-template-columns" "[name] 35% [times-taken] 25% [description] auto"
         ]
         (List.concat
@@ -645,7 +682,7 @@ viewTalents model =
 viewAdjustments : Model -> Html Msg
 viewAdjustments model =
     Html.div
-        [ HA.style "display" "grid"
+        [ HA.class "grid"
         , HA.style "grid-template-columns" "[value] 20% [description] auto"
         ]
         (List.concat
@@ -733,12 +770,12 @@ viewTrappings model =
 viewWealth : Model -> Html Msg
 viewWealth model =
     Html.div
-        [ HA.style "display" "grid"
+        [ HA.class "grid"
         , HA.style "grid-template-columns" "2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 2fr"
         ]
         [ Html.div
             [ HA.style "grid-column" "span 3" ]
-            [ Html.text "G"
+            [ Html.text "Gold Crowns"
             , viewNumberInput
                 { onInput = Msg.SetWealthGold
                 , value = model.character.wealth.gold
@@ -746,7 +783,7 @@ viewWealth model =
             ]
         , Html.div
             [ HA.style "grid-column" "span 4" ]
-            [ Html.text "/"
+            [ Html.text "Silver Shillings"
             , viewNumberInput
                 { onInput = Msg.SetWealthSilver
                 , value = model.character.wealth.silver
@@ -754,7 +791,7 @@ viewWealth model =
             ]
         , Html.div
             [ HA.style "grid-column" "span 3" ]
-            [ Html.text "d"
+            [ Html.text "Brass Pennies"
             , viewNumberInput
                 { onInput = Msg.SetWealthBrass
                 , value = model.character.wealth.brass
@@ -882,7 +919,7 @@ viewWeapons model =
 viewArmour : Model -> Html Msg
 viewArmour model =
     Html.div
-        [ HA.style "display" "grid"
+        [ HA.class "grid"
         , HA.style "grid-template-columns" "[name] auto [locations] auto [enc] 40px [ap] 40px [qualities] auto"
         ]
         (List.concat

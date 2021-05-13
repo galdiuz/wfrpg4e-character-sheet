@@ -16,6 +16,7 @@ import Json.Decode
 import Json.Encode
 import Model exposing (Model)
 import Msg as Msg exposing (Msg)
+import Process
 import Task
 import Ui
 import Url
@@ -227,13 +228,12 @@ update msg model =
                 |> Cmd.Extra.withNoCmd
 
         Msg.SetDragElement cardType ->
-            Ui.setDraggedCard (Just cardType) model.ui
-                |> Model.asUiIn model
+            model
                 |> Cmd.Extra.withCmd
                     (Browser.Dom.getElement (Ui.cardId cardType)
                         |> Task.map .element
                         |> Task.attempt
-                            (Result.map (Msg.SetDragElementData)
+                            (Result.map (Msg.SetDragElementData cardType)
                                 >> Result.withDefault Msg.NoOp
                             )
                     )
@@ -249,18 +249,36 @@ update msg model =
                         )
                         Ui.allCards
                     )
+                |> Cmd.Extra.addCmds
+                    (List.indexedMap
+                        (\index _ ->
+                            Browser.Dom.getElement (Ui.columnId index)
+                                |> Task.map .element
+                                |> Task.attempt
+                                    (Result.map (Msg.SetColumnData index)
+                                        >> Result.withDefault Msg.NoOp
+                                    )
+                        )
+                        model.ui.columns
+                    )
 
         Msg.SetCardData card data ->
             Ui.setCardHeight card (round data.height) model.ui
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.SetDragElementData data ->
-            Ui.setDragPosition
-                ( round (data.x)
-                , round (data.y)
-                )
-                model.ui
+        Msg.SetColumnData index data ->
+            Ui.setColumnPosition index ( round data.x, round data.y ) model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.SetDragElementData card data ->
+            model.ui
+                |> Ui.setDraggedCard (Just card)
+                |> Ui.setDragPosition
+                    ( round (data.x)
+                    , round (data.y)
+                    )
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
@@ -270,7 +288,34 @@ update msg model =
                 |> Cmd.Extra.withNoCmd
 
         Msg.ClearDragElementOnDragEnd ->
-            Ui.setDraggedCard Nothing model.ui
+            model
+                |> Cmd.Extra.withCmd
+                    (case model.ui.draggedCard of
+                        Just card ->
+                            Browser.Dom.getElement (Ui.cardId card)
+                                |> Task.map .element
+                                |> Task.attempt
+                                    (Result.map (Msg.GotElement card)
+                                        >> Result.withDefault Msg.NoOp
+                                    )
+
+                        Nothing ->
+                            Cmd.none
+                    )
+
+        Msg.GotElement card data ->
+            model.ui
+                |> Ui.setMovingCard card ( round data.x, round data.y )
+                |> Ui.setDraggedCard Nothing
+                |> Ui.setDragPosition ( 0, 0 )
+                |> Model.asUiIn model
+                |> Cmd.Extra.withCmd
+                    (Process.sleep 1000
+                        |> Task.perform (\_ -> Msg.RemoveMovingCard card)
+                    )
+
+        Msg.RemoveMovingCard card ->
+            Ui.removeMovingCard card model.ui
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 

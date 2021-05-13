@@ -10,11 +10,19 @@ type alias Ui =
     { cardHeights : Dict String Int
     , cardStates : Dict String CardState
     , columns : List (List Card)
+    , columnPositions : Dict Int ( Int, Int )
     , drag : Draggable.State Card
     , dragPosition : ( Int, Int )
     , draggedCard : Maybe Card
+    , movingCards : Dict String ( Int, Int )
+    , theme : Theme
     , windowWidth : Int
     }
+
+
+columnId : Int -> String
+columnId index =
+    "column-" ++ String.fromInt index
 
 
 emptyUi : Ui
@@ -22,11 +30,19 @@ emptyUi =
     { cardHeights = Dict.empty
     , cardStates = Dict.empty
     , columns = []
+    , columnPositions = Dict.empty
     , drag = Draggable.init
-    , draggedCard = Nothing
     , dragPosition = ( 0, 0 )
+    , draggedCard = Nothing
+    , movingCards = Dict.empty
+    , theme = Dark
     , windowWidth = 0
     }
+
+
+type Theme
+    = Dark
+    | Light
 
 
 type Card
@@ -267,3 +283,59 @@ expandAllCards ui =
         (setCardState Open)
         ui
         allCards
+
+
+setMovingCard : Card -> ( Int, Int ) -> Ui -> Ui
+setMovingCard card position ui =
+    { ui
+        | movingCards =
+            Dict.insert
+                (cardId card)
+                position
+                ui.movingCards
+    }
+
+
+removeMovingCard : Card -> Ui -> Ui
+removeMovingCard card ui =
+    { ui
+        | movingCards =
+            Dict.remove
+                (cardId card)
+                ui.movingCards
+    }
+
+
+isCardFloating : Ui -> Card -> Bool
+isCardFloating ui card =
+    ui.draggedCard == Just card
+    && ui.dragPosition /= ( 0, 0 )
+    || Dict.member (cardId card) ui.movingCards
+
+
+getFloatingCardPosition : Ui -> Card -> Int -> ( Int, Int )
+getFloatingCardPosition ui card index =
+    case ( Dict.get (cardId card) ui.movingCards, Dict.get index ui.columnPositions ) of
+        ( Just cardPos, Just columnPos ) ->
+            ( Tuple.first cardPos - Tuple.first columnPos
+            , Tuple.second cardPos - Tuple.second columnPos
+            )
+
+        ( _, Just columnPos ) ->
+            ( Tuple.first ui.dragPosition - Tuple.first columnPos
+            , Tuple.second ui.dragPosition - Tuple.second columnPos
+            )
+
+        _ ->
+            ( 0, 0 )
+
+
+setColumnPosition : Int -> ( Int, Int ) -> Ui -> Ui
+setColumnPosition index position ui =
+    { ui
+        | columnPositions =
+            Dict.insert
+                index
+                position
+                ui.columnPositions
+    }
