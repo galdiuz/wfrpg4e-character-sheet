@@ -20,6 +20,7 @@ type alias Character =
     , extraWounds : Int
     , info : Information
     , maxEncumbrance : Int
+    , notes : List String
     , talents : List Talent
     , trappings : List Trapping
     , wealth : Wealth
@@ -41,6 +42,7 @@ emptyCharacter =
     , extraWounds = 0
     , info = emptyInformation
     , maxEncumbrance = 0
+    , notes = []
     , talents = []
     , trappings = []
     , wealth = emptyWealth
@@ -63,6 +65,7 @@ encodeCharacter character =
         , ( "extraWounds", Encode.int character.extraWounds )
         , ( "info", encodeInformation character.info )
         , ( "maxEncumbrance", Encode.int character.maxEncumbrance )
+        , ( "notes", Encode.list Encode.string character.notes )
         , ( "talents", Encode.list encodeTalent character.talents )
         , ( "trappings", Encode.list encodeTrapping character.trappings )
         , ( "wealth", encodeWealth character.wealth )
@@ -84,6 +87,7 @@ decodeCharacter =
     Field.require "extraWounds" Decode.int <| \extraWounds ->
     Field.require "info" decodeInformation <| \info ->
     Field.require "maxEncumbrance" Decode.int <| \maxEncumbrance ->
+    Field.require "notes" (Decode.list Decode.string) <| \notes ->
     Field.require "talents" (Decode.list decodeTalent) <| \talents ->
     Field.require "trappings" (Decode.list decodeTrapping) <| \trappings ->
     Field.require "wealth" decodeWealth <| \wealth ->
@@ -101,6 +105,7 @@ decodeCharacter =
         , extraWounds = extraWounds
         , info = info
         , maxEncumbrance = maxEncumbrance
+        , notes = notes
         , talents = talents
         , trappings = trappings
         , wealth = wealth
@@ -816,6 +821,25 @@ decodeInformation =
         , species = species
         , status = status
         }
+
+-----------
+-- Notes --
+-----------
+
+addNote : Character -> Character
+addNote character =
+    { character | notes = character.notes ++ [ "" ] }
+
+
+setNote : Int -> String -> Character -> Character
+setNote index value character =
+    { character
+        | notes =
+            List.Extra.setAt
+                index
+                value
+                character.notes
+    }
 
 ------------
 -- Skills --

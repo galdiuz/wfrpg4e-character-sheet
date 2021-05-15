@@ -51,6 +51,7 @@ type Card
     | Encumbrance
     | Experience
     | Information
+    | Notes
     | Skills
     | Talents
     | Trappings
@@ -66,6 +67,7 @@ allCards =
     , Encumbrance
     , Experience
     , Information
+    , Notes
     , Skills
     , Talents
     , Trappings
@@ -83,6 +85,7 @@ cardId card =
         Encumbrance -> "encumbrance"
         Experience -> "experience"
         Information -> "information"
+        Notes -> "notes"
         Skills -> "skills"
         Talents -> "talents"
         Trappings -> "trappings"
@@ -99,6 +102,7 @@ cardTitle card =
         Encumbrance -> "Encumbrance"
         Experience -> "Experience"
         Information -> "Information"
+        Notes -> "Notes"
         Skills -> "Skills"
         Talents -> "Talents"
         Trappings -> "Trappings"
@@ -115,6 +119,7 @@ cardIcon card =
         Encumbrance -> Icons.weight
         Experience -> Icons.wisdom
         Information -> Icons.character
+        Notes -> Icons.notebook
         Skills -> Icons.graduateCap
         Talents -> Icons.ribbonMedal
         Trappings -> Icons.bag

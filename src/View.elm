@@ -167,6 +167,9 @@ viewCard model card =
                         Ui.Information ->
                             viewInformation model
 
+                        Ui.Notes ->
+                            viewNotes model
+
                         Ui.Skills ->
                             viewSkills model
 
@@ -1201,3 +1204,31 @@ viewEncumbrance model =
             , value = model.character.maxEncumbrance
             }
         ]
+
+
+viewNotes : Model -> Html Msg
+viewNotes model =
+    Html.div
+        [ HA.style "display" "flex"
+        , HA.style "flex-flow" "column"
+        , HA.style "gap" "4px"
+        ]
+        (List.concat
+            [ List.indexedMap
+                (\index note ->
+                    viewTextareaInput
+                        { onInput = Msg.TextFieldChanged (Character.setNote index)
+                        , value = note
+                        }
+                )
+                model.character.notes
+            , [ Html.div
+                []
+                [ viewButton
+                    { onClick = Msg.ButtonPressed (Character.addNote)
+                    , text = "Add"
+                    }
+                ]
+              ]
+            ]
+        )
