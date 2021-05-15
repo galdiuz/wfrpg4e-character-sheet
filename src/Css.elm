@@ -76,18 +76,18 @@ css =
     border-width: 1px;
     cursor: move;
     display: flex;
-    font-size: 32px;
+    font-size: 34px;
     height: 40px;
     justify-content: center;
     left: 0px;
     position: absolute;
-    width: 42px;
+    width: 40px;
 }
 
 .card-header-title {
     cursor: move;
     flex: 1;
-    padding-left: 38px;
+    padding-left: 36px;
 }
 
 .grid {

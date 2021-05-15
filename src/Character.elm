@@ -19,6 +19,7 @@ type alias Character =
     , experience : Int
     , extraWounds : Int
     , info : Information
+    , maxEncumbrance : Int
     , talents : List Talent
     , trappings : List Trapping
     , wealth : Wealth
@@ -39,6 +40,7 @@ emptyCharacter =
     , experience = 0
     , extraWounds = 0
     , info = emptyInformation
+    , maxEncumbrance = 0
     , talents = []
     , trappings = []
     , wealth = emptyWealth
@@ -60,6 +62,7 @@ encodeCharacter character =
         , ( "experience", Encode.int character.experience )
         , ( "extraWounds", Encode.int character.extraWounds )
         , ( "info", encodeInformation character.info )
+        , ( "maxEncumbrance", Encode.int character.maxEncumbrance )
         , ( "talents", Encode.list encodeTalent character.talents )
         , ( "trappings", Encode.list encodeTrapping character.trappings )
         , ( "wealth", encodeWealth character.wealth )
@@ -80,6 +83,7 @@ decodeCharacter =
     Field.require "experience" Decode.int <| \experience ->
     Field.require "extraWounds" Decode.int <| \extraWounds ->
     Field.require "info" decodeInformation <| \info ->
+    Field.require "maxEncumbrance" Decode.int <| \maxEncumbrance ->
     Field.require "talents" (Decode.list decodeTalent) <| \talents ->
     Field.require "trappings" (Decode.list decodeTrapping) <| \trappings ->
     Field.require "wealth" decodeWealth <| \wealth ->
@@ -96,6 +100,7 @@ decodeCharacter =
         , experience = experience
         , extraWounds = extraWounds
         , info = info
+        , maxEncumbrance = maxEncumbrance
         , talents = talents
         , trappings = trappings
         , wealth = wealth
@@ -573,6 +578,43 @@ decodeC12c =
     Decode.andThen
         (c12cFromString >> Json.Decode.Extra.fromResult)
         Decode.string
+
+-----------------
+-- Encumbrance --
+-----------------
+
+armourEncumbrance : Character -> Int
+armourEncumbrance character =
+    List.foldl
+        ((+) << .encumbrance)
+        0
+        character.armour
+
+
+totalEncumbrance : Character -> Int
+totalEncumbrance character =
+    armourEncumbrance character + trappingsEncumbrance character + weaponEncumbrance character
+
+
+trappingsEncumbrance : Character -> Int
+trappingsEncumbrance character =
+    List.foldl
+        ((+) << .encumbrance)
+        0
+        character.trappings
+
+
+weaponEncumbrance : Character -> Int
+weaponEncumbrance character =
+    List.foldl
+        ((+) << .encumbrance)
+        0
+        character.weapons
+
+
+setMaxEncumbrance : Int -> Character -> Character
+setMaxEncumbrance value character =
+    { character | maxEncumbrance = Basics.max 0 value }
 
 ----------------
 -- Experience --

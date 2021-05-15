@@ -158,6 +158,9 @@ viewCard model card =
                         Ui.C12cs ->
                             viewC12cs model
 
+                        Ui.Encumbrance ->
+                            viewEncumbrance model
+
                         Ui.Experience ->
                             viewExperience model
 
@@ -217,8 +220,7 @@ viewInformation model =
         , HA.style "gap" "8px"
         ]
         [ viewTextInputWithLabel
-            { id = "information-name"
-            , label = "Name"
+            { label = "Name"
             , onInput = Msg.TextFieldChanged (Character.setInformation Character.Name)
             , value = model.character.info.name
             }
@@ -228,14 +230,12 @@ viewInformation model =
             , HA.style "gap" "8px"
             ]
             [ viewTextInputWithLabel
-                { id = "information-species"
-                , label = "Species"
+                { label = "Species"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Species)
                 , value = model.character.info.species
                 }
             , viewTextInputWithLabel
-                { id = "information-class"
-                , label = "Class"
+                { label = "Class"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Class)
                 , value = model.character.info.class
                 }
@@ -246,20 +246,17 @@ viewInformation model =
             , HA.style "gap" "8px"
             ]
             [ viewTextInputWithLabel
-                { id = "information-career-path"
-                , label = "Career Path"
+                { label = "Career Path"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.CareerPath)
                 , value = model.character.info.careerPath
                 }
             , viewTextInputWithLabel
-                { id = "information-career"
-                , label = "Career"
+                { label = "Career"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Career)
                 , value = model.character.info.career
                 }
             , viewTextInputWithLabel
-                { id = "information-status"
-                , label = "Status"
+                { label = "Status"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Status)
                 , value = model.character.info.status
                 }
@@ -270,26 +267,22 @@ viewInformation model =
             , HA.style "gap" "8px"
             ]
             [ viewTextInputWithLabel
-                { id = "information-age"
-                , label = "Age"
+                { label = "Age"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Age)
                 , value = model.character.info.age
                 }
             , viewTextInputWithLabel
-                { id = "information-height"
-                , label = "Height"
+                { label = "Height"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Height)
                 , value = model.character.info.height
                 }
             , viewTextInputWithLabel
-                { id = "information-hair"
-                , label = "Hair"
+                { label = "Hair"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Hair)
                 , value = model.character.info.hair
                 }
             , viewTextInputWithLabel
-                { id = "information-eyes"
-                , label = "Eyes"
+                { label = "Eyes"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Eyes)
                 , value = model.character.info.eyes
                 }
@@ -360,23 +353,19 @@ viewTextInput data =
 
 
 viewTextInputWithLabel :
-    { id : String
-    , label : String
+    { label : String
     , onInput : String -> msg
     , value : String
     }
     -> Html msg
 viewTextInputWithLabel data =
-    Html.div
-        [ HA.style "flex" "1" ]
-        [ Html.label
-            [ HA.class "label"
-            , HA.for data.id
-            ]
-            [ Html.text data.label ]
+    Html.label
+        [ HA.class "label"
+        , HA.style "flex" "1"
+        ]
+        [ Html.text data.label
         , Html.input
-            [ HA.id data.id
-            , HA.type_ "text"
+            [ HA.type_ "text"
             , HA.value data.value
             , Events.onInput data.onInput
             ]
@@ -413,23 +402,19 @@ viewNumberInput data =
 
 
 viewNumberInputWithLabel :
-    { id: String
-    , label : String
+    { label : String
     , onInput : String -> msg
     , value : Int
     }
     -> Html msg
 viewNumberInputWithLabel data =
-    Html.div
-        [ HA.style "flex" "1" ]
-        [ Html.label
-            [ HA.class "label"
-            , HA.for data.id
-            ]
-            [ Html.text data.label ]
+    Html.label
+        [ HA.class "label"
+        , HA.style "flex" "1"
+        ]
+        [ Html.text data.label
         , Html.input
-            [ HA.id data.id
-            , HA.type_ "number"
+            [ HA.type_ "number"
             , HA.value (String.fromInt data.value)
             , Events.onInput data.onInput
             ]
@@ -472,8 +457,7 @@ viewExperienceTable model =
         , HA.style "gap" "8px"
         ]
         [ viewNumberInputWithLabel
-            { id = "experience-total"
-            , label = "Total"
+            { label = "Total"
             , onInput = Msg.NumberFieldChanged (Character.setExperience)
             , value = model.character.experience
             }
@@ -816,8 +800,7 @@ viewWealth model =
         [ Html.div
             [ HA.style "grid-column" "span 3" ]
             [ viewNumberInputWithLabel
-                { id = "wealth-gold"
-                , label = "Gold Crowns"
+                { label = "Gold Crowns"
                 , onInput = Msg.NumberFieldChanged (Character.setGold)
                 , value = model.character.wealth.gold
                 }
@@ -825,8 +808,7 @@ viewWealth model =
         , Html.div
             [ HA.style "grid-column" "span 4" ]
             [ viewNumberInputWithLabel
-                { id = "wealth-silver"
-                , label = "Silver Shillings"
+                { label = "Silver Shillings"
                 , onInput = Msg.NumberFieldChanged (Character.setSilver)
                 , value = model.character.wealth.silver
                 }
@@ -834,8 +816,7 @@ viewWealth model =
         , Html.div
             [ HA.style "grid-column" "span 3" ]
             [ viewNumberInputWithLabel
-                { id = "wealth-brass"
-                , label = "Brass Pennies"
+                { label = "Brass Pennies"
                 , onInput = Msg.NumberFieldChanged (Character.setBrass)
                 , value = model.character.wealth.brass
                 }
@@ -977,20 +958,17 @@ viewArmour model =
                 , HA.style "gap" "8px"
                 ]
                 [ viewNumberInputWithLabel
-                    { id = "ap-left-arm"
-                    , label = "Left arm (10-24)"
+                    { label = "Left arm (10-24)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.LeftArm)
                     , value = model.character.ap.leftArm
                     }
                 , viewNumberInputWithLabel
-                    { id = "ap-head"
-                    , label = "Head (01-09)"
+                    { label = "Head (01-09)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.Head)
                     , value = model.character.ap.head
                     }
                 , viewNumberInputWithLabel
-                    { id = "ap-right-arm"
-                    , label = "Right arm (10-24)"
+                    { label = "Right arm (10-24)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.RightArm)
                     , value = model.character.ap.rightArm
                     }
@@ -1001,26 +979,22 @@ viewArmour model =
                 , HA.style "gap" "8px"
                 ]
                 [ viewNumberInputWithLabel
-                    { id = "ap-shield"
-                    , label = "Shield"
+                    { label = "Shield"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.Shield)
                     , value = model.character.ap.shield
                     }
                 , viewNumberInputWithLabel
-                    { id = "ap-left-leg"
-                    , label = "Left leg (80-89)"
+                    { label = "Left leg (80-89)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.LeftLeg)
                     , value = model.character.ap.leftLeg
                     }
                 , viewNumberInputWithLabel
-                    { id = "ap-body"
-                    , label = "Body (45-79)"
+                    { label = "Body (45-79)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.Body)
                     , value = model.character.ap.body
                     }
                 , viewNumberInputWithLabel
-                    { id = "ap-right-leg"
-                    , label = "Right leg (90-00)"
+                    { label = "Right leg (90-00)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.RightLeg)
                     , value = model.character.ap.rightLeg
                     }
@@ -1140,8 +1114,7 @@ viewWounds model =
             []
             [ Html.text "+" ]
         , viewNumberInputWithLabel
-            { id = "wounds-extra"
-            , label = "Extra"
+            { label = "Extra"
             , onInput = Msg.NumberFieldChanged (Character.setExtraWounds)
             , value = model.character.extraWounds
             }
@@ -1158,9 +1131,73 @@ viewWounds model =
                 |> Html.text
             ]
         , viewNumberInputWithLabel
-            { id = "wounds-current"
-            , label = "Current"
+            { label = "Current"
             , onInput = Msg.NumberFieldChanged (Character.setCurrentWounds)
             , value = model.character.currentWounds
+            }
+        ]
+
+
+viewEncumbrance : Model -> Html Msg
+viewEncumbrance model =
+    Html.div
+        [ HA.style "display" "flex"
+        , HA.style "flex-flow" "row"
+        , HA.style "justify-content" "space-between"
+        , HA.style "align-items" "flex-end"
+        , HA.style "gap" "8px"
+        ]
+        [ Html.div
+            [ HA.style "flex" "1" ]
+            [ Html.div
+                [ HA.class "label" ]
+                [ Html.text "Weapons" ]
+            , Character.weaponEncumbrance model.character
+                |> String.fromInt
+                |> Html.text
+            ]
+        , Html.div
+            []
+            [ Html.text "+" ]
+        , Html.div
+            [ HA.style "flex" "1" ]
+            [ Html.div
+                [ HA.class "label" ]
+                [ Html.text "Armour" ]
+            , Character.armourEncumbrance model.character
+                |> String.fromInt
+                |> Html.text
+            ]
+        , Html.div
+            []
+            [ Html.text "+" ]
+        , Html.div
+            [ HA.style "flex" "1" ]
+            [ Html.div
+                [ HA.class "label" ]
+                [ Html.text "Trappings" ]
+            , Character.trappingsEncumbrance model.character
+                |> String.fromInt
+                |> Html.text
+            ]
+        , Html.div
+            []
+            [ Html.text "=" ]
+        , Html.div
+            [ HA.style "flex" "1" ]
+            [ Html.div
+                [ HA.class "label" ]
+                [ Html.text "Total" ]
+            , Character.totalEncumbrance model.character
+                |> String.fromInt
+                |> Html.text
+            ]
+        , Html.div
+            []
+            [ Html.text "/" ]
+        , viewNumberInputWithLabel
+            { label = "Max Enc."
+            , onInput = Msg.NumberFieldChanged (Character.setMaxEncumbrance)
+            , value = model.character.maxEncumbrance
             }
         ]

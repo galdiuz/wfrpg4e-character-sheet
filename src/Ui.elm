@@ -48,6 +48,7 @@ type Theme
 type Card
     = Armour
     | C12cs
+    | Encumbrance
     | Experience
     | Information
     | Skills
@@ -62,6 +63,7 @@ allCards : List Card
 allCards =
     [ Armour
     , C12cs
+    , Encumbrance
     , Experience
     , Information
     , Skills
@@ -78,6 +80,7 @@ cardId card =
     case card of
         Armour -> "armour"
         C12cs -> "characteristics"
+        Encumbrance -> "encumbrance"
         Experience -> "experience"
         Information -> "information"
         Skills -> "skills"
@@ -93,6 +96,7 @@ cardTitle card =
     case card of
         Armour -> "Armour"
         C12cs -> "Characteristics"
+        Encumbrance -> "Encumbrance"
         Experience -> "Experience"
         Information -> "Information"
         Skills -> "Skills"
@@ -108,6 +112,7 @@ cardIcon card =
     case card of
         Armour -> Icons.breastplate
         C12cs -> Icons.skills
+        Encumbrance -> Icons.weight
         Experience -> Icons.wisdom
         Information -> Icons.character
         Skills -> Icons.graduateCap
