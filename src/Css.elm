@@ -7,6 +7,7 @@ css =
     display: flex;
     flex-direction: row;
     gap: 4px;
+    padding: 4px;
 }
 
 .content-column {
@@ -20,9 +21,9 @@ css =
 .card {
     background-color: #fff;
     border: solid;
-    border-width: 1px;
+    border-width: 0px;
     border-radius: 4px;
-    margin: 4px 0px 4px 8px;
+    margin: 4px 2px 4px 8px;
 }
 
 .card-container-fading {
@@ -47,19 +48,19 @@ css =
 }
 
 .card-content {
-    border-top: solid 1px;
-    padding: 8px 4px 4px;
+    padding: 8px;
 }
 
 .card-header {
     align-items: center;
     box-sizing: border-box;
+    border-top-right-radius: 4px;
     display: flex;
     font-size: 20px;
     font-weight: 700;
     height: 32px;
     justify-content: space-between;
-    padding: 2px;
+    padding: 4px;
 }
 
 .card-header-buttons {
@@ -73,9 +74,10 @@ css =
     border-radius: 50%;
     border-style: solid;
     border-width: 1px;
+    cursor: move;
     display: flex;
-    font-size: 34px;
-    height: 42px;
+    font-size: 32px;
+    height: 40px;
     justify-content: center;
     left: 0px;
     position: absolute;
@@ -83,31 +85,36 @@ css =
 }
 
 .card-header-title {
-    margin-left: 38px;
+    cursor: move;
+    flex: 1;
+    padding-left: 38px;
 }
 
 .grid {
     display: grid;
     column-gap: 8px;
-    row-gap: 2px;
+    row-gap: 4px;
+}
+
+.label {
+    font-size: 14px;
 }
 
 button {
-    border-width: 2px;
-    border-style: outset;
-    border-color: #767676;
-    padding: 1px 6px;
-    font-size: 16px;
     white-space: nowrap;
-    cursor: pointer;
 }
 
 .button-style {
-    border-width: 2px;
-    border-style: outset;
+    align-items: center;
     border-color: #767676;
-    padding: 1px 6px;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
     font-size: 16px;
+    padding: 1px 6px;
+    transition-duration: 0.15s;
+    transition-property: background-color, color;
+    transition-timing-function: ease-in-out;
 }
 
 input {
@@ -150,9 +157,26 @@ input::-webkit-inner-spin-button {
 dark : String
 dark =
     """
-body, button, input, select, textarea, .card, .card-header-icon {
-    color: #ddd;
+body, button, input, select, textarea, .card-header-icon {
     background-color: #282828;
+    color: #ddd;
+}
+
+.card {
+    background-color: #383838;
+}
+
+.card-header {
+    background-color: #484848;
+}
+
+button:hover {
+    background-color: #ddd;
+    color: #282828;
+}
+
+.label {
+    color: #999;
 }
 
 input {

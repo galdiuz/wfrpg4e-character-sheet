@@ -118,24 +118,23 @@ viewCard model card =
         [ Html.div
             [ HA.class "card-header" ]
             [ Html.div
-                [ HA.class "card-header-icon" ]
+                [ HA.class "card-header-icon"
+                , Draggable.mouseTrigger card Msg.DragMsgReceived
+                ]
                 [ Icons.view (Ui.cardIcon card) ]
             , Html.span
-                [ HA.class "card-header-title" ]
+                [ HA.class "card-header-title"
+                , Draggable.mouseTrigger card Msg.DragMsgReceived
+                ]
                 [ Html.text (Ui.cardTitle card)
                 ]
             , Html.div
                 [ HA.class "card-header-buttons" ]
                 [ Html.div
-                    [ Draggable.mouseTrigger card Msg.DragMsgReceived
-                    , HA.class "button-style"
-                    , HA.style "cursor" "move"
-                    ]
-                    [ FA.viewIcon FontAwesome.Solid.arrowsAlt ]
-                , Html.div
                     []
                     [ Html.button
-                        [ Events.onClick (Msg.ToggleCardStatePressed card)
+                        [ HA.class "button-style"
+                        , Events.onClick (Msg.ToggleCardStatePressed card)
                         ]
                         [ case Ui.getCardState card model.ui of
                             Ui.Open ->
@@ -217,12 +216,28 @@ viewInformation model =
         , HA.style "flex-flow" "column"
         , HA.style "gap" "8px"
         ]
-        [ Html.div
-            []
-            [ Html.text "Name"
-            , viewTextInput
-                { onInput = Msg.TextFieldChanged (Character.setInformation Character.Name)
-                , value = model.character.info.name
+        [ viewTextInputWithLabel
+            { id = "information-name"
+            , label = "Name"
+            , onInput = Msg.TextFieldChanged (Character.setInformation Character.Name)
+            , value = model.character.info.name
+            }
+        , Html.div
+            [ HA.style "display" "flex"
+            , HA.style "flex-flow" "row"
+            , HA.style "gap" "8px"
+            ]
+            [ viewTextInputWithLabel
+                { id = "information-species"
+                , label = "Species"
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.Species)
+                , value = model.character.info.species
+                }
+            , viewTextInputWithLabel
+                { id = "information-class"
+                , label = "Class"
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.Class)
+                , value = model.character.info.class
                 }
             ]
         , Html.div
@@ -230,90 +245,54 @@ viewInformation model =
             , HA.style "flex-flow" "row"
             , HA.style "gap" "8px"
             ]
-            [ Html.div
-                []
-                [ Html.text "Species"
-                , viewTextInput
-                    { onInput = Msg.TextFieldChanged (Character.setInformation Character.Species)
-                    , value = model.character.info.species
-                    }
-                ]
-            , Html.div
-                []
-                [ Html.text "Class"
-                , viewTextInput
-                    { onInput = Msg.TextFieldChanged (Character.setInformation Character.Class)
-                    , value = model.character.info.class
-                    }
-                ]
+            [ viewTextInputWithLabel
+                { id = "information-career-path"
+                , label = "Career Path"
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.CareerPath)
+                , value = model.character.info.careerPath
+                }
+            , viewTextInputWithLabel
+                { id = "information-career"
+                , label = "Career"
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.Career)
+                , value = model.character.info.career
+                }
+            , viewTextInputWithLabel
+                { id = "information-status"
+                , label = "Status"
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.Status)
+                , value = model.character.info.status
+                }
             ]
         , Html.div
             [ HA.style "display" "flex"
             , HA.style "flex-flow" "row"
             , HA.style "gap" "8px"
             ]
-            [ Html.div
-                []
-                [ Html.text "Career Path"
-                , viewTextInput
-                    { onInput = Msg.TextFieldChanged (Character.setInformation Character.CareerPath)
-                    , value = model.character.info.careerPath
-                    }
-                ]
-            , Html.div
-                []
-                [ Html.text "Career"
-                , viewTextInput
-                    { onInput = Msg.TextFieldChanged (Character.setInformation Character.Career)
-                    , value = model.character.info.career
-                    }
-                ]
-            , Html.div
-                []
-                [ Html.text "Status"
-                , viewTextInput
-                    { onInput = Msg.TextFieldChanged (Character.setInformation Character.Status)
-                    , value = model.character.info.status
-                    }
-                ]
-            ]
-        , Html.div
-            [ HA.style "display" "flex"
-            , HA.style "flex-flow" "row"
-            , HA.style "gap" "8px"
-            ]
-            [ Html.div
-                [ HA.style "flex" "20" ]
-                [ Html.text "Age"
-                , viewTextInput
-                    { onInput = Msg.TextFieldChanged (Character.setInformation Character.Age)
-                    , value = model.character.info.age
-                    }
-                ]
-            , Html.div
-                [ HA.style "flex" "20" ]
-                [ Html.text "Height"
-                , viewTextInput
-                    { onInput = Msg.TextFieldChanged (Character.setInformation Character.Height)
-                    , value = model.character.info.height
-                    }
-                ]
-            , Html.div
-                [ HA.style "flex" "30" ]
-                [ Html.text "Hair"
-                , viewTextInput
-                    { onInput = Msg.TextFieldChanged (Character.setInformation Character.Hair)
-                    , value = model.character.info.hair
-                    }
-                ]
-            , Html.div
-                [ HA.style "flex" "30" ]
-                [ Html.text "Eyes"
-                , viewTextInput
-                    { onInput = Msg.TextFieldChanged (Character.setInformation Character.Eyes)
-                    , value = model.character.info.eyes
-                    }
-                ]
+            [ viewTextInputWithLabel
+                { id = "information-age"
+                , label = "Age"
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.Age)
+                , value = model.character.info.age
+                }
+            , viewTextInputWithLabel
+                { id = "information-height"
+                , label = "Height"
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.Height)
+                , value = model.character.info.height
+                }
+            , viewTextInputWithLabel
+                { id = "information-hair"
+                , label = "Hair"
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.Hair)
+                , value = model.character.info.hair
+                }
+            , viewTextInputWithLabel
+                { id = "information-eyes"
+                , label = "Eyes"
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.Eyes)
+                , value = model.character.info.eyes
+                }
             ]
         ]
 
@@ -326,16 +305,16 @@ viewC12cs model =
         ]
         (List.concat
             [ [ Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Characteristic" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Initial" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Advances" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Current" ]
               ]
             , List.map
@@ -366,13 +345,11 @@ viewC12cs model =
         )
 
 
-type alias TextInputData msg =
+viewTextInput :
     { onInput : String -> msg
     , value : String
     }
-
-
-viewTextInput : TextInputData msg -> Html msg
+    -> Html msg
 viewTextInput data =
     Html.input
         [ HA.type_ "text"
@@ -382,7 +359,36 @@ viewTextInput data =
         []
 
 
-viewTextareaInput : TextInputData msg -> Html msg
+viewTextInputWithLabel :
+    { id : String
+    , label : String
+    , onInput : String -> msg
+    , value : String
+    }
+    -> Html msg
+viewTextInputWithLabel data =
+    Html.div
+        [ HA.style "flex" "1" ]
+        [ Html.label
+            [ HA.class "label"
+            , HA.for data.id
+            ]
+            [ Html.text data.label ]
+        , Html.input
+            [ HA.id data.id
+            , HA.type_ "text"
+            , HA.value data.value
+            , Events.onInput data.onInput
+            ]
+            []
+        ]
+
+
+viewTextareaInput :
+    { onInput : String -> msg
+    , value : String
+    }
+    -> Html msg
 viewTextareaInput data =
     Html.textarea
         [ HA.attribute "rows" "1"
@@ -392,13 +398,11 @@ viewTextareaInput data =
         []
 
 
-type alias NumberInputData msg =
+viewNumberInput :
     { onInput : String -> msg
     , value : Int
     }
-
-
-viewNumberInput : NumberInputData msg -> Html msg
+    -> Html msg
 viewNumberInput data =
     Html.input
         [ HA.type_ "number"
@@ -406,6 +410,31 @@ viewNumberInput data =
         , Events.onInput data.onInput
         ]
         []
+
+
+viewNumberInputWithLabel :
+    { id: String
+    , label : String
+    , onInput : String -> msg
+    , value : Int
+    }
+    -> Html msg
+viewNumberInputWithLabel data =
+    Html.div
+        [ HA.style "flex" "1" ]
+        [ Html.label
+            [ HA.class "label"
+            , HA.for data.id
+            ]
+            [ Html.text data.label ]
+        , Html.input
+            [ HA.id data.id
+            , HA.type_ "number"
+            , HA.value (String.fromInt data.value)
+            , Events.onInput data.onInput
+            ]
+            []
+        ]
 
 
 type alias ButtonData msg =
@@ -417,7 +446,8 @@ type alias ButtonData msg =
 viewButton : ButtonData msg -> Html msg
 viewButton data =
     Html.button
-        [ Events.onClick data.onClick
+        [ HA.class "button-style"
+        , Events.onClick data.onClick
         , HA.style "width" "100%"
         ]
         [ Html.text data.text ]
@@ -426,7 +456,10 @@ viewButton data =
 viewExperience : Model -> Html Msg
 viewExperience model =
     Html.div
-        []
+        [ HA.style "display" "flex"
+        , HA.style "flex-flow" "column"
+        , HA.style "gap" "16px"
+        ]
         [ viewExperienceTable model
         , viewAdjustments model
         ]
@@ -438,18 +471,16 @@ viewExperienceTable model =
         [ HA.style "display" "flex"
         , HA.style "gap" "8px"
         ]
-        [ Html.div
-            [ HA.style "flex" "1" ]
-            [ Html.text "Total"
-            , viewNumberInput
-                { onInput = Msg.NumberFieldChanged (Character.setExperience)
-                , value = model.character.experience
-                }
-            ]
+        [ viewNumberInputWithLabel
+            { id = "experience-total"
+            , label = "Total"
+            , onInput = Msg.NumberFieldChanged (Character.setExperience)
+            , value = model.character.experience
+            }
         , Html.div
             [ HA.style "flex" "1" ]
-            [ Html.div
-                []
+            [ Html.span
+                [ HA.class "label" ]
                 [ Html.text "Spent" ]
             , Html.div
                 []
@@ -460,7 +491,9 @@ viewExperienceTable model =
             ]
         , Html.div
             [ HA.style "flex" "1" ]
-            [ Html.text "Current"
+            [ Html.span
+                [ HA.class "label" ]
+                [ Html.text "Current" ]
             , Html.div
                 []
                 [ Character.currentExp model.character
@@ -485,17 +518,18 @@ viewSkills model =
                 [ Html.text "Basic skills" ]
               ]
             , [ Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Name" ]
               , Html.span
-                [ HA.style "grid-column" "span 2"
+                [ HA.class "label"
+                , HA.style "grid-column" "span 2"
                 ]
                 [ Html.text "Characteristic" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Advances" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Skill" ]
               ]
             , List.indexedMap
@@ -535,17 +569,18 @@ viewSkills model =
                 [ Html.text "Grouped & Advanced Skills" ]
               ]
             , [ Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Name" ]
               , Html.span
-                [ HA.style "grid-column" "span 2"
+                [ HA.class "label"
+                , HA.style "grid-column" "span 2"
                 ]
                 [ Html.text "Characteristic" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Advances" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Skill" ]
               ]
             , List.indexedMap
@@ -640,13 +675,13 @@ viewTalents model =
         ]
         (List.concat
             [ [ Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Name" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Times taken" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Description" ]
               ]
             , List.indexedMap
@@ -687,10 +722,10 @@ viewAdjustments model =
         ]
         (List.concat
             [ [ Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Value" ]
               , Html.span
-                []
+                [ HA.class "label" ]
                 [ Html.text "Description" ]
               ]
             , List.indexedMap
@@ -723,15 +758,19 @@ viewAdjustments model =
 viewTrappings : Model -> Html Msg
 viewTrappings model =
     Html.div
-        [ HA.style "display" "grid"
+        [ HA.class "grid"
         , HA.style "grid-template-columns" "[name] auto [enc] 40px"
         ]
         (List.concat
             [ [ Html.div
-                [ HA.style "grid-column" "name" ]
+                [ HA.class "label"
+                , HA.style "grid-column" "name"
+                ]
                 [ Html.text "Name" ]
               , Html.div
-                [ HA.style "grid-column" "enc" ]
+                [ HA.class "label"
+                , HA.style "grid-column" "enc"
+                ]
                 [ Html.text "Enc" ]
               ]
             , (List.indexedMap
@@ -772,28 +811,32 @@ viewWealth model =
     Html.div
         [ HA.class "grid"
         , HA.style "grid-template-columns" "2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 2fr"
+        , HA.style "row-gap" "4px"
         ]
         [ Html.div
             [ HA.style "grid-column" "span 3" ]
-            [ Html.text "Gold Crowns"
-            , viewNumberInput
-                { onInput = Msg.NumberFieldChanged (Character.setGold)
+            [ viewNumberInputWithLabel
+                { id = "wealth-gold"
+                , label = "Gold Crowns"
+                , onInput = Msg.NumberFieldChanged (Character.setGold)
                 , value = model.character.wealth.gold
                 }
             ]
         , Html.div
             [ HA.style "grid-column" "span 4" ]
-            [ Html.text "Silver Shillings"
-            , viewNumberInput
-                { onInput = Msg.NumberFieldChanged (Character.setSilver)
+            [ viewNumberInputWithLabel
+                { id = "wealth-silver"
+                , label = "Silver Shillings"
+                , onInput = Msg.NumberFieldChanged (Character.setSilver)
                 , value = model.character.wealth.silver
                 }
             ]
         , Html.div
             [ HA.style "grid-column" "span 3" ]
-            [ Html.text "Brass Pennies"
-            , viewNumberInput
-                { onInput = Msg.NumberFieldChanged (Character.setBrass)
+            [ viewNumberInputWithLabel
+                { id = "wealth-brass"
+                , label = "Brass Pennies"
+                , onInput = Msg.NumberFieldChanged (Character.setBrass)
                 , value = model.character.wealth.brass
                 }
             ]
@@ -933,68 +976,54 @@ viewArmour model =
                 , HA.style "flex-flow" "row"
                 , HA.style "gap" "8px"
                 ]
-                [ Html.div
-                    []
-                    [ Html.text "Left arm (10-24)"
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setAp Character.LeftArm)
-                        , value = model.character.ap.leftArm
-                        }
-                    ]
-                , Html.div
-                    []
-                    [ Html.text "Head (01-09)"
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setAp Character.Head)
-                        , value = model.character.ap.head
-                        }
-                    ]
-                , Html.div
-                    []
-                    [ Html.text "Right arm (25-44)"
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setAp Character.RightArm)
-                        , value = model.character.ap.rightArm
-                        }
-                    ]
+                [ viewNumberInputWithLabel
+                    { id = "ap-left-arm"
+                    , label = "Left arm (10-24)"
+                    , onInput = Msg.NumberFieldChanged (Character.setAp Character.LeftArm)
+                    , value = model.character.ap.leftArm
+                    }
+                , viewNumberInputWithLabel
+                    { id = "ap-head"
+                    , label = "Head (01-09)"
+                    , onInput = Msg.NumberFieldChanged (Character.setAp Character.Head)
+                    , value = model.character.ap.head
+                    }
+                , viewNumberInputWithLabel
+                    { id = "ap-right-arm"
+                    , label = "Right arm (10-24)"
+                    , onInput = Msg.NumberFieldChanged (Character.setAp Character.RightArm)
+                    , value = model.character.ap.rightArm
+                    }
                 ]
             , Html.div
                 [ HA.style "display" "flex"
                 , HA.style "flex-flow" "row"
                 , HA.style "gap" "8px"
                 ]
-                [ Html.div
-                    []
-                    [ Html.text "Shield"
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setAp Character.Shield)
-                        , value = model.character.ap.shield
-                        }
-                    ]
-                , Html.div
-                    []
-                    [ Html.text "Left leg (80-89)"
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setAp Character.LeftLeg)
-                        , value = model.character.ap.leftLeg
-                        }
-                    ]
-                , Html.div
-                    []
-                    [ Html.text "Body (45-79)"
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setAp Character.Body)
-                        , value = model.character.ap.body
-                        }
-                    ]
-                , Html.div
-                    []
-                    [ Html.text "Right leg (90-00)"
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setAp Character.RightLeg)
-                        , value = model.character.ap.rightLeg
-                        }
-                    ]
+                [ viewNumberInputWithLabel
+                    { id = "ap-shield"
+                    , label = "Shield"
+                    , onInput = Msg.NumberFieldChanged (Character.setAp Character.Shield)
+                    , value = model.character.ap.shield
+                    }
+                , viewNumberInputWithLabel
+                    { id = "ap-left-leg"
+                    , label = "Left leg (80-89)"
+                    , onInput = Msg.NumberFieldChanged (Character.setAp Character.LeftLeg)
+                    , value = model.character.ap.leftLeg
+                    }
+                , viewNumberInputWithLabel
+                    { id = "ap-body"
+                    , label = "Body (45-79)"
+                    , onInput = Msg.NumberFieldChanged (Character.setAp Character.Body)
+                    , value = model.character.ap.body
+                    }
+                , viewNumberInputWithLabel
+                    { id = "ap-right-leg"
+                    , label = "Right leg (90-00)"
+                    , onInput = Msg.NumberFieldChanged (Character.setAp Character.RightLeg)
+                    , value = model.character.ap.rightLeg
+                    }
                 ]
             ]
         , Html.div
@@ -1003,19 +1032,19 @@ viewArmour model =
             ]
             (List.concat
                 [ [ Html.span
-                    []
+                    [ HA.class "label" ]
                     [ Html.text "Name" ]
                   , Html.span
-                    []
+                    [ HA.class "label" ]
                     [ Html.text "Locations" ]
                   , Html.span
-                    []
+                    [ HA.class "label" ]
                     [ Html.text "Enc" ]
                   , Html.span
-                    []
+                    [ HA.class "label" ]
                     [ Html.text "AP" ]
                   , Html.span
-                    []
+                    [ HA.class "label" ]
                     [ Html.text "Qualities" ]
                   ]
                 , (List.indexedMap
@@ -1065,11 +1094,12 @@ viewWounds model =
         , HA.style "flex-flow" "row"
         , HA.style "justify-content" "space-between"
         , HA.style "align-items" "flex-end"
+        , HA.style "gap" "8px"
         ]
         [ Html.div
-            []
+            [ HA.style "flex" "1" ]
             [ Html.div
-                []
+                [ HA.class "label" ]
                 [ Html.text "SB" ]
             , Character.getC12cs model.character
                 |> Character.getC12c Character.S
@@ -1081,9 +1111,9 @@ viewWounds model =
             []
             [ Html.text "+" ]
         , Html.div
-            []
+            [ HA.style "flex" "1" ]
             [ Html.div
-                []
+                [ HA.class "label" ]
                 [ Html.text "TBx2" ]
             , Character.getC12cs model.character
                 |> Character.getC12c Character.T
@@ -1096,9 +1126,9 @@ viewWounds model =
             []
             [ Html.text "+" ]
         , Html.div
-            []
+            [ HA.style "flex" "1" ]
             [ Html.div
-                []
+                [ HA.class "label" ]
                 [ Html.text "WP" ]
             , Character.getC12cs model.character
                 |> Character.getC12c Character.WP
@@ -1109,38 +1139,28 @@ viewWounds model =
         , Html.div
             []
             [ Html.text "+" ]
-        , Html.div
-            []
-            [ Html.text "Extra"
-            , Html.div
-                [ HA.style "width" "40px" ]
-                [ viewNumberInput
-                    { onInput = Msg.NumberFieldChanged (Character.setExtraWounds)
-                    , value = model.character.extraWounds
-                    }
-                ]
-            ]
+        , viewNumberInputWithLabel
+            { id = "wounds-extra"
+            , label = "Extra"
+            , onInput = Msg.NumberFieldChanged (Character.setExtraWounds)
+            , value = model.character.extraWounds
+            }
         , Html.div
             []
             [ Html.text "=" ]
         , Html.div
-            []
+            [ HA.style "flex" "1" ]
             [ Html.div
-                []
+                [ HA.class "label" ]
                 [ Html.text "Total" ]
             , Character.getWounds model.character
                 |> String.fromInt
                 |> Html.text
             ]
-        , Html.div
-            []
-            [ Html.text "Current"
-            , Html.div
-                [ HA.style "width" "40px" ]
-                [ viewNumberInput
-                    { onInput = Msg.NumberFieldChanged (Character.setCurrentWounds)
-                    , value = model.character.currentWounds
-                    }
-                ]
-            ]
+        , viewNumberInputWithLabel
+            { id = "wounds-current"
+            , label = "Current"
+            , onInput = Msg.NumberFieldChanged (Character.setCurrentWounds)
+            , value = model.character.currentWounds
+            }
         ]
