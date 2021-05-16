@@ -1140,79 +1140,124 @@ viewArmour model =
 viewWounds : Model -> Html Msg
 viewWounds model =
     Html.div
-        [ HA.style "display" "flex"
-        , HA.style "flex-flow" "row"
-        , HA.style "justify-content" "space-between"
-        , HA.style "align-items" "flex-end"
-        , HA.style "gap" "8px"
+        [ HA.class "flex-column"
+        , HA.style "gap" "16px"
         ]
         [ Html.div
-            [ HA.style "flex" "1" ]
+            [ HA.style "display" "flex"
+            , HA.style "flex-flow" "row"
+            , HA.style "justify-content" "space-between"
+            , HA.style "align-items" "flex-end"
+            , HA.style "gap" "8px"
+            ]
             [ Html.div
-                [ HA.class "label" ]
-                [ Html.text "SB" ]
-            , Character.getC12cs model.character
-                |> Character.getC12c Character.S
-                |> Character.getBonus
-                |> String.fromInt
-                |> Html.text
+                [ HA.style "flex" "1" ]
+                [ Html.div
+                    [ HA.class "label" ]
+                    [ Html.text "SB" ]
+                , Character.getC12cs model.character
+                    |> Character.getC12c Character.S
+                    |> Character.getBonus
+                    |> String.fromInt
+                    |> Html.text
+                ]
+            , Html.div
+                []
+                [ Html.text "+" ]
+            , Html.div
+                [ HA.style "flex" "1" ]
+                [ Html.div
+                    [ HA.class "label" ]
+                    [ Html.text "TBx2" ]
+                , Character.getC12cs model.character
+                    |> Character.getC12c Character.T
+                    |> Character.getBonus
+                    |> (*) 2
+                    |> String.fromInt
+                    |> Html.text
+                ]
+            , Html.div
+                []
+                [ Html.text "+" ]
+            , Html.div
+                [ HA.style "flex" "1" ]
+                [ Html.div
+                    [ HA.class "label" ]
+                    [ Html.text "WP" ]
+                , Character.getC12cs model.character
+                    |> Character.getC12c Character.WP
+                    |> Character.getBonus
+                    |> String.fromInt
+                    |> Html.text
+                ]
+            , Html.div
+                []
+                [ Html.text "+" ]
+            , viewNumberInputWithLabel
+                []
+                { label = "Extra"
+                , onInput = Msg.NumberFieldChanged (Character.setExtraWounds)
+                , value = model.character.extraWounds
+                }
+            , Html.div
+                []
+                [ Html.text "=" ]
+            , Html.div
+                [ HA.style "flex" "1" ]
+                [ Html.div
+                    [ HA.class "label" ]
+                    [ Html.text "Total" ]
+                , Character.getWounds model.character
+                    |> String.fromInt
+                    |> Html.text
+                ]
+            , viewNumberInputWithLabel
+                []
+                { label = "Current"
+                , onInput = Msg.NumberFieldChanged (Character.setCurrentWounds)
+                , value = model.character.currentWounds
+                }
             ]
         , Html.div
-            []
-            [ Html.text "+" ]
-        , Html.div
-            [ HA.style "flex" "1" ]
-            [ Html.div
-                [ HA.class "label" ]
-                [ Html.text "TBx2" ]
-            , Character.getC12cs model.character
-                |> Character.getC12c Character.T
-                |> Character.getBonus
-                |> (*) 2
-                |> String.fromInt
-                |> Html.text
+            [ HA.class "grid"
+            , HA.style "grid-template-columns" "[location] 20% [description] auto"
             ]
-        , Html.div
-            []
-            [ Html.text "+" ]
-        , Html.div
-            [ HA.style "flex" "1" ]
-            [ Html.div
-                [ HA.class "label" ]
-                [ Html.text "WP" ]
-            , Character.getC12cs model.character
-                |> Character.getC12c Character.WP
-                |> Character.getBonus
-                |> String.fromInt
-                |> Html.text
-            ]
-        , Html.div
-            []
-            [ Html.text "+" ]
-        , viewNumberInputWithLabel
-            []
-            { label = "Extra"
-            , onInput = Msg.NumberFieldChanged (Character.setExtraWounds)
-            , value = model.character.extraWounds
-            }
-        , Html.div
-            []
-            [ Html.text "=" ]
-        , Html.div
-            [ HA.style "flex" "1" ]
-            [ Html.div
-                [ HA.class "label" ]
-                [ Html.text "Total" ]
-            , Character.getWounds model.character
-                |> String.fromInt
-                |> Html.text
-            ]
-        , viewNumberInputWithLabel
-            []
-            { label = "Current"
-            , onInput = Msg.NumberFieldChanged (Character.setCurrentWounds)
-            , value = model.character.currentWounds
-            }
+            (List.concat
+                [ [ Html.span
+                    [ HA.class "label" ]
+                    [ Html.text "Location" ]
+                  , Html.span
+                    [ HA.class "label" ]
+                    [ Html.text "Description" ]
+                  ]
+                , List.indexedMap
+                    (\index injury ->
+                        [ viewSelect
+                            { options = Character.injuryLocations
+                            , label = Character.bodyLocationToString
+                            , value = Character.bodyLocationToString
+                            , selected = Just injury.location
+                            , onInput = Msg.TextFieldChanged (Character.setInjuryLocationFromString index)
+                            }
+                        , viewTextInput
+                            { list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setInjuryDescription index)
+                            , value = injury.description
+                            }
+                        ]
+                    )
+                    model.character.injuries
+                    |> List.concat
+                , [ Html.div
+                    [ HA.style "grid-column" "span 2" ]
+                    [ viewButton
+                        { onClick = Msg.ButtonPressed (Character.addInjury)
+                        , text = "Add"
+                        }
+                    ]
+                    ]
+                ]
+            )
         ]
 
 

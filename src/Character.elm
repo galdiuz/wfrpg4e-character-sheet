@@ -11,7 +11,7 @@ import List.Extra
 type alias Character =
     { advancedSkills : List Skill
     , armour : List Armour
-    , ap : ApLocations
+    , ap : Ap
     , basicSkills : List Skill
     , c12csAdvances : C12cs
     , c12csInitial : C12cs
@@ -23,6 +23,7 @@ type alias Character =
     , fate : Int
     , fortune : Int
     , info : Information
+    , injuries : List Injury
     , maxEncumbrance : Int
     , motivation : String
     , movement : Int
@@ -54,6 +55,7 @@ emptyCharacter =
     , fate = 0
     , fortune = 0
     , info = emptyInformation
+    , injuries = []
     , maxEncumbrance = 0
     , motivation = ""
     , movement = 0
@@ -86,6 +88,7 @@ encodeCharacter character =
         , ( "fate", Encode.int character.fate )
         , ( "fortune", Encode.int character.fortune )
         , ( "info", encodeInformation character.info )
+        , ( "injuries", Encode.list encodeInjury character.injuries )
         , ( "maxEncumbrance", Encode.int character.maxEncumbrance )
         , ( "motivation", Encode.string character.motivation )
         , ( "movement", Encode.int character.movement )
@@ -117,6 +120,7 @@ decodeCharacter =
     Field.require "fate" Decode.int <| \fate ->
     Field.require "fortune" Decode.int <| \fortune ->
     Field.require "info" decodeInformation <| \info ->
+    Field.require "injuries" (Decode.list decodeInjury) <| \injuries ->
     Field.require "maxEncumbrance" Decode.int <| \maxEncumbrance ->
     Field.require "motivation" Decode.string <| \motivation ->
     Field.require "movement" Decode.int <| \movement ->
@@ -144,6 +148,7 @@ decodeCharacter =
         , fate = fate
         , fortune = fortune
         , info = info
+        , injuries = injuries
         , maxEncumbrance = maxEncumbrance
         , motivation = motivation
         , movement = movement
@@ -191,17 +196,7 @@ emptyArmour =
     }
 
 
-type ApLocation
-    = Body
-    | Head
-    | LeftArm
-    | LeftLeg
-    | RightArm
-    | RightLeg
-    | Shield
-
-
-type alias ApLocations =
+type alias Ap =
     { body : Int
     , head : Int
     , leftArm : Int
@@ -212,7 +207,7 @@ type alias ApLocations =
     }
 
 
-emptyApLocations : ApLocations
+emptyApLocations : Ap
 emptyApLocations =
     { body = 0
     , head = 0
@@ -229,11 +224,11 @@ addArmour character =
     { character | armour = character.armour ++ [ emptyArmour ] }
 
 
-setAp : ApLocation -> Int -> Character -> Character
-setAp apLocation value ({ ap } as character) =
+setAp : BodyLocation -> Int -> Character -> Character
+setAp location value ({ ap } as character) =
     { character
         | ap =
-            case apLocation of
+            case location of
                 Body -> { ap | body = value }
                 Head -> { ap | head = value }
                 LeftArm -> { ap | leftArm = value }
@@ -320,7 +315,7 @@ encodeArmour armour =
         ]
 
 
-encodeAp : ApLocations -> Encode.Value
+encodeAp : Ap -> Encode.Value
 encodeAp ap =
     Encode.object
         [ ( "body", Encode.int ap.body )
@@ -351,7 +346,7 @@ decodeArmour =
         (Decode.field "qualities" Decode.string)
 
 
-decodeAp : Decode.Decoder ApLocations
+decodeAp : Decode.Decoder Ap
 decodeAp =
     Decode.map7
         (\body head leftArm leftLeg rightArm rightLeg shield ->
@@ -1941,6 +1936,65 @@ decodeWeapon =
 -- Wounds --
 ------------
 
+type BodyLocation
+    = Body
+    | Head
+    | LeftArm
+    | LeftLeg
+    | RightArm
+    | RightLeg
+    | Shield
+
+
+type alias Injury =
+    { description : String
+    , location : BodyLocation
+    }
+
+
+emptyInjury : Injury
+emptyInjury =
+    { description = ""
+    , location = Head
+    }
+
+
+bodyLocationToString : BodyLocation -> String
+bodyLocationToString location =
+    case location of
+        Body -> "Body"
+        Head -> "Head"
+        LeftArm -> "Left Arm"
+        LeftLeg -> "Left Leg"
+        RightArm -> "Right Arm"
+        RightLeg -> "Right Leg"
+        Shield -> "Shield"
+
+
+bodyLocationFromString : String -> Result String BodyLocation
+bodyLocationFromString str =
+    case str of
+        "Body" -> Ok Body
+        "Head" -> Ok Head
+        "Left Arm" -> Ok LeftArm
+        "Left Leg" -> Ok LeftLeg
+        "Right Arm" -> Ok RightArm
+        "Right Leg" -> Ok RightLeg
+        "Shield" -> Ok Shield
+        _ -> Err ("Cannot make mutation kind from '" ++ str ++ "'.")
+
+
+injuryLocations : List BodyLocation
+injuryLocations =
+    [ Body
+    , Head
+    , LeftArm
+    , LeftLeg
+    , RightArm
+    , RightLeg
+    ]
+
+
 getWounds : Character -> Int
 getWounds character =
     let
@@ -1948,6 +2002,11 @@ getWounds character =
             getBonus (getC12c c12c (getC12cs character))
     in
     c12cBonus S + c12cBonus T * 2 + c12cBonus WP + character.extraWounds
+
+
+addInjury : Character -> Character
+addInjury character =
+    { character | injuries = character.injuries ++ [ emptyInjury ] }
 
 
 setCurrentWounds : Int -> Character -> Character
@@ -1958,3 +2017,64 @@ setCurrentWounds value character =
 setExtraWounds : Int -> Character -> Character
 setExtraWounds value character =
     { character | extraWounds = max 0 value }
+
+
+setInjuryDescription : Int -> String -> Character -> Character
+setInjuryDescription index value character =
+    { character |
+        injuries =
+            List.Extra.updateAt
+                index
+                (\injury ->
+                    { injury | description = value }
+                )
+                character.injuries
+    }
+
+
+setInjuryLocation : Int -> BodyLocation -> Character -> Character
+setInjuryLocation index value character =
+    { character |
+        injuries =
+            List.Extra.updateAt
+                index
+                (\injury ->
+                    { injury | location = value }
+                )
+                character.injuries
+    }
+
+
+setInjuryLocationFromString : Int -> String -> Character -> Character
+setInjuryLocationFromString index str character =
+    case bodyLocationFromString str of
+        Ok location ->
+            setInjuryLocation index location character
+
+        Err _ ->
+            character
+
+
+encodeInjury : Injury -> Encode.Value
+encodeInjury injury =
+    Encode.object
+        []
+
+
+decodeInjury : Decode.Decoder Injury
+decodeInjury =
+    Decode.map2
+        (\description location ->
+            { description = description
+            , location = location
+            }
+        )
+        (Decode.field "description" Decode.string)
+        (Decode.field "location" decodeBodyLocation)
+
+
+decodeBodyLocation : Decode.Decoder BodyLocation
+decodeBodyLocation =
+    Decode.andThen
+        (bodyLocationFromString >> Json.Decode.Extra.fromResult)
+        Decode.string
