@@ -24,6 +24,7 @@ type alias Character =
     , info : Information
     , maxEncumbrance : Int
     , motivation : String
+    , movement : Int
     , notes : List String
     , resilience : Int
     , resolve : Int
@@ -51,6 +52,7 @@ emptyCharacter =
     , info = emptyInformation
     , maxEncumbrance = 0
     , motivation = ""
+    , movement = 0
     , notes = []
     , resilience = 0
     , resolve = 0
@@ -79,6 +81,7 @@ encodeCharacter character =
         , ( "info", encodeInformation character.info )
         , ( "maxEncumbrance", Encode.int character.maxEncumbrance )
         , ( "motivation", Encode.string character.motivation )
+        , ( "movement", Encode.int character.movement )
         , ( "notes", Encode.list Encode.string character.notes )
         , ( "resilience", Encode.int character.resilience )
         , ( "resolve", Encode.int character.resolve )
@@ -106,6 +109,7 @@ decodeCharacter =
     Field.require "info" decodeInformation <| \info ->
     Field.require "maxEncumbrance" Decode.int <| \maxEncumbrance ->
     Field.require "motivation" Decode.string <| \motivation ->
+    Field.require "movement" Decode.int <| \movement ->
     Field.require "notes" (Decode.list Decode.string) <| \notes ->
     Field.require "resilience" Decode.int <| \resilience ->
     Field.require "resolve" Decode.int <| \resolve ->
@@ -129,6 +133,7 @@ decodeCharacter =
         , info = info
         , maxEncumbrance = maxEncumbrance
         , motivation = motivation
+        , movement = movement
         , notes = notes
         , resilience = resilience
         , resolve = resolve
@@ -888,6 +893,24 @@ decodeInformation =
         , species = species
         , status = status
         }
+
+--------------
+-- Movement --
+--------------
+
+setMovement : Int -> Character -> Character
+setMovement value character =
+    { character | movement = max 0 value }
+
+
+run : Character -> Int
+run character =
+    character.movement * 4
+
+
+walk : Character -> Int
+walk character =
+    character.movement * 2
 
 -----------
 -- Notes --

@@ -52,6 +52,7 @@ type Card
     | Experience
     | Fate
     | Information
+    | Movement
     | Notes
     | Skills
     | Talents
@@ -69,6 +70,7 @@ allCards =
     , Experience
     , Fate
     , Information
+    , Movement
     , Notes
     , Skills
     , Talents
@@ -88,6 +90,7 @@ cardId card =
         Experience -> "experience"
         Fate -> "fate"
         Information -> "information"
+        Movement -> "movement"
         Notes -> "notes"
         Skills -> "skills"
         Talents -> "talents"
@@ -106,6 +109,7 @@ cardTitle card =
         Experience -> "Experience"
         Fate -> "Fate & Resilience"
         Information -> "Information"
+        Movement -> "Movement"
         Notes -> "Notes"
         Skills -> "Skills"
         Talents -> "Talents"
@@ -124,6 +128,7 @@ cardIcon card =
         Experience -> Icons.wisdom
         Fate -> Icons.sparkles
         Information -> Icons.character
+        Movement -> Icons.run
         Notes -> Icons.notebook
         Skills -> Icons.graduateCap
         Talents -> Icons.ribbonMedal

@@ -172,6 +172,9 @@ viewCard model card =
                         Ui.Information ->
                             viewInformation model
 
+                        Ui.Movement ->
+                            viewMovement model
+
                         Ui.Notes ->
                             viewNotes model
 
@@ -521,8 +524,7 @@ viewExperience model =
 viewExperienceTable : Model -> Html Msg
 viewExperienceTable model =
     Html.div
-        [ HA.style "display" "flex"
-        , HA.style "gap" "8px"
+        [ HA.class "flex-row"
         ]
         [ viewNumberInputWithLabel
             []
@@ -1414,4 +1416,31 @@ viewFate model =
             , onInput = Msg.TextFieldChanged Character.setMotivation
             , value = model.character.motivation
             }
+        ]
+
+
+viewMovement : Model -> Html Msg
+viewMovement model =
+    Html.div
+        [ HA.class "flex-row" ]
+        [ viewNumberInputWithLabel
+            []
+            { label = "Movement"
+            , onInput = Msg.NumberFieldChanged Character.setMovement
+            , value = model.character.movement
+            }
+        , Html.div
+            [ HA.style "flex" "1" ]
+            [ Html.div
+                [ HA.class "label" ]
+                [ Html.text "Walk" ]
+            , Html.text (String.fromInt (Character.walk model.character))
+            ]
+        , Html.div
+            [ HA.style "flex" "1" ]
+            [ Html.div
+                [ HA.class "label" ]
+                [ Html.text "Run" ]
+            , Html.text (String.fromInt (Character.run model.character))
+            ]
         ]
