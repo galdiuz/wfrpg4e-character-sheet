@@ -160,6 +160,9 @@ viewCard model card =
                         Ui.C12cs ->
                             viewC12cs model
 
+                        Ui.Corruption ->
+                            viewCorruption model
+
                         Ui.Encumbrance ->
                             viewEncumbrance model
 
@@ -1529,3 +1532,76 @@ viewSpells model =
               ]
             ]
         )
+
+
+viewCorruption : Model -> Html Msg
+viewCorruption model =
+    Html.div
+        [ HA.class "flex-column"
+        , HA.style "gap" "16px"
+        ]
+        [ Html.div
+            [ HA.class "flex-row" ]
+            [ viewNumberInputWithLabel
+                []
+                { label = "Corruption Points"
+                , onInput = Msg.NumberFieldChanged (Character.setCorruption)
+                , value = model.character.corruption
+                }
+            , Html.div
+                [ HA.style "flex" "1" ]
+                [ Html.div
+                    [ HA.class "label" ]
+                    [ Html.text "Mutation Threshold" ]
+                , Html.text (String.fromInt (Character.mutationThreshold model.character))
+                ]
+            ]
+        , Html.div
+            [ HA.class "grid"
+            , HA.style "grid-template-columns" "[kind] 20% [description] 30% [effect] auto"
+            ]
+            (List.concat
+                [ [ Html.span
+                    [ HA.class "label" ]
+                    [ Html.text "Kind" ]
+                  , Html.span
+                    [ HA.class "label" ]
+                    [ Html.text "Description" ]
+                  , Html.span
+                    [ HA.class "label" ]
+                    [ Html.text "Effect" ]
+                  ]
+                , List.indexedMap
+                    (\index mutation ->
+                        [ viewSelect
+                            { options = Character.allMutationKinds
+                            , label = Character.mutationKindToString
+                            , value = Character.mutationKindToString
+                            , selected = Just mutation.kind
+                            , onInput = Msg.TextFieldChanged (Character.setMutationKindFromString index)
+                            }
+                        , viewTextInput
+                            { list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setMutationDescription index)
+                            , value = mutation.description
+                            }
+                        , viewTextInput
+                            { list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setMutationEffect index)
+                            , value = mutation.effect
+                            }
+                        ]
+                    )
+                    model.character.mutations
+                    |> List.concat
+                , [ Html.div
+                    [ HA.style "grid-column" "span 3" ]
+                    [ viewButton
+                        { onClick = Msg.ButtonPressed (Character.addMutation)
+                        , text = "Add"
+                        }
+                    ]
+                    ]
+                ]
+            )
+        ]

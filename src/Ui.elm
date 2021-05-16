@@ -50,6 +50,7 @@ type Theme
 type Card
     = Armour
     | C12cs
+    | Corruption
     | Encumbrance
     | Experience
     | Fate
@@ -69,6 +70,7 @@ allCards : List Card
 allCards =
     [ Armour
     , C12cs
+    , Corruption
     , Encumbrance
     , Experience
     , Fate
@@ -90,6 +92,7 @@ cardId card =
     case card of
         Armour -> "armour"
         C12cs -> "characteristics"
+        Corruption -> "corruption"
         Encumbrance -> "encumbrance"
         Experience -> "experience"
         Fate -> "fate"
@@ -110,6 +113,7 @@ cardTitle card =
     case card of
         Armour -> "Armour"
         C12cs -> "Characteristics"
+        Corruption -> "Corruption & Mutations"
         Encumbrance -> "Encumbrance"
         Experience -> "Experience"
         Fate -> "Fate & Resilience"
@@ -130,6 +134,7 @@ cardIcon card =
     case card of
         Armour -> Icons.breastplate
         C12cs -> Icons.skills
+        Corruption -> Icons.tentacle
         Encumbrance -> Icons.weight
         Experience -> Icons.wisdom
         Fate -> Icons.sparkles

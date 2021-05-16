@@ -15,6 +15,7 @@ type alias Character =
     , basicSkills : List Skill
     , c12csAdvances : C12cs
     , c12csInitial : C12cs
+    , corruption : Int
     , currentWounds : Int
     , expAdjustments : List ExpAdjustment
     , experience : Int
@@ -25,6 +26,7 @@ type alias Character =
     , maxEncumbrance : Int
     , motivation : String
     , movement : Int
+    , mutations : List Mutation
     , notes : List String
     , resilience : Int
     , resolve : Int
@@ -44,6 +46,7 @@ emptyCharacter =
     , basicSkills = basicSkillsList
     , c12csAdvances = emptyC12cs
     , c12csInitial = emptyC12cs
+    , corruption = 0
     , currentWounds = 0
     , expAdjustments = []
     , experience = 0
@@ -54,6 +57,7 @@ emptyCharacter =
     , maxEncumbrance = 0
     , motivation = ""
     , movement = 0
+    , mutations = []
     , notes = []
     , resilience = 0
     , resolve = 0
@@ -74,6 +78,7 @@ encodeCharacter character =
         , ( "basicSkills", Encode.list encodeSkill character.basicSkills )
         , ( "c12csAdvances", encodeC12cs character.c12csAdvances )
         , ( "c12csInitial", encodeC12cs character.c12csInitial )
+        , ( "corruption", Encode.int character.corruption )
         , ( "currentWounds", Encode.int character.currentWounds )
         , ( "expAdjustments", Encode.list encodeExpAdjustment character.expAdjustments )
         , ( "experience", Encode.int character.experience )
@@ -84,6 +89,7 @@ encodeCharacter character =
         , ( "maxEncumbrance", Encode.int character.maxEncumbrance )
         , ( "motivation", Encode.string character.motivation )
         , ( "movement", Encode.int character.movement )
+        , ( "mutations", Encode.list encodeMutation character.mutations )
         , ( "notes", Encode.list Encode.string character.notes )
         , ( "resilience", Encode.int character.resilience )
         , ( "resolve", Encode.int character.resolve )
@@ -103,6 +109,7 @@ decodeCharacter =
     Field.require "basicSkills" (Decode.list decodeSkill) <| \basicSkills ->
     Field.require "c12csAdvances" decodeC12cs <| \c12csAdvances ->
     Field.require "c12csInitial" decodeC12cs <| \c12csInitial ->
+    Field.require "corruption" Decode.int <| \corruption ->
     Field.require "currentWounds" Decode.int <| \currentWounds ->
     Field.require "expAdjustments" (Decode.list decodeExpAdjustment) <| \expAdjustments ->
     Field.require "experience" Decode.int <| \experience ->
@@ -113,6 +120,7 @@ decodeCharacter =
     Field.require "maxEncumbrance" Decode.int <| \maxEncumbrance ->
     Field.require "motivation" Decode.string <| \motivation ->
     Field.require "movement" Decode.int <| \movement ->
+    Field.require "mutations" (Decode.list decodeMutation) <| \mutations ->
     Field.require "notes" (Decode.list Decode.string) <| \notes ->
     Field.require "resilience" Decode.int <| \resilience ->
     Field.require "resolve" Decode.int <| \resolve ->
@@ -128,6 +136,7 @@ decodeCharacter =
         , basicSkills = basicSkills
         , c12csAdvances = c12csAdvances
         , c12csInitial = c12csInitial
+        , corruption = corruption
         , currentWounds = currentWounds
         , expAdjustments = expAdjustments
         , experience = experience
@@ -138,6 +147,7 @@ decodeCharacter =
         , maxEncumbrance = maxEncumbrance
         , motivation = motivation
         , movement = movement
+        , mutations = mutations
         , notes = notes
         , resilience = resilience
         , resolve = resolve
@@ -516,7 +526,7 @@ c12cFromString str =
         "Int" -> Ok Int
         "WP" -> Ok WP
         "Fel" -> Ok Fel
-        _ -> Err ("Cannot make characteristic from '" ++ str ++ "'")
+        _ -> Err ("Cannot make characteristic from '" ++ str ++ "'.")
 
 
 c12csCost : C12cs -> Int
@@ -618,6 +628,144 @@ decodeC12c : Decode.Decoder C12c
 decodeC12c =
     Decode.andThen
         (c12cFromString >> Json.Decode.Extra.fromResult)
+        Decode.string
+
+----------------
+-- Corruption --
+----------------
+
+type alias Mutation =
+    { description : String
+    , effect : String
+    , kind : MutationKind
+    }
+
+
+type MutationKind
+    = Mental
+    | Physical
+
+
+allMutationKinds =
+    [ Physical
+    , Mental
+    ]
+
+
+emptyMutation : Mutation
+emptyMutation =
+    { description = ""
+    , effect = ""
+    , kind = Physical
+    }
+
+
+mutationThreshold : Character -> Int
+mutationThreshold character =
+    getBonus (getC12c T (getC12cs character)) + getBonus (getC12c WP (getC12cs character))
+
+
+mutationKindToString : MutationKind -> String
+mutationKindToString kind =
+    case kind of
+        Mental -> "Mental"
+        Physical -> "Physical"
+
+
+mutationKindFromString : String -> Result String MutationKind
+mutationKindFromString str =
+    case str of
+        "Mental" -> Ok Mental
+        "Physical" -> Ok Physical
+        _ -> Err ("Cannot make mutation kind from '" ++ str ++ "'.")
+
+
+addMutation : Character -> Character
+addMutation character =
+    { character | mutations = character.mutations ++ [ emptyMutation ] }
+
+
+setCorruption : Int -> Character -> Character
+setCorruption value character =
+    { character | corruption = max 0 value }
+
+
+setMutationDescription : Int -> String -> Character -> Character
+setMutationDescription index value character =
+    { character |
+        mutations =
+            List.Extra.updateAt
+                index
+                (\mutation ->
+                    { mutation | description = value }
+                )
+                character.mutations
+    }
+
+
+setMutationEffect : Int -> String -> Character -> Character
+setMutationEffect index value character =
+    { character |
+        mutations =
+            List.Extra.updateAt
+                index
+                (\mutation ->
+                    { mutation | effect = value }
+                )
+                character.mutations
+    }
+
+
+setMutationKind : Int -> MutationKind -> Character -> Character
+setMutationKind index value character =
+    { character |
+        mutations =
+            List.Extra.updateAt
+                index
+                (\mutation ->
+                    { mutation | kind = value }
+                )
+                character.mutations
+    }
+
+
+setMutationKindFromString : Int -> String -> Character -> Character
+setMutationKindFromString index str character =
+    case mutationKindFromString str of
+        Ok kind ->
+            setMutationKind index kind character
+
+        Err _ ->
+            character
+
+
+encodeMutation : Mutation -> Encode.Value
+encodeMutation mutation =
+    Encode.object
+        [ ( "description", Encode.string mutation.description )
+        , ( "effect", Encode.string mutation.effect )
+        , ( "kind", Encode.string (mutationKindToString mutation.kind) )
+        ]
+
+
+decodeMutation : Decode.Decoder Mutation
+decodeMutation =
+    Decode.map3
+        (\description effect kind ->
+            { description = description
+            , effect = effect
+            , kind = kind
+            }
+        )
+        (Decode.field "description" Decode.string)
+        (Decode.field "effect" Decode.string)
+        (Decode.field "kind" decodeMutationKind)
+
+
+decodeMutationKind : Decode.Decoder MutationKind
+decodeMutationKind =
+    Decode.andThen
+        (mutationKindFromString >> Json.Decode.Extra.fromResult)
         Decode.string
 
 -----------------
