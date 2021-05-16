@@ -166,6 +166,9 @@ viewCard model card =
                         Ui.Experience ->
                             viewExperience model
 
+                        Ui.Fate ->
+                            viewFate model
+
                         Ui.Information ->
                             viewInformation model
 
@@ -1374,3 +1377,41 @@ viewDatalist id options =
             )
             options
         )
+
+
+viewFate : Model -> Html Msg
+viewFate model =
+    Html.div
+        [ HA.class "flex-row" ]
+        [ viewNumberInputWithLabel
+            [ HA.style "flex" "2" ]
+            { label = "Fate"
+            , onInput = Msg.NumberFieldChanged Character.setFate
+            , value = model.character.fate
+            }
+        , viewNumberInputWithLabel
+            [ HA.style "flex" "3" ]
+            { label = "Fortune"
+            , onInput = Msg.NumberFieldChanged Character.setFate
+            , value = model.character.fate
+            }
+        , viewNumberInputWithLabel
+            [ HA.style "flex" "3" ]
+            { label = "Resilience"
+            , onInput = Msg.NumberFieldChanged Character.setFate
+            , value = model.character.fate
+            }
+        , viewNumberInputWithLabel
+            [ HA.style "flex" "3" ]
+            { label = "Resolve"
+            , onInput = Msg.NumberFieldChanged Character.setFate
+            , value = model.character.fate
+            }
+        , viewTextInputWithLabel
+            [ HA.style "flex" "5" ]
+            { label = "Motivation"
+            , list = Nothing
+            , onInput = Msg.TextFieldChanged Character.setMotivation
+            , value = model.character.motivation
+            }
+        ]

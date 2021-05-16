@@ -19,9 +19,14 @@ type alias Character =
     , expAdjustments : List ExpAdjustment
     , experience : Int
     , extraWounds : Int
+    , fate : Int
+    , fortune : Int
     , info : Information
     , maxEncumbrance : Int
+    , motivation : String
     , notes : List String
+    , resilience : Int
+    , resolve : Int
     , talents : List Talent
     , trappings : List Trapping
     , wealth : Wealth
@@ -41,9 +46,14 @@ emptyCharacter =
     , expAdjustments = []
     , experience = 0
     , extraWounds = 0
+    , fate = 0
+    , fortune = 0
     , info = emptyInformation
     , maxEncumbrance = 0
+    , motivation = ""
     , notes = []
+    , resilience = 0
+    , resolve = 0
     , talents = []
     , trappings = []
     , wealth = emptyWealth
@@ -64,9 +74,14 @@ encodeCharacter character =
         , ( "expAdjustments", Encode.list encodeExpAdjustment character.expAdjustments )
         , ( "experience", Encode.int character.experience )
         , ( "extraWounds", Encode.int character.extraWounds )
+        , ( "fate", Encode.int character.fate )
+        , ( "fortune", Encode.int character.fortune )
         , ( "info", encodeInformation character.info )
         , ( "maxEncumbrance", Encode.int character.maxEncumbrance )
+        , ( "motivation", Encode.string character.motivation )
         , ( "notes", Encode.list Encode.string character.notes )
+        , ( "resilience", Encode.int character.resilience )
+        , ( "resolve", Encode.int character.resolve )
         , ( "talents", Encode.list encodeTalent character.talents )
         , ( "trappings", Encode.list encodeTrapping character.trappings )
         , ( "wealth", encodeWealth character.wealth )
@@ -86,9 +101,14 @@ decodeCharacter =
     Field.require "expAdjustments" (Decode.list decodeExpAdjustment) <| \expAdjustments ->
     Field.require "experience" Decode.int <| \experience ->
     Field.require "extraWounds" Decode.int <| \extraWounds ->
+    Field.require "fate" Decode.int <| \fate ->
+    Field.require "fortune" Decode.int <| \fortune ->
     Field.require "info" decodeInformation <| \info ->
     Field.require "maxEncumbrance" Decode.int <| \maxEncumbrance ->
+    Field.require "motivation" Decode.string <| \motivation ->
     Field.require "notes" (Decode.list Decode.string) <| \notes ->
+    Field.require "resilience" Decode.int <| \resilience ->
+    Field.require "resolve" Decode.int <| \resolve ->
     Field.require "talents" (Decode.list decodeTalent) <| \talents ->
     Field.require "trappings" (Decode.list decodeTrapping) <| \trappings ->
     Field.require "wealth" decodeWealth <| \wealth ->
@@ -104,9 +124,14 @@ decodeCharacter =
         , expAdjustments = expAdjustments
         , experience = experience
         , extraWounds = extraWounds
+        , fate = fate
+        , fortune = fortune
         , info = info
         , maxEncumbrance = maxEncumbrance
+        , motivation = motivation
         , notes = notes
+        , resilience = resilience
+        , resolve = resolve
         , talents = talents
         , trappings = trappings
         , wealth = wealth
@@ -717,6 +742,34 @@ decodeExpAdjustment =
         )
         (Decode.field "description" Decode.string)
         (Decode.field "value" Decode.int)
+
+-----------------------
+-- Fate & Resilience --
+-----------------------
+
+setFate : Int -> Character -> Character
+setFate value character =
+    { character | fate = max 0 value }
+
+
+setFortune : Int -> Character -> Character
+setFortune value character =
+    { character | fortune = max 0 value }
+
+
+setMotivation : String -> Character -> Character
+setMotivation value character =
+    { character | motivation = value }
+
+
+setResilience: Int -> Character -> Character
+setResilience value character =
+    { character | resilience = max 0 value }
+
+
+setResolve : Int -> Character -> Character
+setResolve value character =
+    { character | resolve = max 0 value }
 
 -----------------
 -- Information --

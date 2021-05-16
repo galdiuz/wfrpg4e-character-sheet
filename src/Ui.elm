@@ -50,6 +50,7 @@ type Card
     | C12cs
     | Encumbrance
     | Experience
+    | Fate
     | Information
     | Notes
     | Skills
@@ -66,6 +67,7 @@ allCards =
     , C12cs
     , Encumbrance
     , Experience
+    , Fate
     , Information
     , Notes
     , Skills
@@ -84,6 +86,7 @@ cardId card =
         C12cs -> "characteristics"
         Encumbrance -> "encumbrance"
         Experience -> "experience"
+        Fate -> "fate"
         Information -> "information"
         Notes -> "notes"
         Skills -> "skills"
@@ -101,6 +104,7 @@ cardTitle card =
         C12cs -> "Characteristics"
         Encumbrance -> "Encumbrance"
         Experience -> "Experience"
+        Fate -> "Fate & Resilience"
         Information -> "Information"
         Notes -> "Notes"
         Skills -> "Skills"
@@ -118,6 +122,7 @@ cardIcon card =
         C12cs -> Icons.skills
         Encumbrance -> Icons.weight
         Experience -> Icons.wisdom
+        Fate -> Icons.sparkles
         Information -> Icons.character
         Notes -> Icons.notebook
         Skills -> Icons.graduateCap
