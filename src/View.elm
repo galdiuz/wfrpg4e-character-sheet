@@ -2,6 +2,7 @@ module View exposing (view)
 
 import Character as Character
 import Css
+import Data
 import Dict
 import Draggable
 import FontAwesome.Styles
@@ -36,6 +37,7 @@ view model =
         , FontAwesome.Styles.css
         , viewHeader
         , viewContent model
+        , viewDatalists
         ]
 
 
@@ -218,74 +220,97 @@ viewFile =
 viewInformation : Model -> Html Msg
 viewInformation model =
     Html.div
-        [ HA.style "display" "flex"
-        , HA.style "flex-flow" "column"
-        , HA.style "gap" "8px"
+        [ HA.class "flex-column"
         ]
-        [ viewTextInputWithLabel
-            { label = "Name"
-            , onInput = Msg.TextFieldChanged (Character.setInformation Character.Name)
-            , value = model.character.info.name
-            }
-        , Html.div
-            [ HA.style "display" "flex"
-            , HA.style "flex-flow" "row"
-            , HA.style "gap" "8px"
+        [ Html.div
+            [ HA.class "flex-row"
             ]
             [ viewTextInputWithLabel
+                [ HA.style "flex" "2" ]
+                { label = "Name"
+                , list = Nothing
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.Name)
+                , value = model.character.info.name
+                }
+            , viewTextInputWithLabel
+                []
                 { label = "Species"
+                , list = Just "datalist-species"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Species)
                 , value = model.character.info.species
                 }
-            , viewTextInputWithLabel
+            ]
+        , Html.div
+            [ HA.class "flex-row"
+            ]
+            [ viewTextInputWithLabel
+                []
                 { label = "Class"
+                , list = Just "datalist-classes"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Class)
                 , value = model.character.info.class
                 }
-            ]
-        , Html.div
-            [ HA.style "display" "flex"
-            , HA.style "flex-flow" "row"
-            , HA.style "gap" "8px"
-            ]
-            [ viewTextInputWithLabel
-                { label = "Career Path"
-                , onInput = Msg.TextFieldChanged (Character.setInformation Character.CareerPath)
-                , value = model.character.info.careerPath
-                }
             , viewTextInputWithLabel
+                []
                 { label = "Career"
+                , list = Just ("datalist-careers-" ++ formatId model.character.info.class)
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Career)
                 , value = model.character.info.career
                 }
             , viewTextInputWithLabel
+                [ HA.style "flex" "2" ]
+                { label = "Career Level"
+                , list = Just ("datalist-career-levels-" ++ formatId model.character.info.career)
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.CareerLevel)
+                , value = model.character.info.careerLevel
+                }
+            ]
+        , Html.div
+            [ HA.class "flex-row"
+            ]
+            [ viewTextInputWithLabel
+                [ HA.style "flex" "4" ]
+                { label = "Career Path"
+                , list = Nothing
+                , onInput = Msg.TextFieldChanged (Character.setInformation Character.CareerPath)
+                , value = model.character.info.careerPath
+                }
+            , viewTextInputWithLabel
+                []
                 { label = "Status"
+                , list = Just "datalist-statuses"
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Status)
                 , value = model.character.info.status
                 }
             ]
         , Html.div
-            [ HA.style "display" "flex"
-            , HA.style "flex-flow" "row"
-            , HA.style "gap" "8px"
+            [ HA.class "flex-row"
             ]
             [ viewTextInputWithLabel
+                [ HA.style "flex" "2" ]
                 { label = "Age"
+                , list = Nothing
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Age)
                 , value = model.character.info.age
                 }
             , viewTextInputWithLabel
+                [ HA.style "flex" "2" ]
                 { label = "Height"
+                , list = Nothing
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Height)
                 , value = model.character.info.height
                 }
             , viewTextInputWithLabel
+                [ HA.style "flex" "3" ]
                 { label = "Hair"
+                , list = Nothing
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Hair)
                 , value = model.character.info.hair
                 }
             , viewTextInputWithLabel
+                [ HA.style "flex" "3" ]
                 { label = "Eyes"
+                , list = Nothing
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Eyes)
                 , value = model.character.info.eyes
                 }
@@ -342,7 +367,8 @@ viewC12cs model =
 
 
 viewTextInput :
-    { onInput : String -> msg
+    { list : Maybe String
+    , onInput : String -> msg
     , value : String
     }
     -> Html msg
@@ -350,25 +376,32 @@ viewTextInput data =
     Html.input
         [ HA.type_ "text"
         , HA.value data.value
+        , HAE.attributeMaybe HA.list data.list
         , Events.onInput data.onInput
         ]
         []
 
 
 viewTextInputWithLabel :
-    { label : String
-    , onInput : String -> msg
-    , value : String
-    }
+    List (Html.Attribute msg)
+    -> { label : String
+       , list : Maybe String
+       , onInput : String -> msg
+       , value : String
+       }
     -> Html msg
-viewTextInputWithLabel data =
+viewTextInputWithLabel attributes data =
     Html.label
-        [ HA.class "label"
-        , HA.style "flex" "1"
-        ]
+        (List.append
+            [ HA.class "label"
+            , HA.style "flex" "1"
+            ]
+            attributes
+        )
         [ Html.text data.label
         , Html.input
             [ HA.type_ "text"
+            , HAE.attributeMaybe HA.list data.list
             , HA.value data.value
             , Events.onInput data.onInput
             ]
@@ -382,12 +415,37 @@ viewTextareaInput :
     }
     -> Html msg
 viewTextareaInput data =
-    Html.textarea
-        [ HA.attribute "rows" "1"
-        , HA.value data.value
-        , Events.onInput data.onInput
+    Html.div
+        [ HA.style "position" "relative"
+        , HA.style "flex" "1"
         ]
-        []
+        [ Html.div
+            [ HA.class "textarea"
+            , HA.style "display" "hidden"
+            ]
+            (data.value
+                |> String.split "\n"
+                |> List.map
+                    (\text ->
+                        if String.isEmpty text then
+                            Html.text " "
+                        else
+                            Html.text text
+                    )
+                |> List.intersperse (Html.br [] [])
+            )
+        , Html.textarea
+            [ HA.class "textarea"
+            , HA.style "position" "absolute"
+            , HA.style "left" "0"
+            , HA.style "top" "0"
+            , HA.style "width" "100%"
+            , HA.style "height" "100%"
+            , HA.value data.value
+            , Events.onInput data.onInput
+            ]
+            []
+        ]
 
 
 viewNumberInput :
@@ -405,16 +463,20 @@ viewNumberInput data =
 
 
 viewNumberInputWithLabel :
-    { label : String
-    , onInput : String -> msg
-    , value : Int
-    }
+    List (Html.Attribute msg)
+    -> { label : String
+       , onInput : String -> msg
+       , value : Int
+       }
     -> Html msg
-viewNumberInputWithLabel data =
+viewNumberInputWithLabel attributes data =
     Html.label
-        [ HA.class "label"
-        , HA.style "flex" "1"
-        ]
+        (List.append
+            [ HA.class "label"
+            , HA.style "flex" "1"
+            ]
+            attributes
+        )
         [ Html.text data.label
         , Html.input
             [ HA.type_ "number"
@@ -460,6 +522,7 @@ viewExperienceTable model =
         , HA.style "gap" "8px"
         ]
         [ viewNumberInputWithLabel
+            []
             { label = "Total"
             , onInput = Msg.NumberFieldChanged (Character.setExperience)
             , value = model.character.experience
@@ -575,7 +638,8 @@ viewSkills model =
                     [ Html.span
                         []
                         [ viewTextInput
-                            { onInput = Msg.TextFieldChanged (Character.setAdvancedSkillName index)
+                            { list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setAdvancedSkillName index)
                             , value = skill.name
                             }
                         ]
@@ -658,7 +722,7 @@ viewTalents : Model -> Html Msg
 viewTalents model =
     Html.div
         [ HA.class "grid"
-        , HA.style "grid-template-columns" "[name] 35% [times-taken] 25% [description] auto"
+        , HA.style "grid-template-columns" "[name] 35% [times-taken] 20% [description] auto"
         ]
         (List.concat
             [ [ Html.span
@@ -674,7 +738,8 @@ viewTalents model =
             , List.indexedMap
                 (\index talent ->
                     [ viewTextInput
-                        { onInput = Msg.TextFieldChanged (Character.setTalentName index)
+                        { list = Just "datalist-talents"
+                        , onInput = Msg.TextFieldChanged (Character.setTalentName index)
                         , value = talent.name
                         }
                     , viewNumberInput
@@ -765,7 +830,8 @@ viewTrappings model =
                     [ Html.div
                         [ HA.style "grid-column" "name" ]
                         [ viewTextInput
-                            { onInput = Msg.TextFieldChanged (Character.setTrappingName index)
+                            { list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setTrappingName index)
                             , value = trapping.name
                             }
                         ]
@@ -803,6 +869,7 @@ viewWealth model =
         [ Html.div
             [ HA.style "grid-column" "span 3" ]
             [ viewNumberInputWithLabel
+                []
                 { label = "Gold Crowns"
                 , onInput = Msg.NumberFieldChanged (Character.setGold)
                 , value = model.character.wealth.gold
@@ -811,6 +878,7 @@ viewWealth model =
         , Html.div
             [ HA.style "grid-column" "span 4" ]
             [ viewNumberInputWithLabel
+                []
                 { label = "Silver Shillings"
                 , onInput = Msg.NumberFieldChanged (Character.setSilver)
                 , value = model.character.wealth.silver
@@ -819,6 +887,7 @@ viewWealth model =
         , Html.div
             [ HA.style "grid-column" "span 3" ]
             [ viewNumberInputWithLabel
+                []
                 { label = "Brass Pennies"
                 , onInput = Msg.NumberFieldChanged (Character.setBrass)
                 , value = model.character.wealth.brass
@@ -881,7 +950,8 @@ viewWeapons model =
                             ]
                             [ Html.text "Name"
                             , viewTextInput
-                                { onInput = Msg.TextFieldChanged (Character.setWeaponName index)
+                                { list = Nothing
+                                , onInput = Msg.TextFieldChanged (Character.setWeaponName index)
                                 , value = weapon.name
                                 }
                             ]
@@ -890,7 +960,8 @@ viewWeapons model =
                             ]
                             [ Html.text "Damage"
                             , viewTextInput
-                                { onInput = Msg.TextFieldChanged (Character.setWeaponDamage index)
+                                { list = Nothing
+                                , onInput = Msg.TextFieldChanged (Character.setWeaponDamage index)
                                 , value = weapon.damage
                                 }
                             ]
@@ -899,7 +970,8 @@ viewWeapons model =
                             ]
                             [ Html.text "Group"
                             , viewTextInput
-                                { onInput = Msg.TextFieldChanged (Character.setWeaponGroup index)
+                                { list = Nothing
+                                , onInput = Msg.TextFieldChanged (Character.setWeaponGroup index)
                                 , value = weapon.group
                                 }
                             ]
@@ -917,7 +989,8 @@ viewWeapons model =
                             ]
                             [ Html.text "Range/Reach"
                             , viewTextInput
-                                { onInput = Msg.TextFieldChanged (Character.setWeaponRange index)
+                                { list = Nothing
+                                , onInput = Msg.TextFieldChanged (Character.setWeaponRange index)
                                 , value = weapon.range
                                 }
                             ]
@@ -926,7 +999,8 @@ viewWeapons model =
                             ]
                             [ Html.text "Qualities"
                             , viewTextInput
-                                { onInput = Msg.TextFieldChanged (Character.setWeaponQualities index)
+                                { list = Nothing
+                                , onInput = Msg.TextFieldChanged (Character.setWeaponQualities index)
                                 , value = weapon.qualities
                                 }
                             ]
@@ -951,52 +1025,53 @@ viewArmour model =
         , HA.style "gap" "16px"
         ]
         [ Html.div
-            [ HA.style "display" "flex"
-            , HA.style "flex-flow" "column"
-            , HA.style "gap" "8px"
+            [ HA.class "flex-column"
             ]
             [ Html.div
-                [ HA.style "display" "flex"
-                , HA.style "flex-flow" "row"
-                , HA.style "gap" "8px"
+                [ HA.class "flex-row"
                 ]
                 [ viewNumberInputWithLabel
+                    []
                     { label = "Left arm (10-24)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.LeftArm)
                     , value = model.character.ap.leftArm
                     }
                 , viewNumberInputWithLabel
+                    []
                     { label = "Head (01-09)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.Head)
                     , value = model.character.ap.head
                     }
                 , viewNumberInputWithLabel
+                    []
                     { label = "Right arm (10-24)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.RightArm)
                     , value = model.character.ap.rightArm
                     }
                 ]
             , Html.div
-                [ HA.style "display" "flex"
-                , HA.style "flex-flow" "row"
-                , HA.style "gap" "8px"
+                [ HA.class "flex-row"
                 ]
                 [ viewNumberInputWithLabel
+                    [ HA.style "flex" "1" ]
                     { label = "Shield"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.Shield)
                     , value = model.character.ap.shield
                     }
                 , viewNumberInputWithLabel
+                    [ HA.style "flex" "2" ]
                     { label = "Left leg (80-89)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.LeftLeg)
                     , value = model.character.ap.leftLeg
                     }
                 , viewNumberInputWithLabel
+                    [ HA.style "flex" "2" ]
                     { label = "Body (45-79)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.Body)
                     , value = model.character.ap.body
                     }
                 , viewNumberInputWithLabel
+                    [ HA.style "flex" "2" ]
                     { label = "Right leg (90-00)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.RightLeg)
                     , value = model.character.ap.rightLeg
@@ -1027,11 +1102,13 @@ viewArmour model =
                 , (List.indexedMap
                     (\index armour ->
                         [ viewTextInput
-                            { onInput = Msg.TextFieldChanged (Character.setArmourName index)
+                            { list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setArmourName index)
                             , value = armour.name
                             }
                         , viewTextInput
-                            { onInput = Msg.TextFieldChanged (Character.setArmourLocations index)
+                            { list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setArmourLocations index)
                             , value = armour.locations
                             }
                         , viewNumberInput
@@ -1043,7 +1120,8 @@ viewArmour model =
                             , value = armour.ap
                             }
                         , viewTextInput
-                            { onInput = Msg.TextFieldChanged (Character.setArmourQualities index)
+                            { list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setArmourQualities index)
                             , value = armour.qualities
                             }
                         ]
@@ -1117,6 +1195,7 @@ viewWounds model =
             []
             [ Html.text "+" ]
         , viewNumberInputWithLabel
+            []
             { label = "Extra"
             , onInput = Msg.NumberFieldChanged (Character.setExtraWounds)
             , value = model.character.extraWounds
@@ -1134,6 +1213,7 @@ viewWounds model =
                 |> Html.text
             ]
         , viewNumberInputWithLabel
+            []
             { label = "Current"
             , onInput = Msg.NumberFieldChanged (Character.setCurrentWounds)
             , value = model.character.currentWounds
@@ -1199,6 +1279,7 @@ viewEncumbrance model =
             []
             [ Html.text "/" ]
         , viewNumberInputWithLabel
+            []
             { label = "Max Enc."
             , onInput = Msg.NumberFieldChanged (Character.setMaxEncumbrance)
             , value = model.character.maxEncumbrance
@@ -1231,4 +1312,65 @@ viewNotes model =
                 ]
               ]
             ]
+        )
+
+
+viewDatalists : Html msg
+viewDatalists =
+    Html.div
+        []
+        (List.append
+            [ viewDatalist
+                "datalist-classes"
+                (List.map .name Data.classes)
+            , viewDatalist
+                "datalist-species"
+                Data.species
+            , viewDatalist
+                "datalist-statuses"
+                Data.statuses
+            , viewDatalist
+                "datalist-talents"
+                Data.talents
+            ]
+            (List.map
+                (\class ->
+                    List.append
+                        [ viewDatalist
+                            ("datalist-careers-" ++ formatId class.name)
+                            (List.map .name class.careers)
+                        ]
+                        (List.map
+                            (\career ->
+                                viewDatalist
+                                    ("datalist-career-levels-" ++ formatId career.name)
+                                    (List.map .name career.levels)
+                            )
+                            class.careers
+                        )
+                )
+                Data.classes
+                |> List.concat
+            )
+        )
+
+
+formatId : String -> String
+formatId str =
+    str
+        |> String.replace " " "-"
+        |> String.toLower
+
+
+viewDatalist : String -> List String -> Html msg
+viewDatalist id options =
+    Html.datalist
+        [ HA.id id ]
+        (List.map
+            (\option ->
+                Html.option
+                    [ HA.value option ]
+                    []
+            )
+            options
         )

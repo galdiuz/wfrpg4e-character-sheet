@@ -3,6 +3,10 @@ module Css exposing (css, dark)
 css : String
 css =
     """
+body {
+    font-family: Times New Roman;
+}
+
 .content {
     display: flex;
     flex-direction: row;
@@ -90,6 +94,18 @@ css =
     padding-left: 36px;
 }
 
+.flex-column {
+    display: flex;
+    flex-flow: column;
+    gap: 8px;
+}
+
+.flex-row {
+    display: flex;
+    flex-flow: row;
+    gap: 8px;
+}
+
 .grid {
     display: grid;
     column-gap: 8px;
@@ -122,8 +138,7 @@ input {
     padding: 1px;
     width: 100%;
     border-width: 1px;
-    border-style: solid;
-    border-bottom-style: dashed;
+    border-style: solid solid dashed;
     border-radius: 2px;
     transition: border-color 0.15s ease-in-out;
 }
@@ -134,12 +149,24 @@ input:focus {
     border-width: 1px;
 }
 
-input:focus-visible {
+input:focus-visible, textarea:focus-visible {
     outline: 0;
 }
 
-textarea {
-    resize: vertical;
+.textarea {
+    border-radius: 2px;
+    border-style: solid solid dashed;
+    border-width: 1px;
+    box-sizing: border-box;
+    font-family: Times New Roman;
+    font-size: 14px;
+    max-height: 80px;
+    overflow-wrap: anywhere;
+    overflow: auto;
+    padding: 2px;
+    resize: none;
+    transition: border-color 0.15s ease-in-out;
+    white-space: break-spaces;
 }
 
 input[type=number] {
@@ -150,6 +177,10 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+input::-webkit-calendar-picker-indicator {
+    display: none;
 }
     """
 
@@ -179,17 +210,17 @@ button:hover {
     color: #999;
 }
 
-input {
+input, .textarea {
     border-color: #333;
     border-bottom-color: #666
 }
 
-input:hover {
+input:hover, .textarea:hover {
     border-color: #555;
     border-bottom-color: #888;
 }
 
-input:focus {
+input:focus, .textarea:focus {
     border-color: #999;
     border-bottom-color: #bbb;
 }

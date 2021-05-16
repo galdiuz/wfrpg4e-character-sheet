@@ -1,5 +1,6 @@
 module Character exposing (..)
 
+import Data
 import Json.Decode as Decode
 import Json.Decode.Extra
 import Json.Decode.Field as Field
@@ -724,6 +725,7 @@ decodeExpAdjustment =
 type alias Information =
     { age : String
     , career : String
+    , careerLevel : String
     , careerPath : String
     , class : String
     , eyes : String
@@ -739,6 +741,7 @@ emptyInformation : Information
 emptyInformation =
     { age = ""
     , career = ""
+    , careerLevel = ""
     , careerPath = ""
     , class = ""
     , eyes = ""
@@ -753,6 +756,7 @@ emptyInformation =
 type InformationField
     = Age
     | Career
+    | CareerLevel
     | CareerPath
     | Class
     | Eyes
@@ -770,6 +774,13 @@ setInformation field value ({ info } as character) =
             case field of
                 Age -> { info | age = value }
                 Career -> { info | career = value }
+                CareerLevel ->
+                    { info
+                        | careerLevel = value
+                        , status =
+                            Data.getStatus info.class info.career value
+                                |> Maybe.withDefault info.status
+                    }
                 CareerPath -> { info | careerPath = value }
                 Class -> { info | class = value }
                 Eyes -> { info | eyes = value }
@@ -786,6 +797,7 @@ encodeInformation info =
     Encode.object
         [ ( "age", Encode.string info.age )
         , ( "career", Encode.string info.career )
+        , ( "careerLevel", Encode.string info.careerLevel )
         , ( "careerPath", Encode.string info.careerPath )
         , ( "class", Encode.string info.class )
         , ( "eyes", Encode.string info.eyes )
@@ -801,6 +813,7 @@ decodeInformation : Decode.Decoder Information
 decodeInformation =
     Field.require "age" Decode.string <| \age ->
     Field.require "career" Decode.string <| \career ->
+    Field.require "careerLevel" Decode.string <| \careerLevel ->
     Field.require "careerPath" Decode.string <| \careerPath ->
     Field.require "class" Decode.string <| \class ->
     Field.require "eyes" Decode.string <| \eyes ->
@@ -812,6 +825,7 @@ decodeInformation =
     Decode.succeed
         { age = age
         , career = career
+        , careerLevel = careerLevel
         , careerPath = careerPath
         , class = class
         , eyes = eyes
