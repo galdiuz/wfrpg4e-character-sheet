@@ -97,13 +97,14 @@ body {
 .flex-column {
     display: flex;
     flex-flow: column;
-    gap: 8px;
+    gap: 4px;
 }
 
 .flex-row {
     display: flex;
     flex-flow: row;
     gap: 8px;
+    justify-content: space-between;
 }
 
 .grid {
@@ -113,6 +114,7 @@ body {
 }
 
 .label {
+    flex: 1;
     font-size: 14px;
 }
 

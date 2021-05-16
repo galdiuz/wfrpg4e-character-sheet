@@ -181,6 +181,9 @@ viewCard model card =
                         Ui.Skills ->
                             viewSkills model
 
+                        Ui.Spells ->
+                            viewSpells model
+
                         Ui.Talents ->
                             viewTalents model
 
@@ -400,7 +403,6 @@ viewTextInputWithLabel attributes data =
     Html.label
         (List.append
             [ HA.class "label"
-            , HA.style "flex" "1"
             ]
             attributes
         )
@@ -940,71 +942,56 @@ viewWealth model =
 viewWeapons : Model -> Html Msg
 viewWeapons model =
     Html.div
-        []
+        [ HA.class "flex-column" ]
         (List.concat
             [ (List.indexedMap
                   (\index weapon ->
                     Html.div
-                        -- Name     Damage Range
-                        -- Group Enc Qualities
-                        [ HA.style "display" "flex"
-                        , HA.style "flex-flow" "row wrap"
+                        [ HA.class "flex-column"
                         ]
                         [ Html.div
-                            [ HA.style "width" "50%"
-                            ]
-                            [ Html.text "Name"
-                            , viewTextInput
-                                { list = Nothing
+                            [ HA.class "flex-row" ]
+                            [ viewTextInputWithLabel
+                                [ HA.style "flex" "2" ]
+                                { label = "Name"
+                                , list = Nothing
                                 , onInput = Msg.TextFieldChanged (Character.setWeaponName index)
                                 , value = weapon.name
                                 }
-                            ]
-                        , Html.div
-                            [ HA.style "width" "25%"
-                            ]
-                            [ Html.text "Damage"
-                            , viewTextInput
-                                { list = Nothing
+                            , viewTextInputWithLabel
+                                []
+                                { label = "Damage"
+                                , list = Nothing
                                 , onInput = Msg.TextFieldChanged (Character.setWeaponDamage index)
                                 , value = weapon.damage
                                 }
-                            ]
-                        , Html.div
-                            [ HA.style "width" "25%"
-                            ]
-                            [ Html.text "Group"
-                            , viewTextInput
-                                { list = Nothing
+                            , viewTextInputWithLabel
+                                []
+                                { label = "Group"
+                                , list = Nothing
                                 , onInput = Msg.TextFieldChanged (Character.setWeaponGroup index)
                                 , value = weapon.group
                                 }
                             ]
                         , Html.div
-                            [ HA.style "width" "25%"
-                            ]
-                            [ Html.text "Encumbrance"
-                            , viewNumberInput
-                                { onInput = Msg.NumberFieldChanged (Character.setWeaponEncumbrance index)
+                            [ HA.class "flex-row" ]
+                            [ viewNumberInputWithLabel
+                                []
+                                { label = "Enc"
+                                , onInput = Msg.NumberFieldChanged (Character.setWeaponEncumbrance index)
                                 , value = weapon.encumbrance
                                 }
-                            ]
-                        , Html.div
-                            [ HA.style "width" "25%"
-                            ]
-                            [ Html.text "Range/Reach"
-                            , viewTextInput
-                                { list = Nothing
+                            , viewTextInputWithLabel
+                                [ HA.style "flex" "2" ]
+                                { label = "Range/Reach"
+                                , list = Nothing
                                 , onInput = Msg.TextFieldChanged (Character.setWeaponRange index)
                                 , value = weapon.range
                                 }
-                            ]
-                        , Html.div
-                            [ HA.style "width" "50%"
-                            ]
-                            [ Html.text "Qualities"
-                            , viewTextInput
-                                { list = Nothing
+                            , viewTextInputWithLabel
+                                [ HA.style "flex" "5" ]
+                                { label = "Qualities"
+                                , list = Nothing
                                 , onInput = Msg.TextFieldChanged (Character.setWeaponQualities index)
                                 , value = weapon.qualities
                                 }
@@ -1014,7 +1001,7 @@ viewWeapons model =
                 model.character.weapons
               )
             , [ viewButton
-                { onClick = Msg.ButtonPressed (Character.addWeapon)
+                { onClick = Msg.ButtonPressed Character.addWeapon
                 , text = "Add"
                 }
               ]
@@ -1444,3 +1431,101 @@ viewMovement model =
             , Html.text (String.fromInt (Character.run model.character))
             ]
         ]
+
+
+viewSpells : Model -> Html Msg
+viewSpells model =
+    Html.div
+        [ HA.class "flex-column" ]
+        (List.concat
+            [ (List.indexedMap
+                (\index spell ->
+                    case Ui.getSpellState index model.ui of
+                        Ui.Collapsed ->
+                            Html.div
+                                [ HA.class "flex-row"
+                                ]
+                                [ viewButton
+                                    { onClick = Msg.ToggleSpellStatePressed index
+                                    , text =
+                                        if String.isEmpty spell.name then
+                                            "<New spell>"
+
+                                        else
+                                            spell.name
+                                    }
+                                ]
+
+                        Ui.Open ->
+                            Html.div
+                                [ HA.class "flex-column"
+                                ]
+                                [ Html.div
+                                    [ HA.class "flex-row" ]
+                                    [ viewTextInputWithLabel
+                                        [ HA.style "flex" "1" ]
+                                        { label = "Name"
+                                        , list = Nothing
+                                        , onInput = Msg.TextFieldChanged (Character.setSpellName index)
+                                        , value = spell.name
+                                        }
+                                    , viewTextInputWithLabel
+                                        []
+                                        { label = "Range"
+                                        , list = Nothing
+                                        , onInput = Msg.TextFieldChanged (Character.setSpellRange index)
+                                        , value = spell.range
+                                        }
+                                    , Html.button
+                                        [ HA.class "button-style"
+                                        , Events.onClick (Msg.ToggleSpellStatePressed index)
+                                        ]
+                                        [ FA.viewIcon FontAwesome.Solid.compress ]
+                                    ]
+                                , Html.div
+                                    [ HA.class "flex-row" ]
+                                    [ viewTextInputWithLabel
+                                        [ HA.style "flex" "5" ]
+                                        { label = "Target"
+                                        , list = Nothing
+                                        , onInput = Msg.TextFieldChanged (Character.setSpellTarget index)
+                                        , value = spell.target
+                                        }
+                                    , viewTextInputWithLabel
+                                        [ HA.style "flex" "5" ]
+                                        { label = "Duration"
+                                        , list = Nothing
+                                        , onInput = Msg.TextFieldChanged (Character.setSpellDuration index)
+                                        , value = spell.duration
+                                        }
+                                    , viewNumberInputWithLabel
+                                        [ HA.style "flex" "1" ]
+                                        { label = "CN"
+                                        , onInput = Msg.NumberFieldChanged (Character.setSpellCn index)
+                                        , value = spell.cn
+                                        }
+                                    ]
+                                , Html.label
+                                    [ HA.class "label" ]
+                                    [ Html.text "Effect"
+                                    , viewTextareaInput
+                                        { onInput = Msg.TextFieldChanged (Character.setSpellEffect index)
+                                        , value = spell.effect
+                                        }
+                                    ]
+                                ]
+                )
+                model.character.spells
+                |> List.intersperse
+                    (Html.div
+                        []
+                        []
+                    )
+              )
+            , [ viewButton
+                { onClick = Msg.ButtonPressed Character.addSpell
+                , text = "Add"
+                }
+              ]
+            ]
+        )

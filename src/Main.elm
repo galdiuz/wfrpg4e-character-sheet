@@ -238,6 +238,11 @@ update msg model =
                 model
                 |> Cmd.Extra.withNoCmd
 
+        Msg.ToggleSpellStatePressed index ->
+            Ui.toggleSpellState index model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
 
 dragConfig : Draggable.Config Ui.Card Msg
 dragConfig =

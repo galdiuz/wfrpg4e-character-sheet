@@ -28,6 +28,7 @@ type alias Character =
     , notes : List String
     , resilience : Int
     , resolve : Int
+    , spells : List Spell
     , talents : List Talent
     , trappings : List Trapping
     , wealth : Wealth
@@ -56,6 +57,7 @@ emptyCharacter =
     , notes = []
     , resilience = 0
     , resolve = 0
+    , spells = []
     , talents = []
     , trappings = []
     , wealth = emptyWealth
@@ -85,6 +87,7 @@ encodeCharacter character =
         , ( "notes", Encode.list Encode.string character.notes )
         , ( "resilience", Encode.int character.resilience )
         , ( "resolve", Encode.int character.resolve )
+        , ( "spells", Encode.list encodeSpell character.spells )
         , ( "talents", Encode.list encodeTalent character.talents )
         , ( "trappings", Encode.list encodeTrapping character.trappings )
         , ( "wealth", encodeWealth character.wealth )
@@ -113,6 +116,7 @@ decodeCharacter =
     Field.require "notes" (Decode.list Decode.string) <| \notes ->
     Field.require "resilience" Decode.int <| \resilience ->
     Field.require "resolve" Decode.int <| \resolve ->
+    Field.require "spells" (Decode.list decodeSpell) <| \spells ->
     Field.require "talents" (Decode.list decodeTalent) <| \talents ->
     Field.require "trappings" (Decode.list decodeTrapping) <| \trappings ->
     Field.require "wealth" decodeWealth <| \wealth ->
@@ -137,6 +141,7 @@ decodeCharacter =
         , notes = notes
         , resilience = resilience
         , resolve = resolve
+        , spells = spells
         , talents = talents
         , trappings = trappings
         , wealth = wealth
@@ -1191,6 +1196,145 @@ decodeSkill =
         (Decode.field "advances" Decode.int)
         (Decode.field "c12c" decodeC12c)
         (Decode.field "name" Decode.string)
+
+------------
+-- Spells --
+------------
+
+type alias Spell =
+    { cn : Int
+    , duration : String
+    , effect : String
+    , name : String
+    , range : String
+    , target : String
+    }
+
+
+emptySpell : Spell
+emptySpell =
+    { cn = 0
+    , duration = ""
+    , effect = ""
+    , name = ""
+    , range = ""
+    , target = ""
+    }
+
+
+addSpell : Character -> Character
+addSpell character =
+    { character | spells = character.spells ++ [ emptySpell ] }
+
+
+setSpellCn : Int -> Int -> Character -> Character
+setSpellCn index value character =
+    { character |
+        spells =
+            List.Extra.updateAt
+                index
+                (\spell ->
+                    { spell | cn = max 0 value }
+                )
+                character.spells
+    }
+
+
+setSpellDuration : Int -> String -> Character -> Character
+setSpellDuration index value character =
+    { character |
+        spells =
+            List.Extra.updateAt
+                index
+                (\spell ->
+                    { spell | duration = value }
+                )
+                character.spells
+    }
+
+
+setSpellEffect : Int -> String -> Character -> Character
+setSpellEffect index value character =
+    { character |
+        spells =
+            List.Extra.updateAt
+                index
+                (\spell ->
+                    { spell | effect = value }
+                )
+                character.spells
+    }
+
+
+setSpellName : Int -> String -> Character -> Character
+setSpellName index value character =
+    { character |
+        spells =
+            List.Extra.updateAt
+                index
+                (\spell ->
+                    { spell | name = value }
+                )
+                character.spells
+    }
+
+
+setSpellRange : Int -> String -> Character -> Character
+setSpellRange index value character =
+    { character |
+        spells =
+            List.Extra.updateAt
+                index
+                (\spell ->
+                    { spell | range = value }
+                )
+                character.spells
+    }
+
+
+setSpellTarget : Int -> String -> Character -> Character
+setSpellTarget index value character =
+    { character |
+        spells =
+            List.Extra.updateAt
+                index
+                (\spell ->
+                    { spell | target = value }
+                )
+                character.spells
+    }
+
+
+encodeSpell : Spell -> Encode.Value
+encodeSpell spell =
+    Encode.object
+        [ ( "cn", Encode.int spell.cn )
+        , ( "duration", Encode.string spell.duration )
+        , ( "effect", Encode.string spell.effect )
+        , ( "name", Encode.string spell.name )
+        , ( "range", Encode.string spell.range )
+        , ( "target", Encode.string spell.target )
+        ]
+
+
+decodeSpell : Decode.Decoder Spell
+decodeSpell =
+    Decode.map6
+        (\cn duration effect name range target ->
+            { cn = cn
+            , duration = duration
+            , effect = effect
+            , name = name
+            , range = range
+            , target = target
+            }
+        )
+        (Decode.field "cn" Decode.int)
+        (Decode.field "duration" Decode.string)
+        (Decode.field "effect" Decode.string)
+        (Decode.field "name" Decode.string)
+        (Decode.field "range" Decode.string)
+        (Decode.field "target" Decode.string)
 
 -------------
 -- Talents --

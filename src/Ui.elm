@@ -15,6 +15,7 @@ type alias Ui =
     , dragPosition : ( Int, Int )
     , draggedCard : Maybe Card
     , movingCards : Dict String ( Int, Int )
+    , spellStates : Dict Int CardState
     , theme : Theme
     , windowWidth : Int
     }
@@ -35,6 +36,7 @@ emptyUi =
     , dragPosition = ( 0, 0 )
     , draggedCard = Nothing
     , movingCards = Dict.empty
+    , spellStates = Dict.empty
     , theme = Dark
     , windowWidth = 0
     }
@@ -55,6 +57,7 @@ type Card
     | Movement
     | Notes
     | Skills
+    | Spells
     | Talents
     | Trappings
     | Wealth
@@ -73,6 +76,7 @@ allCards =
     , Movement
     , Notes
     , Skills
+    , Spells
     , Talents
     , Trappings
     , Wealth
@@ -93,6 +97,7 @@ cardId card =
         Movement -> "movement"
         Notes -> "notes"
         Skills -> "skills"
+        Spells -> "spells"
         Talents -> "talents"
         Trappings -> "trappings"
         Wealth -> "wealth"
@@ -112,6 +117,7 @@ cardTitle card =
         Movement -> "Movement"
         Notes -> "Notes"
         Skills -> "Skills"
+        Spells -> "Spells & Prayers"
         Talents -> "Talents"
         Trappings -> "Trappings"
         Wealth -> "Wealth"
@@ -131,6 +137,7 @@ cardIcon card =
         Movement -> Icons.run
         Notes -> Icons.notebook
         Skills -> Icons.graduateCap
+        Spells -> Icons.spellBook
         Talents -> Icons.ribbonMedal
         Trappings -> Icons.bag
         Wealth -> Icons.coins
@@ -359,3 +366,24 @@ setColumnPosition index position ui =
                 position
                 ui.columnPositions
     }
+
+
+getSpellState : Int -> Ui -> CardState
+getSpellState index ui =
+    Dict.get index ui.spellStates
+        |> Maybe.withDefault Collapsed
+
+
+setSpellState : CardState -> Int -> Ui -> Ui
+setSpellState state index ui =
+    { ui | spellStates = Dict.insert index state ui.spellStates }
+
+
+toggleSpellState : Int -> Ui -> Ui
+toggleSpellState index ui =
+    case getSpellState index ui of
+        Open ->
+            setSpellState Collapsed index ui
+
+        Collapsed ->
+            setSpellState Open index ui

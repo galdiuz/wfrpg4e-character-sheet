@@ -29,6 +29,7 @@ type Msg
     | ButtonPressed (Character -> Character)
     | TextFieldChanged (String -> Character -> Character) String
     | NumberFieldChanged (Int -> Character -> Character) String
+    | ToggleSpellStatePressed Int
 
 
 type alias PositionAndSize =
