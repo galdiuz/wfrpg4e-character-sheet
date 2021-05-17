@@ -51,11 +51,11 @@ viewHeader =
         , Html.div
             [ HA.style "display" "flex" ]
             [ viewButton
-                { onClick = Msg.CollapseAllCardsPressed
+                { onClick = Msg.SetAllCardStatesPressed Ui.Collapsed
                 , text = "Collapse all"
                 }
             , viewButton
-                { onClick = Msg.ExpandAllCardsPressed
+                { onClick = Msg.SetAllCardStatesPressed Ui.Open
                 , text = "Expand all"
                 }
             ]
@@ -148,63 +148,77 @@ viewCard model card =
                     ]
                 ]
             ]
-        , case Ui.getCardState card model.ui of
-            Ui.Open ->
-                Html.div
-                    [ HA.class "card-content"
-                    ]
-                    [ case card of
-                        Ui.Armour ->
-                            viewArmour model
+        , Html.div
+            (List.append
+                [ HA.class "card-content"
+                , HA.id (Ui.cardId card ++ "-content")
+                ]
+                (case Ui.getCardState card model.ui of
+                    Ui.Open ->
+                        [ HAE.attributeMaybe
+                            (\height ->
+                                HA.style "max-height" (String.fromInt height ++ "px")
+                            )
+                            (Dict.get (Ui.cardId card) model.ui.cardContentHeights)
+                        ]
 
-                        Ui.C12cs ->
-                            viewC12cs model
+                    Ui.Collapsed ->
+                        [ HA.style "max-height" "0px"
+                        , HA.style "padding-bottom" "0px"
+                        , HA.style "padding-top" "0px"
+                        , HA.style "transform" "scale(1, 0.25)"
+                        ]
+                )
+            )
+            [ case card of
+                Ui.Armour ->
+                    viewArmour model
 
-                        Ui.Corruption ->
-                            viewCorruption model
+                Ui.C12cs ->
+                    viewC12cs model
 
-                        Ui.Encumbrance ->
-                            viewEncumbrance model
+                Ui.Corruption ->
+                    viewCorruption model
 
-                        Ui.Experience ->
-                            viewExperience model
+                Ui.Encumbrance ->
+                    viewEncumbrance model
 
-                        Ui.Fate ->
-                            viewFate model
+                Ui.Experience ->
+                    viewExperience model
 
-                        Ui.Information ->
-                            viewInformation model
+                Ui.Fate ->
+                    viewFate model
 
-                        Ui.Movement ->
-                            viewMovement model
+                Ui.Information ->
+                    viewInformation model
 
-                        Ui.Notes ->
-                            viewNotes model
+                Ui.Movement ->
+                    viewMovement model
 
-                        Ui.Skills ->
-                            viewSkills model
+                Ui.Notes ->
+                    viewNotes model
 
-                        Ui.Spells ->
-                            viewSpells model
+                Ui.Skills ->
+                    viewSkills model
 
-                        Ui.Talents ->
-                            viewTalents model
+                Ui.Spells ->
+                    viewSpells model
 
-                        Ui.Trappings ->
-                            viewTrappings model
+                Ui.Talents ->
+                    viewTalents model
 
-                        Ui.Wealth ->
-                            viewWealth model
+                Ui.Trappings ->
+                    viewTrappings model
 
-                        Ui.Weapons ->
-                            viewWeapons model
+                Ui.Wealth ->
+                    viewWealth model
 
-                        Ui.Wounds ->
-                            viewWounds model
-                    ]
+                Ui.Weapons ->
+                    viewWeapons model
 
-            Ui.Collapsed ->
-                Html.text ""
+                Ui.Wounds ->
+                    viewWounds model
+            ]
         ]
 
 
@@ -447,11 +461,6 @@ viewTextareaInput data =
             )
         , Html.textarea
             [ HA.class "textarea"
-            , HA.style "position" "absolute"
-            , HA.style "left" "0"
-            , HA.style "top" "0"
-            , HA.style "width" "100%"
-            , HA.style "height" "100%"
             , HA.value data.value
             , Events.onInput data.onInput
             ]
@@ -568,7 +577,7 @@ viewSkills : Model -> Html Msg
 viewSkills model =
     Html.div
         [ HA.class "grid"
-        , HA.style "grid-template-columns" "[name] auto [c12c] 15% [c12c-value] 15% [adv] 20% [skill] 10%"
+        , HA.style "grid-template-columns" "[name] auto [c12c] 15% [c12c-value] 10% [adv] 20% [skill] 10%"
         ]
         (List.concat
             [ [ Html.span
@@ -1048,25 +1057,25 @@ viewArmour model =
                 [ HA.class "flex-row"
                 ]
                 [ viewNumberInputWithLabel
-                    [ HA.style "flex" "1" ]
+                    [ HA.style "flex" "9" ]
                     { label = "Shield"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.Shield)
                     , value = model.character.ap.shield
                     }
                 , viewNumberInputWithLabel
-                    [ HA.style "flex" "2" ]
+                    [ HA.style "flex" "20" ]
                     { label = "Left leg (80-89)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.LeftLeg)
                     , value = model.character.ap.leftLeg
                     }
                 , viewNumberInputWithLabel
-                    [ HA.style "flex" "2" ]
+                    [ HA.style "flex" "17" ]
                     { label = "Body (45-79)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.Body)
                     , value = model.character.ap.body
                     }
                 , viewNumberInputWithLabel
-                    [ HA.style "flex" "2" ]
+                    [ HA.style "flex" "20" ]
                     { label = "Right leg (90-00)"
                     , onInput = Msg.NumberFieldChanged (Character.setAp Character.RightLeg)
                     , value = model.character.ap.rightLeg
@@ -1264,11 +1273,8 @@ viewWounds model =
 viewEncumbrance : Model -> Html Msg
 viewEncumbrance model =
     Html.div
-        [ HA.style "display" "flex"
-        , HA.style "flex-flow" "row"
-        , HA.style "justify-content" "space-between"
+        [ HA.class "flex-row"
         , HA.style "align-items" "flex-end"
-        , HA.style "gap" "8px"
         ]
         [ Html.div
             [ HA.style "flex" "1" ]
@@ -1307,7 +1313,7 @@ viewEncumbrance model =
             []
             [ Html.text "=" ]
         , Html.div
-            [ HA.style "flex" "1" ]
+            [ HA.style "flex" "0.8" ]
             [ Html.div
                 [ HA.class "label" ]
                 [ Html.text "Total" ]
@@ -1330,9 +1336,7 @@ viewEncumbrance model =
 viewNotes : Model -> Html Msg
 viewNotes model =
     Html.div
-        [ HA.style "display" "flex"
-        , HA.style "flex-flow" "column"
-        , HA.style "gap" "4px"
+        [ HA.class "flex-column"
         ]
         (List.concat
             [ List.indexedMap

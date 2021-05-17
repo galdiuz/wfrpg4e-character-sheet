@@ -65,9 +65,17 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Browser.Events.onResize Msg.WindowSizeReceived
-        , Draggable.subscriptions Msg.DragMsgReceived model.ui.drag
-        ]
+        (List.append
+            [ Browser.Events.onResize Msg.WindowSizeReceived
+            , Draggable.subscriptions Msg.DragMsgReceived model.ui.drag
+            ]
+            (List.map
+                (\( card, cardState ) ->
+                    Browser.Events.onAnimationFrame (always (Msg.CardToggleAnimationFramePassed card cardState))
+                )
+                model.ui.cardsWaitingForFrame
+            )
+        )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -206,17 +214,51 @@ update msg model =
                 |> Tuple.mapFirst (Model.asUiIn model)
 
         Msg.ToggleCardStatePressed card ->
-            Ui.toggleCardState card model.ui
+            model
+                |> Cmd.Extra.withCmd
+                    (getElementSceneHeight
+                        (Ui.cardId card ++ "-content")
+                        (Msg.CardContentHeightReceived
+                            card
+                            (Ui.invertCardState (Ui.getCardState card model.ui))
+                        )
+                    )
+
+        Msg.SetAllCardStatesPressed cardState ->
+            model
+                |> Cmd.Extra.withCmds
+                    (List.map
+                        (\card ->
+                            (getElementSceneHeight
+                                (Ui.cardId card ++ "-content")
+                                (Msg.CardContentHeightReceived
+                                    card
+                                    cardState
+                                )
+                            )
+                        )
+                        Ui.allCards
+                    )
+
+        Msg.CardContentHeightReceived card cardState height ->
+            model.ui
+                |> Ui.setCardContentHeight card height
+                |> Ui.addCardWaitingForFrame card cardState
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
-        Msg.CollapseAllCardsPressed ->
-            Ui.collapseAllCards model.ui
+        Msg.CardToggleAnimationFramePassed card cardState ->
+            model.ui
+                |> Ui.setCardState cardState card
+                |> Ui.removeCardWaitingForFrame card
                 |> Model.asUiIn model
-                |> Cmd.Extra.withNoCmd
+                |> Cmd.Extra.withCmd
+                    (Process.sleep 500
+                        |> Task.perform (\_ -> Msg.CardToggleTimePassed card)
+                    )
 
-        Msg.ExpandAllCardsPressed ->
-            Ui.expandAllCards model.ui
+        Msg.CardToggleTimePassed card ->
+            Ui.removeCardContentHeight card model.ui
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
@@ -279,5 +321,15 @@ getElementPositionAndSize : String -> (Msg.PositionAndSize -> Msg) -> Cmd Msg
 getElementPositionAndSize id toMsg =
     Browser.Dom.getElement id
         |> Task.map .element
+        |> Task.attempt
+            (Result.map toMsg >> Result.withDefault Msg.NoOp)
+
+
+getElementSceneHeight : String -> (Int -> Msg) -> Cmd Msg
+getElementSceneHeight id toMsg =
+    Browser.Dom.getViewportOf id
+        |> Task.map .scene
+        |> Task.map .height
+        |> Task.map round
         |> Task.attempt
             (Result.map toMsg >> Result.withDefault Msg.NoOp)

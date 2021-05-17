@@ -24,8 +24,10 @@ type Msg
     | CardPositionAndSizeReceived Ui.Card PositionAndSize
     | ColumnPositionAndSizeReceived Int PositionAndSize
     | ToggleCardStatePressed Ui.Card
-    | CollapseAllCardsPressed
-    | ExpandAllCardsPressed
+    | SetAllCardStatesPressed Ui.CardState
+    | CardContentHeightReceived Ui.Card Ui.CardState Int
+    | CardToggleAnimationFramePassed Ui.Card Ui.CardState
+    | CardToggleTimePassed Ui.Card
     | ButtonPressed (Character -> Character)
     | TextFieldChanged (String -> Character -> Character) String
     | NumberFieldChanged (Int -> Character -> Character) String

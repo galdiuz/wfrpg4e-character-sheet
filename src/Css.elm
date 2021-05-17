@@ -52,7 +52,12 @@ body {
 }
 
 .card-content {
+    overflow-y: hidden;
     padding: 8px;
+    transform-origin: top;
+    transition-duration: 0.5s;
+    transition-property: max-height, padding, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-header {
@@ -169,6 +174,14 @@ input:focus-visible, textarea:focus-visible {
     resize: none;
     transition: border-color 0.15s ease-in-out;
     white-space: break-spaces;
+}
+
+textarea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
 }
 
 input[type=number] {

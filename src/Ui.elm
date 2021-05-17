@@ -7,8 +7,10 @@ import List.Extra
 
 
 type alias Ui =
-    { cardHeights : Dict String Int
+    { cardContentHeights : Dict String Int
+    , cardHeights : Dict String Int
     , cardStates : Dict String CardState
+    , cardsWaitingForFrame : List ( Card, CardState )
     , columns : List (List Card)
     , columnPositions : Dict Int ( Int, Int )
     , drag : Draggable.State Card
@@ -28,8 +30,10 @@ columnId index =
 
 emptyUi : Ui
 emptyUi =
-    { cardHeights = Dict.empty
+    { cardContentHeights = Dict.empty
+    , cardHeights = Dict.empty
     , cardStates = Dict.empty
+    , cardsWaitingForFrame = []
     , columns = []
     , columnPositions = Dict.empty
     , drag = Draggable.init
@@ -280,6 +284,13 @@ getCardState card ui =
         |> Maybe.withDefault Open
 
 
+invertCardState : CardState -> CardState
+invertCardState state =
+    case state of
+        Open -> Collapsed
+        Collapsed -> Open
+
+
 setCardState : CardState -> Card -> Ui -> Ui
 setCardState state card ui =
     { ui
@@ -289,32 +300,6 @@ setCardState state card ui =
                 state
                 ui.cardStates
     }
-
-
-toggleCardState : Card -> Ui -> Ui
-toggleCardState card ui =
-    case getCardState card ui of
-        Open ->
-            setCardState Collapsed card ui
-
-        Collapsed ->
-            setCardState Open card ui
-
-
-collapseAllCards : Ui -> Ui
-collapseAllCards ui =
-    List.foldl
-        (setCardState Collapsed)
-        ui
-        allCards
-
-
-expandAllCards : Ui -> Ui
-expandAllCards ui =
-    List.foldl
-        (setCardState Open)
-        ui
-        allCards
 
 
 setMovingCard : Card -> ( Int, Int ) -> Ui -> Ui
@@ -392,3 +377,43 @@ toggleSpellState index ui =
 
         Collapsed ->
             setSpellState Open index ui
+
+
+setCardContentHeight : Card -> Int -> Ui -> Ui
+setCardContentHeight card height ui =
+    { ui
+        | cardContentHeights =
+            Dict.insert
+                (cardId card)
+                height
+                ui.cardContentHeights
+    }
+
+
+removeCardContentHeight : Card -> Ui -> Ui
+removeCardContentHeight card ui =
+    { ui
+        | cardContentHeights =
+            Dict.remove
+                (cardId card)
+                ui.cardContentHeights
+    }
+
+
+addCardWaitingForFrame : Card -> CardState -> Ui -> Ui
+addCardWaitingForFrame card cardState ui =
+    { ui
+        | cardsWaitingForFrame =
+            ui.cardsWaitingForFrame ++ [ ( card, cardState ) ]
+                |> List.Extra.uniqueBy (Tuple.first >> cardId)
+    }
+
+
+removeCardWaitingForFrame : Card -> Ui -> Ui
+removeCardWaitingForFrame card ui =
+    { ui
+        | cardsWaitingForFrame =
+            List.filter
+                (Tuple.first >> (/=) card)
+                ui.cardsWaitingForFrame
+    }
