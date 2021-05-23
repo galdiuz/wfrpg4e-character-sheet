@@ -11,6 +11,7 @@ body {
     display: flex;
     flex-direction: row;
     gap: 4px;
+    min-width: 400px;
     padding: 4px;
 }
 
@@ -53,11 +54,29 @@ body {
 
 .card-content {
     overflow-y: hidden;
+    transform-origin: top;
+    transition-duration: 0.35s;
+    transition-property: max-height, opacity, padding;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-content-collapsed {
+    max-height: 0px;
+    padding-bottom: 0px;
+    padding-top: 0px;
+    opacity: 0;
+}
+
+.card-content-inner {
     padding: 8px;
     transform-origin: top;
-    transition-duration: 0.5s;
-    transition-property: max-height, padding, transform;
+    transition-duration: 0.35s;
+    transition-property: transform;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-content-inner-collapsed {
+    transform: scale(1, 0);
 }
 
 .card-header {

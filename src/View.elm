@@ -163,61 +163,74 @@ viewCard model card =
                         ]
 
                     Ui.Collapsed ->
-                        [ HA.style "max-height" "0px"
-                        , HA.style "padding-bottom" "0px"
-                        , HA.style "padding-top" "0px"
-                        , HA.style "transform" "scale(1, 0.25)"
+                        [ HA.class "card-content-collapsed"
                         ]
                 )
             )
-            [ case card of
-                Ui.Armour ->
-                    viewArmour model
+            [ Html.div
+                [ HA.class "card-content-inner"
+                , HAE.attributeMaybe
+                    (\height ->
+                        HA.style "height" (String.fromInt height ++ "px")
+                    )
+                    (Dict.get (Ui.cardId card) model.ui.cardContentHeights)
+                , case Ui.getCardState card model.ui of
+                    Ui.Open ->
+                        HAE.empty
 
-                Ui.C12cs ->
-                    viewC12cs model
+                    Ui.Collapsed ->
+                        HA.class "card-content-inner-collapsed"
 
-                Ui.Corruption ->
-                    viewCorruption model
+                ]
+                [ case card of
+                    Ui.Armour ->
+                        viewArmour model
 
-                Ui.Encumbrance ->
-                    viewEncumbrance model
+                    Ui.C12cs ->
+                        viewC12cs model
 
-                Ui.Experience ->
-                    viewExperience model
+                    Ui.Corruption ->
+                        viewCorruption model
 
-                Ui.Fate ->
-                    viewFate model
+                    Ui.Encumbrance ->
+                        viewEncumbrance model
 
-                Ui.Information ->
-                    viewInformation model
+                    Ui.Experience ->
+                        viewExperience model
 
-                Ui.Movement ->
-                    viewMovement model
+                    Ui.Fate ->
+                        viewFate model
 
-                Ui.Notes ->
-                    viewNotes model
+                    Ui.Information ->
+                        viewInformation model
 
-                Ui.Skills ->
-                    viewSkills model
+                    Ui.Movement ->
+                        viewMovement model
 
-                Ui.Spells ->
-                    viewSpells model
+                    Ui.Notes ->
+                        viewNotes model
 
-                Ui.Talents ->
-                    viewTalents model
+                    Ui.Skills ->
+                        viewSkills model
 
-                Ui.Trappings ->
-                    viewTrappings model
+                    Ui.Spells ->
+                        viewSpells model
 
-                Ui.Wealth ->
-                    viewWealth model
+                    Ui.Talents ->
+                        viewTalents model
 
-                Ui.Weapons ->
-                    viewWeapons model
+                    Ui.Trappings ->
+                        viewTrappings model
 
-                Ui.Wounds ->
-                    viewWounds model
+                    Ui.Wealth ->
+                        viewWealth model
+
+                    Ui.Weapons ->
+                        viewWeapons model
+
+                    Ui.Wounds ->
+                        viewWounds model
+                ]
             ]
         ]
 
@@ -313,7 +326,7 @@ viewInformation model =
             [ HA.class "flex-row"
             ]
             [ viewTextInputWithLabel
-                [ HA.style "flex" "2" ]
+                [ HA.style "flex" "1" ]
                 { label = "Age"
                 , list = Nothing
                 , onInput = Msg.TextFieldChanged (Character.setInformation Character.Age)
