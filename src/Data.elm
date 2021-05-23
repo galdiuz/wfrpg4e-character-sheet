@@ -1564,7 +1564,7 @@ talents =
     , "Enclosed Fighter"
     , "Etiquette (Social Group)"
     , "Fast Hands"
-    , "FastShot"
+    , "Fast Shot"
     , "Fearless (Enemy)"
     , "Feint"
     , "Field Dressing"

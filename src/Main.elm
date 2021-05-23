@@ -17,6 +17,7 @@ import Json.Encode
 import Model exposing (Model)
 import Msg as Msg exposing (Msg)
 import Process
+import String.Extra
 import Task
 import Ui
 import Url
@@ -87,7 +88,13 @@ update msg model =
         Msg.SavePressed ->
             ( model
             , Json.Encode.encode 0 (Character.encodeCharacter model.character)
-                |> File.Download.string "file.json" "application/json"
+                |> File.Download.string
+                    (if String.Extra.isBlank model.character.info.name then
+                        "character.json"
+                     else
+                         String.Extra.underscored model.character.info.name ++ ".json"
+                    )
+                    "application/json"
             )
 
         Msg.LoadPressed ->

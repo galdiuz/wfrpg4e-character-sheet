@@ -38,7 +38,7 @@ body {
 .card-container-floating {
     position: absolute;
     width: 100%;
-    z-index: 1;
+    z-index: 10;
 }
 
 .card-container-transparent {
@@ -91,6 +91,7 @@ body {
     left: 0px;
     position: absolute;
     width: 40px;
+    z-index: 1;
 }
 
 .card-header-title {
