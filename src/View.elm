@@ -1433,20 +1433,20 @@ viewFate model =
         , viewNumberInputWithLabel
             [ HA.style "flex" "3" ]
             { label = "Fortune"
-            , onInput = Msg.NumberFieldChanged Character.setFate
-            , value = model.character.fate
+            , onInput = Msg.NumberFieldChanged Character.setFortune
+            , value = model.character.fortune
             }
         , viewNumberInputWithLabel
             [ HA.style "flex" "3" ]
             { label = "Resilience"
-            , onInput = Msg.NumberFieldChanged Character.setFate
-            , value = model.character.fate
+            , onInput = Msg.NumberFieldChanged Character.setResilience
+            , value = model.character.resilience
             }
         , viewNumberInputWithLabel
             [ HA.style "flex" "3" ]
             { label = "Resolve"
-            , onInput = Msg.NumberFieldChanged Character.setFate
-            , value = model.character.fate
+            , onInput = Msg.NumberFieldChanged Character.setResolve
+            , value = model.character.resolve
             }
         , viewTextInputWithLabel
             [ HA.style "flex" "5" ]
