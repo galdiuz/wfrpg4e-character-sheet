@@ -31,27 +31,6 @@ body {
     margin: 4px 2px 4px 8px;
 }
 
-.card-container-fading {
-    opacity: 0.0;
-    transition: opacity 0.5s ease-in-out;
-}
-
-.card-container-floating {
-    position: absolute;
-    width: 100%;
-    z-index: 10;
-}
-
-.card-container-transparent {
-    opacity: 0.2;
-}
-
-.card-container-moving {
-    transition-duration: 1s;
-    transition-property: top, left;
-    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
 .card-content {
     overflow-y: hidden;
     transform-origin: top;
@@ -119,6 +98,27 @@ body {
     padding-left: 36px;
 }
 
+.element-fading {
+    opacity: 0.0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.element-floating {
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+}
+
+.element-transparent {
+    opacity: 0.2;
+}
+
+.element-moving {
+    transition-duration: 1s;
+    transition-property: top, left;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .flex-column {
     display: flex;
     flex-flow: column;
@@ -126,6 +126,7 @@ body {
 }
 
 .flex-row {
+    align-items: center;
     display: flex;
     flex-flow: row;
     gap: 8px;
@@ -136,6 +137,11 @@ body {
     display: grid;
     column-gap: 8px;
     row-gap: 4px;
+}
+
+.grid-cell {
+    align-items: center;
+    display: flex;
 }
 
 .label {
@@ -178,6 +184,10 @@ input:focus {
 
 input:focus-visible, textarea:focus-visible {
     outline: 0;
+}
+
+select {
+    width: 100%;
 }
 
 .textarea {
@@ -226,6 +236,10 @@ dark =
 body, button, input, select, textarea, .card-header-icon {
     background-color: #282828;
     color: #ddd;
+}
+
+.background {
+    background-color: #383838;
 }
 
 .card {

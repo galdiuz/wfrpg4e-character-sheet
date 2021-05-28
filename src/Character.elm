@@ -6,133 +6,134 @@ import Json.Decode.Extra
 import Json.Decode.Field as Field
 import Json.Encode as Encode
 import List.Extra
+import OrderedDict exposing (OrderedDict)
 
 
 type alias Character =
-    { advancedSkills : List Skill
-    , armour : List Armour
+    { advancedSkills : OrderedDict Int Skill
+    , armour : OrderedDict Int Armour
     , ap : Ap
     , basicSkills : List Skill
     , c12csAdvances : C12cs
     , c12csInitial : C12cs
     , corruption : Int
     , currentWounds : Int
-    , expAdjustments : List ExpAdjustment
+    , expAdjustments : OrderedDict Int ExpAdjustment
     , experience : Int
     , extraWounds : Int
     , fate : Int
     , fortune : Int
     , info : Information
-    , injuries : List Injury
+    , injuries : OrderedDict Int Injury
     , maxEncumbrance : Int
     , motivation : String
     , movement : Int
-    , mutations : List Mutation
-    , notes : List String
+    , mutations : OrderedDict Int Mutation
+    , notes : OrderedDict Int String
     , resilience : Int
     , resolve : Int
-    , spells : List Spell
-    , talents : List Talent
-    , trappings : List Trapping
+    , spells : OrderedDict Int Spell
+    , talents : OrderedDict Int Talent
+    , trappings : OrderedDict Int Trapping
     , wealth : Wealth
-    , weapons : List Weapon
+    , weapons : OrderedDict Int Weapon
     }
 
 
 emptyCharacter : Character
 emptyCharacter =
-    { advancedSkills = []
-    , armour = []
+    { advancedSkills = OrderedDict.empty
+    , armour = OrderedDict.empty
     , ap = emptyApLocations
     , basicSkills = basicSkillsList
     , c12csAdvances = emptyC12cs
     , c12csInitial = emptyC12cs
     , corruption = 0
     , currentWounds = 0
-    , expAdjustments = []
+    , expAdjustments = OrderedDict.empty
     , experience = 0
     , extraWounds = 0
     , fate = 0
     , fortune = 0
     , info = emptyInformation
-    , injuries = []
+    , injuries = OrderedDict.empty
     , maxEncumbrance = 0
     , motivation = ""
     , movement = 0
-    , mutations = []
-    , notes = []
+    , mutations = OrderedDict.empty
+    , notes = OrderedDict.empty
     , resilience = 0
     , resolve = 0
-    , spells = []
-    , talents = []
-    , trappings = []
+    , spells = OrderedDict.empty
+    , talents = OrderedDict.empty
+    , trappings = OrderedDict.empty
     , wealth = emptyWealth
-    , weapons = []
+    , weapons = OrderedDict.empty
     }
 
 
 encodeCharacter : Character -> Encode.Value
 encodeCharacter character =
     Encode.object
-        [ ( "advancedSkills", Encode.list encodeSkill character.advancedSkills )
-        , ( "armour", Encode.list encodeArmour character.armour )
+        [ ( "advancedSkills", Encode.list encodeSkill (OrderedDict.values character.advancedSkills) )
+        , ( "armour", Encode.list encodeArmour (OrderedDict.values character.armour) )
         , ( "ap", encodeAp character.ap )
         , ( "basicSkills", Encode.list encodeSkill character.basicSkills )
         , ( "c12csAdvances", encodeC12cs character.c12csAdvances )
         , ( "c12csInitial", encodeC12cs character.c12csInitial )
         , ( "corruption", Encode.int character.corruption )
         , ( "currentWounds", Encode.int character.currentWounds )
-        , ( "expAdjustments", Encode.list encodeExpAdjustment character.expAdjustments )
+        , ( "expAdjustments", Encode.list encodeExpAdjustment (OrderedDict.values character.expAdjustments) )
         , ( "experience", Encode.int character.experience )
         , ( "extraWounds", Encode.int character.extraWounds )
         , ( "fate", Encode.int character.fate )
         , ( "fortune", Encode.int character.fortune )
         , ( "info", encodeInformation character.info )
-        , ( "injuries", Encode.list encodeInjury character.injuries )
+        , ( "injuries", Encode.list encodeInjury (OrderedDict.values character.injuries) )
         , ( "maxEncumbrance", Encode.int character.maxEncumbrance )
         , ( "motivation", Encode.string character.motivation )
         , ( "movement", Encode.int character.movement )
-        , ( "mutations", Encode.list encodeMutation character.mutations )
-        , ( "notes", Encode.list Encode.string character.notes )
+        , ( "mutations", Encode.list encodeMutation (OrderedDict.values character.mutations) )
+        , ( "notes", Encode.list Encode.string (OrderedDict.values character.notes) )
         , ( "resilience", Encode.int character.resilience )
         , ( "resolve", Encode.int character.resolve )
-        , ( "spells", Encode.list encodeSpell character.spells )
-        , ( "talents", Encode.list encodeTalent character.talents )
-        , ( "trappings", Encode.list encodeTrapping character.trappings )
+        , ( "spells", Encode.list encodeSpell (OrderedDict.values character.spells) )
+        , ( "talents", Encode.list encodeTalent (OrderedDict.values character.talents) )
+        , ( "trappings", Encode.list encodeTrapping (OrderedDict.values character.trappings) )
         , ( "wealth", encodeWealth character.wealth )
-        , ( "weapons", Encode.list encodeWeapon character.weapons )
+        , ( "weapons", Encode.list encodeWeapon (OrderedDict.values character.weapons) )
         ]
 
 
 decodeCharacter : Decode.Decoder Character
 decodeCharacter =
-    Field.require "advancedSkills" (Decode.list decodeSkill) <| \advancedSkills ->
-    Field.require "armour" (Decode.list decodeArmour) <| \armour ->
+    Field.require "advancedSkills" (OrderedDict.decode decodeSkill) <| \advancedSkills ->
+    Field.require "armour" (OrderedDict.decode decodeArmour) <| \armour ->
     Field.require "ap" decodeAp <| \ap ->
     Field.require "basicSkills" (Decode.list decodeSkill) <| \basicSkills ->
     Field.require "c12csAdvances" decodeC12cs <| \c12csAdvances ->
     Field.require "c12csInitial" decodeC12cs <| \c12csInitial ->
     Field.require "corruption" Decode.int <| \corruption ->
     Field.require "currentWounds" Decode.int <| \currentWounds ->
-    Field.require "expAdjustments" (Decode.list decodeExpAdjustment) <| \expAdjustments ->
+    Field.require "expAdjustments" (OrderedDict.decode decodeExpAdjustment) <| \expAdjustments ->
     Field.require "experience" Decode.int <| \experience ->
     Field.require "extraWounds" Decode.int <| \extraWounds ->
     Field.require "fate" Decode.int <| \fate ->
     Field.require "fortune" Decode.int <| \fortune ->
     Field.require "info" decodeInformation <| \info ->
-    Field.require "injuries" (Decode.list decodeInjury) <| \injuries ->
+    Field.require "injuries" (OrderedDict.decode decodeInjury) <| \injuries ->
     Field.require "maxEncumbrance" Decode.int <| \maxEncumbrance ->
     Field.require "motivation" Decode.string <| \motivation ->
     Field.require "movement" Decode.int <| \movement ->
-    Field.require "mutations" (Decode.list decodeMutation) <| \mutations ->
-    Field.require "notes" (Decode.list Decode.string) <| \notes ->
+    Field.require "mutations" (OrderedDict.decode decodeMutation) <| \mutations ->
+    Field.require "notes" (OrderedDict.decode Decode.string) <| \notes ->
     Field.require "resilience" Decode.int <| \resilience ->
     Field.require "resolve" Decode.int <| \resolve ->
-    Field.require "spells" (Decode.list decodeSpell) <| \spells ->
-    Field.require "talents" (Decode.list decodeTalent) <| \talents ->
-    Field.require "trappings" (Decode.list decodeTrapping) <| \trappings ->
+    Field.require "spells" (OrderedDict.decode decodeSpell) <| \spells ->
+    Field.require "talents" (OrderedDict.decode decodeTalent) <| \talents ->
+    Field.require "trappings" (OrderedDict.decode decodeTrapping) <| \trappings ->
     Field.require "wealth" decodeWealth <| \wealth ->
-    Field.require "weapons" (Decode.list decodeWeapon) <| \weapons ->
+    Field.require "weapons" (OrderedDict.decode decodeWeapon) <| \weapons ->
     Decode.succeed
         { advancedSkills = advancedSkills
         , armour = armour
@@ -221,7 +222,7 @@ emptyApLocations =
 
 addArmour : Character -> Character
 addArmour character =
-    { character | armour = character.armour ++ [ emptyArmour ] }
+    { character | armour = OrderedDict.insert emptyArmour character.armour }
 
 
 setAp : BodyLocation -> Int -> Character -> Character
@@ -240,11 +241,11 @@ setAp location value ({ ap } as character) =
 
 
 setArmourAp : Int -> Int -> Character -> Character
-setArmourAp index value character =
+setArmourAp id value character =
     { character |
         armour =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\armour ->
                     { armour | ap = max 0 value }
                 )
@@ -253,11 +254,11 @@ setArmourAp index value character =
 
 
 setArmourEncumbrance : Int -> Int -> Character -> Character
-setArmourEncumbrance index value character =
+setArmourEncumbrance id value character =
     { character |
         armour =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\armour ->
                     { armour | encumbrance = max 0 value }
                 )
@@ -266,11 +267,11 @@ setArmourEncumbrance index value character =
 
 
 setArmourLocations : Int -> String -> Character -> Character
-setArmourLocations index value character =
+setArmourLocations id value character =
     { character |
         armour =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\armour ->
                     { armour | locations = value }
                 )
@@ -279,11 +280,11 @@ setArmourLocations index value character =
 
 
 setArmourName : Int -> String -> Character -> Character
-setArmourName index value character =
+setArmourName id value character =
     { character |
         armour =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\armour ->
                     { armour | name = value }
                 )
@@ -292,16 +293,21 @@ setArmourName index value character =
 
 
 setArmourQualities : Int -> String -> Character -> Character
-setArmourQualities index value character =
+setArmourQualities id value character =
     { character |
         armour =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\armour ->
                     { armour | qualities = value }
                 )
                 character.armour
     }
+
+
+setArmourOrder : List Int -> Character -> Character
+setArmourOrder order character =
+    { character | armour = OrderedDict.setOrder order character.armour }
 
 
 encodeArmour : Armour -> Encode.Value
@@ -526,12 +532,9 @@ c12cFromString str =
 
 c12csCost : C12cs -> Int
 c12csCost c12cs =
-    List.foldl
-        (\c12c total ->
-            total + c12cCost (getC12c c12c c12cs)
-        )
-        0
-        allC12cs
+    allC12cs
+        |> List.map (\c12c -> c12cCost (getC12c c12c c12cs))
+        |> List.sum
 
 
 c12cCost : Int -> Int
@@ -677,7 +680,7 @@ mutationKindFromString str =
 
 addMutation : Character -> Character
 addMutation character =
-    { character | mutations = character.mutations ++ [ emptyMutation ] }
+    { character | mutations = OrderedDict.insert emptyMutation character.mutations }
 
 
 setCorruption : Int -> Character -> Character
@@ -686,11 +689,11 @@ setCorruption value character =
 
 
 setMutationDescription : Int -> String -> Character -> Character
-setMutationDescription index value character =
+setMutationDescription id value character =
     { character |
         mutations =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\mutation ->
                     { mutation | description = value }
                 )
@@ -699,11 +702,11 @@ setMutationDescription index value character =
 
 
 setMutationEffect : Int -> String -> Character -> Character
-setMutationEffect index value character =
+setMutationEffect id value character =
     { character |
         mutations =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\mutation ->
                     { mutation | effect = value }
                 )
@@ -712,11 +715,11 @@ setMutationEffect index value character =
 
 
 setMutationKind : Int -> MutationKind -> Character -> Character
-setMutationKind index value character =
+setMutationKind id value character =
     { character |
         mutations =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\mutation ->
                     { mutation | kind = value }
                 )
@@ -725,13 +728,18 @@ setMutationKind index value character =
 
 
 setMutationKindFromString : Int -> String -> Character -> Character
-setMutationKindFromString index str character =
+setMutationKindFromString id str character =
     case mutationKindFromString str of
         Ok kind ->
-            setMutationKind index kind character
+            setMutationKind id kind character
 
         Err _ ->
             character
+
+
+setMutationsOrder : List Int -> Character -> Character
+setMutationsOrder order character =
+    { character | mutations = OrderedDict.setOrder order character.mutations }
 
 
 encodeMutation : Mutation -> Encode.Value
@@ -767,33 +775,20 @@ decodeMutationKind =
 -- Encumbrance --
 -----------------
 
-armourEncumbrance : Character -> Int
-armourEncumbrance character =
-    List.foldl
-        ((+) << .encumbrance)
-        0
-        character.armour
+sumEncumbrance : OrderedDict Int { a | encumbrance : Int } -> Int
+sumEncumbrance dict =
+    OrderedDict.values dict
+        |> List.map .encumbrance
+        |> List.sum
 
 
 totalEncumbrance : Character -> Int
 totalEncumbrance character =
-    armourEncumbrance character + trappingsEncumbrance character + weaponEncumbrance character
-
-
-trappingsEncumbrance : Character -> Int
-trappingsEncumbrance character =
-    List.foldl
-        ((+) << .encumbrance)
-        0
-        character.trappings
-
-
-weaponEncumbrance : Character -> Int
-weaponEncumbrance character =
-    List.foldl
-        ((+) << .encumbrance)
-        0
-        character.weapons
+    List.sum
+        [ sumEncumbrance character.armour
+        , sumEncumbrance character.trappings
+        , sumEncumbrance character.weapons
+        ]
 
 
 setMaxEncumbrance : Int -> Character -> Character
@@ -819,8 +814,9 @@ emptyExpAdjustment =
 
 expAdjustmentsCost : List ExpAdjustment -> Int
 expAdjustmentsCost adjustments =
-    List.map .value adjustments
-        |> List.foldl (+) 0
+    adjustments
+        |> List.map .value
+        |> List.sum
 
 
 currentExp : Character -> Int
@@ -830,20 +826,18 @@ currentExp character =
 
 spentExp : Character -> Int
 spentExp character =
-    List.foldl
-        (+)
-        0
+    List.sum
         [ c12csCost character.c12csAdvances
         , skillsCost character.basicSkills
-        , skillsCost character.advancedSkills
-        , talentsCost character.talents
-        , expAdjustmentsCost character.expAdjustments
+        , skillsCost (OrderedDict.values character.advancedSkills)
+        , talentsCost (OrderedDict.values character.talents)
+        , expAdjustmentsCost (OrderedDict.values character.expAdjustments)
         ]
 
 
 addExpAdjustment : Character -> Character
 addExpAdjustment character =
-    { character | expAdjustments = character.expAdjustments ++ [ emptyExpAdjustment ] }
+    { character | expAdjustments = OrderedDict.insert emptyExpAdjustment character.expAdjustments }
 
 
 setExperience : Int -> Character -> Character
@@ -852,11 +846,11 @@ setExperience value character =
 
 
 setExpAdjustmentDescription : Int -> String -> Character -> Character
-setExpAdjustmentDescription index value character =
+setExpAdjustmentDescription id value character =
     { character
         | expAdjustments =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\expAdjustment ->
                     { expAdjustment | description = value }
                 )
@@ -865,16 +859,21 @@ setExpAdjustmentDescription index value character =
 
 
 setExpAdjustmentValue : Int -> Int -> Character -> Character
-setExpAdjustmentValue index value character =
+setExpAdjustmentValue id value character =
     { character
         | expAdjustments =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\expAdjustment ->
                     { expAdjustment | value = value }
                 )
                 character.expAdjustments
     }
+
+
+setExpAdjustmentsOrder : List Int -> Character -> Character
+setExpAdjustmentsOrder order character =
+    { character | expAdjustments = OrderedDict.setOrder order character.expAdjustments }
 
 
 encodeExpAdjustment : ExpAdjustment -> Encode.Value
@@ -1066,18 +1065,23 @@ walk character =
 
 addNote : Character -> Character
 addNote character =
-    { character | notes = character.notes ++ [ "" ] }
+    { character | notes = OrderedDict.insert "" character.notes }
 
 
 setNote : Int -> String -> Character -> Character
-setNote index value character =
+setNote id value character =
     { character
         | notes =
-            List.Extra.setAt
-                index
-                value
+            OrderedDict.update
+                id
+                (\_ -> value)
                 character.notes
     }
+
+
+setNotesOrder : List Int -> Character -> Character
+setNotesOrder order character =
+    { character | notes = OrderedDict.setOrder order character.notes }
 
 ------------
 -- Skills --
@@ -1243,25 +1247,23 @@ skillValue character skill =
 
 skillsCost : List Skill -> Int
 skillsCost skills =
-    List.foldl
-        (\skill total ->
-            total + skillCost skill.advances
-        )
-        0
-        skills
+    skills
+        |> List.map .advances
+        |> List.map skillCost
+        |> List.sum
 
 
 addAdvancedSkill : Character -> Character
 addAdvancedSkill character =
-    { character | advancedSkills = character.advancedSkills ++ [ emptySkill ] }
+    { character | advancedSkills = OrderedDict.insert emptySkill character.advancedSkills }
 
 
 setAdvancedSkillAdvances : Int -> Int -> Character -> Character
-setAdvancedSkillAdvances index value character =
+setAdvancedSkillAdvances id value character =
     { character
         | advancedSkills =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\skill ->
                     { skill | advances = minMax 0 99 value }
                 )
@@ -1270,11 +1272,11 @@ setAdvancedSkillAdvances index value character =
 
 
 setAdvancedSkillC12c : Int -> C12c -> Character -> Character
-setAdvancedSkillC12c index value character =
+setAdvancedSkillC12c id value character =
     { character
         | advancedSkills =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\skill ->
                     { skill | c12c = value }
                 )
@@ -1283,26 +1285,31 @@ setAdvancedSkillC12c index value character =
 
 
 setAdvancedSkillC12cFromString : Int -> String -> Character -> Character
-setAdvancedSkillC12cFromString index str character =
+setAdvancedSkillC12cFromString id str character =
     case c12cFromString str of
         Ok c12c ->
-            setAdvancedSkillC12c index c12c character
+            setAdvancedSkillC12c id c12c character
 
         Err _ ->
             character
 
 
 setAdvancedSkillName : Int -> String -> Character -> Character
-setAdvancedSkillName index value character =
+setAdvancedSkillName id value character =
     { character
         | advancedSkills =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\skill ->
                     { skill | name = value }
                 )
                 character.advancedSkills
     }
+
+
+setAdvancedSkillsOrder : List Int -> Character -> Character
+setAdvancedSkillsOrder order character =
+    { character | advancedSkills = OrderedDict.setOrder order character.advancedSkills }
 
 
 setBasicSkillAdvances : Int -> Int -> Character -> Character
@@ -1367,15 +1374,15 @@ emptySpell =
 
 addSpell : Character -> Character
 addSpell character =
-    { character | spells = character.spells ++ [ emptySpell ] }
+    { character | spells = OrderedDict.insert emptySpell character.spells }
 
 
 setSpellCn : Int -> Int -> Character -> Character
-setSpellCn index value character =
+setSpellCn id value character =
     { character |
         spells =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\spell ->
                     { spell | cn = max 0 value }
                 )
@@ -1384,11 +1391,11 @@ setSpellCn index value character =
 
 
 setSpellDuration : Int -> String -> Character -> Character
-setSpellDuration index value character =
+setSpellDuration id value character =
     { character |
         spells =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\spell ->
                     { spell | duration = value }
                 )
@@ -1397,11 +1404,11 @@ setSpellDuration index value character =
 
 
 setSpellEffect : Int -> String -> Character -> Character
-setSpellEffect index value character =
+setSpellEffect id value character =
     { character |
         spells =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\spell ->
                     { spell | effect = value }
                 )
@@ -1410,11 +1417,11 @@ setSpellEffect index value character =
 
 
 setSpellName : Int -> String -> Character -> Character
-setSpellName index value character =
+setSpellName id value character =
     { character |
         spells =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\spell ->
                     { spell | name = value }
                 )
@@ -1423,11 +1430,11 @@ setSpellName index value character =
 
 
 setSpellRange : Int -> String -> Character -> Character
-setSpellRange index value character =
+setSpellRange id value character =
     { character |
         spells =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\spell ->
                     { spell | range = value }
                 )
@@ -1436,16 +1443,21 @@ setSpellRange index value character =
 
 
 setSpellTarget : Int -> String -> Character -> Character
-setSpellTarget index value character =
+setSpellTarget id value character =
     { character |
         spells =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\spell ->
                     { spell | target = value }
                 )
                 character.spells
     }
+
+
+setSpellsOrder : List Int -> Character -> Character
+setSpellsOrder order character =
+    { character | spells = OrderedDict.setOrder order character.spells }
 
 
 encodeSpell : Spell -> Encode.Value
@@ -1500,25 +1512,23 @@ emptyTalent =
 
 talentsCost : List Talent -> Int
 talentsCost talents =
-    List.foldl
-        (\talent total ->
-            total + (talent.timesTaken * (talent.timesTaken + 1) * 50)
-        )
-        0
-        talents
+    talents
+        |> List.map .timesTaken
+        |> List.map (\timesTaken -> timesTaken * (timesTaken + 1) // 2 * 100)
+        |> List.sum
 
 
 addTalent : Character -> Character
 addTalent character =
-    { character | talents = character.talents ++ [ emptyTalent ] }
+    { character | talents = OrderedDict.insert emptyTalent character.talents }
 
 
 setTalentDescription : Int -> String -> Character -> Character
-setTalentDescription index value character =
+setTalentDescription id value character =
     { character
         | talents =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\talent ->
                     { talent | description = value }
                 )
@@ -1527,11 +1537,11 @@ setTalentDescription index value character =
 
 
 setTalentName : Int -> String -> Character -> Character
-setTalentName index value character =
+setTalentName id value character =
     { character
         | talents =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\talent ->
                     { talent | name = value }
                 )
@@ -1540,16 +1550,21 @@ setTalentName index value character =
 
 
 setTalentTimesTaken : Int -> Int -> Character -> Character
-setTalentTimesTaken index value character =
+setTalentTimesTaken id value character =
     { character
         | talents =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\talent ->
                     { talent | timesTaken = minMax 0 99 value }
                 )
                 character.talents
     }
+
+
+setTalentsOrder : List Int -> Character -> Character
+setTalentsOrder order character =
+    { character | talents = OrderedDict.setOrder order character.talents }
 
 
 encodeTalent : Talent -> Encode.Value
@@ -1593,15 +1608,15 @@ emptyTrapping =
 
 addTrapping : Character -> Character
 addTrapping character =
-    { character | trappings = character.trappings ++ [ emptyTrapping ] }
+    { character | trappings = OrderedDict.insert emptyTrapping character.trappings }
 
 
 setTrappingEncumbrance : Int -> Int -> Character -> Character
-setTrappingEncumbrance index value character =
+setTrappingEncumbrance id value character =
     { character
         | trappings =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\trapping ->
                     { trapping | encumbrance = minMax 0 99 value }
                 )
@@ -1610,16 +1625,21 @@ setTrappingEncumbrance index value character =
 
 
 setTrappingName : Int -> String -> Character -> Character
-setTrappingName index value character =
+setTrappingName id value character =
     { character
         | trappings =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\trapping ->
                     { trapping | name = value }
                 )
                 character.trappings
     }
+
+
+setTrappingsOrder : List Int -> Character -> Character
+setTrappingsOrder order character =
+    { character | trappings = OrderedDict.setOrder order character.trappings }
 
 
 encodeTrapping : Trapping -> Encode.Value
@@ -1820,15 +1840,15 @@ emptyWeapon =
 
 addWeapon : Character -> Character
 addWeapon character =
-    { character | weapons = character.weapons ++ [ emptyWeapon ] }
+    { character | weapons = OrderedDict.insert emptyWeapon character.weapons }
 
 
 setWeaponDamage : Int -> String -> Character -> Character
-setWeaponDamage index value character =
+setWeaponDamage id value character =
     { character |
         weapons =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\weapon ->
                     { weapon | damage = value }
                 )
@@ -1837,11 +1857,11 @@ setWeaponDamage index value character =
 
 
 setWeaponEncumbrance : Int -> Int -> Character -> Character
-setWeaponEncumbrance index value character =
+setWeaponEncumbrance id value character =
     { character |
         weapons =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\weapon ->
                     { weapon | encumbrance = minMax 0 99 value }
                 )
@@ -1850,11 +1870,11 @@ setWeaponEncumbrance index value character =
 
 
 setWeaponGroup : Int -> String -> Character -> Character
-setWeaponGroup index value character =
+setWeaponGroup id value character =
     { character |
         weapons =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\weapon ->
                     { weapon | group = value }
                 )
@@ -1863,11 +1883,11 @@ setWeaponGroup index value character =
 
 
 setWeaponName : Int -> String -> Character -> Character
-setWeaponName index value character =
+setWeaponName id value character =
     { character |
         weapons =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\weapon ->
                     { weapon | name = value }
                 )
@@ -1876,11 +1896,11 @@ setWeaponName index value character =
 
 
 setWeaponQualities : Int -> String -> Character -> Character
-setWeaponQualities index value character =
+setWeaponQualities id value character =
     { character |
         weapons =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\weapon ->
                     { weapon | qualities = value }
                 )
@@ -1889,16 +1909,21 @@ setWeaponQualities index value character =
 
 
 setWeaponRange : Int -> String -> Character -> Character
-setWeaponRange index value character =
+setWeaponRange id value character =
     { character |
         weapons =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\weapon ->
                     { weapon | range = value }
                 )
                 character.weapons
     }
+
+
+setWeaponsOrder : List Int -> Character -> Character
+setWeaponsOrder order character =
+    { character | weapons = OrderedDict.setOrder order character.weapons }
 
 
 encodeWeapon : Weapon -> Encode.Value
@@ -2006,7 +2031,7 @@ getWounds character =
 
 addInjury : Character -> Character
 addInjury character =
-    { character | injuries = character.injuries ++ [ emptyInjury ] }
+    { character | injuries = OrderedDict.insert emptyInjury character.injuries }
 
 
 setCurrentWounds : Int -> Character -> Character
@@ -2020,11 +2045,11 @@ setExtraWounds value character =
 
 
 setInjuryDescription : Int -> String -> Character -> Character
-setInjuryDescription index value character =
+setInjuryDescription id value character =
     { character |
         injuries =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\injury ->
                     { injury | description = value }
                 )
@@ -2033,11 +2058,11 @@ setInjuryDescription index value character =
 
 
 setInjuryLocation : Int -> BodyLocation -> Character -> Character
-setInjuryLocation index value character =
+setInjuryLocation id value character =
     { character |
         injuries =
-            List.Extra.updateAt
-                index
+            OrderedDict.update
+                id
                 (\injury ->
                     { injury | location = value }
                 )
@@ -2046,13 +2071,18 @@ setInjuryLocation index value character =
 
 
 setInjuryLocationFromString : Int -> String -> Character -> Character
-setInjuryLocationFromString index str character =
+setInjuryLocationFromString id str character =
     case bodyLocationFromString str of
         Ok location ->
-            setInjuryLocation index location character
+            setInjuryLocation id location character
 
         Err _ ->
             character
+
+
+setInjuriesOrder : List Int -> Character -> Character
+setInjuriesOrder order character =
+    { character | injuries = OrderedDict.setOrder order character.injuries }
 
 
 encodeInjury : Injury -> Encode.Value

@@ -13,9 +13,11 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Attributes.Extra as HAE
 import Html.Events as Events
+import Html.Keyed
 import Icons
 import Model exposing (Model)
 import Msg as Msg exposing (Msg)
+import OrderedDict exposing (OrderedDict)
 import Ui
 import Json.Decode as Decode
 import Svg
@@ -76,26 +78,26 @@ viewContent model =
                     (List.map
                         (\card ->
                             [ Html.div
-                                [ HAE.attributeIf
-                                    (Just card == model.ui.draggedCard)
-                                    (HA.class  "card-container-transparent")
+                                [ HA.id (Ui.cardId card)
                                 , HAE.attributeIf
-                                    (Dict.member (Ui.cardId card) model.ui.movingCards)
-                                    (HA.class  "card-container-fading")
-                                , HA.id (Ui.cardId card)
+                                    (Just (Ui.Card card) == model.ui.draggedElement)
+                                    (HA.class  "element-transparent")
+                                , HAE.attributeIf
+                                    (Dict.member (Ui.cardId card) model.ui.movingElements)
+                                    (HA.class  "element-fading")
                                 ]
                                 [ viewCard model card ]
 
-                            , if Ui.isCardFloating model.ui card then
+                            , if Ui.isElementFloating model.ui (Ui.Card card) then
                                 let
                                     ( left, top ) =
                                         Ui.getFloatingCardPosition model.ui card index
                                 in
                                 Html.div
-                                    [ HA.class "card-container-floating"
+                                    [ HA.class "element-floating"
                                     , HAE.attributeIf
-                                        (Dict.member (Ui.cardId card) model.ui.movingCards)
-                                        (HA.class "card-container-moving")
+                                        (Dict.member (Ui.cardId card) model.ui.movingElements)
+                                        (HA.class "element-moving")
                                     , HA.style "left" (String.fromInt left ++ "px")
                                     , HA.style "top" (String.fromInt top ++ "px")
                                     ]
@@ -121,12 +123,12 @@ viewCard model card =
             [ HA.class "card-header" ]
             [ Html.div
                 [ HA.class "card-header-icon"
-                , Draggable.mouseTrigger card Msg.DragMsgReceived
+                , Draggable.mouseTrigger (Ui.Card card) Msg.DragMsgReceived
                 ]
                 [ Icons.view (Ui.cardIcon card) ]
             , Html.span
                 [ HA.class "card-header-title"
-                , Draggable.mouseTrigger card Msg.DragMsgReceived
+                , Draggable.mouseTrigger (Ui.Card card) Msg.DragMsgReceived
                 ]
                 [ Html.text (Ui.cardTitle card)
                 ]
@@ -430,21 +432,15 @@ viewTextInputWithLabel :
        }
     -> Html msg
 viewTextInputWithLabel attributes data =
-    Html.label
-        (List.append
-            [ HA.class "label"
-            ]
-            attributes
+    viewInputWithLabel
+        attributes
+        data.label
+        (viewTextInput
+            { list = data.list
+            , onInput = data.onInput
+            , value = data.value
+            }
         )
-        [ Html.text data.label
-        , Html.input
-            [ HA.type_ "text"
-            , HAE.attributeMaybe HA.list data.list
-            , HA.value data.value
-            , Events.onInput data.onInput
-            ]
-            []
-        ]
 
 
 viewTextareaInput :
@@ -503,20 +499,30 @@ viewNumberInputWithLabel :
        }
     -> Html msg
 viewNumberInputWithLabel attributes data =
+    viewInputWithLabel
+        attributes
+        data.label
+        (viewNumberInput
+            { onInput = data.onInput
+            , value = data.value
+            }
+        )
+
+
+viewInputWithLabel :
+    List (Html.Attribute msg)
+    -> String
+    -> Html msg
+    -> Html msg
+viewInputWithLabel attributes label input =
     Html.label
         (List.append
             [ HA.class "label"
-            , HA.style "flex" "1"
             ]
             attributes
         )
-        [ Html.text data.label
-        , Html.input
-            [ HA.type_ "number"
-            , HA.value (String.fromInt data.value)
-            , Events.onInput data.onInput
-            ]
-            []
+        [ Html.text label
+        , input
         ]
 
 
@@ -589,128 +595,139 @@ viewExperienceTable model =
 viewSkills : Model -> Html Msg
 viewSkills model =
     Html.div
-        [ HA.class "grid"
-        , HA.style "grid-template-columns" "[name] auto [c12c] 15% [c12c-value] 10% [adv] 20% [skill] 10%"
-        ]
-        (List.concat
-            [ [ Html.span
-                [ HA.style "font-size" "18px"
-                , HA.style "grid-column" "span 5"
-                ]
-                [ Html.text "Basic skills" ]
-              ]
-            , [ Html.span
-                [ HA.class "label" ]
-                [ Html.text "Name" ]
-              , Html.span
-                [ HA.class "label"
-                , HA.style "grid-column" "span 2"
-                ]
-                [ Html.text "Characteristic" ]
-              , Html.span
-                [ HA.class "label" ]
-                [ Html.text "Advances" ]
-              , Html.span
-                [ HA.class "label" ]
-                [ Html.text "Skill" ]
-              ]
-            , List.indexedMap
-                (\index skill ->
-                    [ Html.span
-                        []
-                        [ Html.text skill.name ]
-                    , Html.span
-                        []
-                        [ Html.text (Character.c12cToString skill.c12c) ]
-                    , Html.span
-                        []
-                        [ Character.getC12cs model.character
-                            |> Character.getC12c skill.c12c
-                            |> String.fromInt
-                            |> Html.text
-                        ]
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setBasicSkillAdvances index)
-                        , value = skill.advances
-                        }
-                    , Html.span
-                        []
-                        [ Character.skillValue model.character skill
-                            |> String.fromInt
-                            |> Html.text
-                        ]
+        []
+        [ Html.div
+            [ HA.class "grid"
+            , HA.style "grid-template-columns" "[name] auto [c12c] 15% [c12c-value] 10% [adv] 20% [skill] 10%"
+            ]
+            (List.concat
+                [ [ Html.span
+                    [ HA.style "font-size" "18px"
+                    , HA.style "grid-column" "span 5"
                     ]
-                )
-                model.character.basicSkills
-                |> List.concat
-            , [ Html.span
-                [ HA.style "grid-column" "span 5"
-                , HA.style "margin-top" "10px"
-                , HA.style "font-size" "18px"
+                    [ Html.text "Basic skills" ]
+                  ]
+                , [ Html.span
+                    [ HA.class "label" ]
+                    [ Html.text "Name" ]
+                  , Html.span
+                    [ HA.class "label"
+                    , HA.style "grid-column" "span 2"
+                    ]
+                    [ Html.text "Characteristic" ]
+                  , Html.span
+                    [ HA.class "label" ]
+                    [ Html.text "Advances" ]
+                  , Html.span
+                    [ HA.class "label" ]
+                    [ Html.text "Skill" ]
+                  ]
+                , List.indexedMap
+                    (\index skill ->
+                        [ Html.span
+                            []
+                            [ Html.text skill.name ]
+                        , Html.span
+                            []
+                            [ Html.text (Character.c12cToString skill.c12c) ]
+                        , Html.span
+                            []
+                            [ Character.getC12cs model.character
+                                |> Character.getC12c skill.c12c
+                                |> String.fromInt
+                                |> Html.text
+                            ]
+                        , viewNumberInput
+                            { onInput = Msg.NumberFieldChanged (Character.setBasicSkillAdvances index)
+                            , value = skill.advances
+                            }
+                        , Html.span
+                            []
+                            [ Character.skillValue model.character skill
+                                |> String.fromInt
+                                |> Html.text
+                            ]
+                        ]
+                    )
+                    model.character.basicSkills
+                    |> List.concat
                 ]
-                [ Html.text "Grouped & Advanced Skills" ]
-              ]
-            , [ Html.span
-                [ HA.class "label" ]
-                [ Html.text "Name" ]
-              , Html.span
-                [ HA.class "label"
-                , HA.style "grid-column" "span 2"
-                ]
-                [ Html.text "Characteristic" ]
-              , Html.span
-                [ HA.class "label" ]
-                [ Html.text "Advances" ]
-              , Html.span
-                [ HA.class "label" ]
-                [ Html.text "Skill" ]
-              ]
-            , List.indexedMap
-                (\index skill ->
-                    [ Html.span
-                        []
+            )
+        , Html.div
+            [ HA.style "margin-top" "10px"
+            , HA.style "font-size" "18px"
+            ]
+            [ Html.text "Grouped & Advanced Skills" ]
+        , viewSortableRows
+            { addMsg = Character.addAdvancedSkill
+            , card = Ui.Skills
+            , headerView =
+                Just
+                    [ Html.div
+                        [ HA.class "label"
+                        , HA.style "flex" "9"
+                        ]
+                        [ Html.text "Name" ]
+                    , Html.div
+                        [ HA.class "label"
+                        , HA.style "flex" "5"
+                        ]
+                        [ Html.text "Characteristic" ]
+                    , Html.div
+                        [ HA.class "label"
+                        , HA.style "flex" "4"
+                        ]
+                        [ Html.text "Advances" ]
+                    , Html.div
+                        [ HA.class "label"
+                        , HA.style "flex" "2"
+                        ]
+                        [ Html.text "Skill" ]
+                    ]
+            , items = model.character.advancedSkills
+            , model = model
+            , rowView =
+                \id skill ->
+                    [ Html.div
+                        [ HA.style "flex" "9" ]
                         [ viewTextInput
                             { list = Nothing
-                            , onInput = Msg.TextFieldChanged (Character.setAdvancedSkillName index)
+                            , onInput = Msg.TextFieldChanged (Character.setAdvancedSkillName id)
                             , value = skill.name
                             }
                         ]
                     , Html.div
-                        []
-                        [ viewC12cSelect index skill
+                        [ HA.class "flex-row"
+                        , HA.style "flex" "5"
                         ]
-                    , Html.span
-                        []
-                        [ Character.getC12cs model.character
-                            |> Character.getC12c skill.c12c
-                            |> String.fromInt
-                            |> Html.text
+                        [ Html.div
+                            [ HA.style "flex" "2" ]
+                            [ viewC12cSelect id skill
+                            ]
+                        , Html.div
+                            [ HA.style "flex" "1" ]
+                            [ Character.getC12cs model.character
+                                |> Character.getC12c skill.c12c
+                                |> String.fromInt
+                                |> Html.text
+                            ]
                         ]
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setAdvancedSkillAdvances index)
-                        , value = skill.advances
-                        }
-                    , Html.span
-                        []
+                    , Html.div
+                        [ HA.style "flex" "4" ]
+                        [ viewNumberInput
+                            { onInput = Msg.NumberFieldChanged (Character.setAdvancedSkillAdvances id)
+                            , value = skill.advances
+                            }
+                        ]
+                    , Html.div
+                        [ HA.style "flex" "2" ]
                         [ Character.skillValue model.character skill
                             |> String.fromInt
                             |> Html.text
                         ]
                     ]
-                )
-                model.character.advancedSkills
-                |> List.concat
-            , [ Html.div
-                [ HA.style "grid-column" "span 5"
-                ]
-                [ viewButton
-                    { onClick = Msg.ButtonPressed (Character.addAdvancedSkill)
-                    , text = "Add"
-                    }
-                ]
-              ]
-            ]
-        )
+            }
+        ]
 
 
 viewC12cSelect : Int -> Character.Skill -> Html Msg
@@ -752,143 +769,138 @@ viewSelect data =
 
 viewTalents : Model -> Html Msg
 viewTalents model =
-    Html.div
-        [ HA.class "grid"
-        , HA.style "grid-template-columns" "[name] 35% [times-taken] 20% [description] auto"
-        ]
-        (List.concat
-            [ [ Html.span
-                [ HA.class "label" ]
-                [ Html.text "Name" ]
-              , Html.span
-                [ HA.class "label" ]
-                [ Html.text "Times taken" ]
-              , Html.span
-                [ HA.class "label" ]
-                [ Html.text "Description" ]
-              ]
-            , List.indexedMap
-                (\index talent ->
+    viewSortableRows
+        { addMsg = Character.addTalent
+        , card = Ui.Talents
+        , headerView =
+            Just
+                [ Html.div
+                    [ HA.class "label"
+                    , HA.style "flex" "2"
+                    ]
+                    [ Html.text "Name" ]
+                , Html.div
+                    [ HA.class "label"
+                    , HA.style "flex" "0 0 45px"
+                    ]
+                    [ Html.text "# taken" ]
+                , Html.div
+                    [ HA.class "label"
+                    , HA.style "flex" "3"
+                    ]
+                    [ Html.text "Description" ]
+                ]
+        , items = model.character.talents
+        , model = model
+        , rowView =
+            \id talent ->
+                [ Html.div
+                    [ HA.style "flex" "2"
+                    ]
                     [ viewTextInput
                         { list = Just "datalist-talents"
-                        , onInput = Msg.TextFieldChanged (Character.setTalentName index)
+                        , onInput = Msg.TextFieldChanged (Character.setTalentName id)
                         , value = talent.name
                         }
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setTalentTimesTaken index)
+                    ]
+                , Html.div
+                    [ HA.style "flex" "0 0 45px"
+                    ]
+                    [ viewNumberInput
+                        { onInput = Msg.NumberFieldChanged (Character.setTalentTimesTaken id)
                         , value = talent.timesTaken
                         }
-                    , viewTextareaInput
-                        { onInput = Msg.TextFieldChanged (Character.setTalentDescription index)
+                    ]
+                , Html.div
+                    [ HA.style "flex" "3"
+                    ]
+                    [ viewTextareaInput
+                        { onInput = Msg.TextFieldChanged (Character.setTalentDescription id)
                         , value = talent.description
                         }
                     ]
-                )
-                model.character.talents
-                |> List.concat
-            , [ Html.div
-                [ HA.style "grid-column" "span 3" ]
-                [ viewButton
-                    { onClick = Msg.ButtonPressed (Character.addTalent)
-                    , text = "Add"
-                    }
                 ]
-              ]
-            ]
-        )
+        }
 
 
 viewAdjustments : Model -> Html Msg
 viewAdjustments model =
-    Html.div
-        [ HA.class "grid"
-        , HA.style "grid-template-columns" "[value] 20% [description] auto"
-        ]
-        (List.concat
-            [ [ Html.span
-                [ HA.class "label" ]
-                [ Html.text "Value" ]
-              , Html.span
-                [ HA.class "label" ]
-                [ Html.text "Description" ]
-              ]
-            , List.indexedMap
-                (\index adjustment ->
+    viewSortableRows
+        { addMsg = Character.addExpAdjustment
+        , card = Ui.Experience
+        , headerView =
+            Just
+                [ Html.div
+                    [ HA.class "label" ]
+                    [ Html.text "Value" ]
+                , Html.div
+                    [ HA.class "label"
+                    , HA.style "flex" "4"
+                    ]
+                    [ Html.text "Description" ]
+                ]
+        , items = model.character.expAdjustments
+        , model = model
+        , rowView =
+            (\id adjustment ->
+                [ Html.div
+                    [ HA.style "flex" "1" ]
                     [ viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setExpAdjustmentValue index)
+                        { onInput = Msg.NumberFieldChanged (Character.setExpAdjustmentValue id)
                         , value = adjustment.value
                         }
-                    , viewTextareaInput
-                        { onInput = Msg.TextFieldChanged (Character.setExpAdjustmentDescription index)
+                    ]
+                , Html.div
+                    [ HA.style "flex" "4" ]
+                    [ viewTextareaInput
+                        { onInput = Msg.TextFieldChanged (Character.setExpAdjustmentDescription id)
                         , value = adjustment.description
                         }
                     ]
-                )
-                model.character.expAdjustments
-                |> List.concat
-            , [ Html.div
-                [ HA.style "grid-column" "span 2"
                 ]
-                [ viewButton
-                    { onClick = Msg.ButtonPressed (Character.addExpAdjustment)
-                    , text = "Add"
-                    }
-                ]
-              ]
-            ]
-        )
+            )
+        }
 
 
 viewTrappings : Model -> Html Msg
 viewTrappings model =
-    Html.div
-        [ HA.class "grid"
-        , HA.style "grid-template-columns" "[name] auto [enc] 40px"
-        ]
-        (List.concat
-            [ [ Html.div
-                [ HA.class "label"
-                , HA.style "grid-column" "name"
-                ]
-                [ Html.text "Name" ]
-              , Html.div
-                [ HA.class "label"
-                , HA.style "grid-column" "enc"
-                ]
-                [ Html.text "Enc" ]
-              ]
-            , (List.indexedMap
-                (\index trapping ->
-                    [ Html.div
-                        [ HA.style "grid-column" "name" ]
-                        [ viewTextInput
-                            { list = Nothing
-                            , onInput = Msg.TextFieldChanged (Character.setTrappingName index)
-                            , value = trapping.name
-                            }
-                        ]
-                    , Html.div
-                        [ HA.style "grid-column" "enc" ]
-                        [ viewNumberInput
-                            { onInput = Msg.NumberFieldChanged (Character.setTrappingEncumbrance index)
-                            , value = trapping.encumbrance
-                            }
-                        ]
+    viewSortableRows
+        { addMsg = Character.addTrapping
+        , card = Ui.Trappings
+        , headerView =
+            Just
+                [ Html.div
+                    [ HA.class "label"
                     ]
-                )
-                model.character.trappings
-                |> List.concat
-              )
-            , [ Html.div
-                [ HA.style "grid-column" "span 2" ]
-                [ viewButton
-                    { onClick = Msg.ButtonPressed (Character.addTrapping)
-                    , text = "Add"
-                    }
+                    [ Html.text "Name" ]
+                , Html.div
+                    [ HA.class "label"
+                    , HA.style "flex" "0 0 40px"
+                    ]
+                    [ Html.text "Enc" ]
                 ]
-              ]
-            ]
-        )
+        , items = model.character.trappings
+        , model = model
+        , rowView =
+            \id trapping ->
+                [ Html.div
+                    [ HA.style "flex" "1" ]
+                    [ viewTextInput
+                        { list = Nothing
+                        , onInput = Msg.TextFieldChanged (Character.setTrappingName id)
+                        , value = trapping.name
+                        }
+                    ]
+                , Html.div
+                    [ HA.style "flex" "0 0 40px"
+                    ]
+                    [ viewNumberInput
+                        { onInput = Msg.NumberFieldChanged (Character.setTrappingEncumbrance id)
+                        , value = trapping.encumbrance
+                        }
+                    ]
+                ]
+        }
 
 
 viewWealth : Model -> Html Msg
@@ -966,72 +978,67 @@ viewWealth model =
 
 viewWeapons : Model -> Html Msg
 viewWeapons model =
-    Html.div
-        [ HA.class "flex-column" ]
-        (List.concat
-            [ (List.indexedMap
-                  (\index weapon ->
-                    Html.div
-                        [ HA.class "flex-column"
+    viewSortableRows
+        { addMsg = Character.addWeapon
+        , card = Ui.Weapons
+        , headerView = Nothing
+        , items = model.character.weapons
+        , model = model
+        , rowView =
+            \id weapon ->
+                [ Html.div
+                    [ HA.class "flex-column"
+                    ]
+                    [ Html.div
+                        [ HA.class "flex-row" ]
+                        [ viewTextInputWithLabel
+                            [ HA.style "flex" "2" ]
+                            { label = "Name"
+                            , list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setWeaponName id)
+                            , value = weapon.name
+                            }
+                        , viewTextInputWithLabel
+                            []
+                            { label = "Damage"
+                            , list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setWeaponDamage id)
+                            , value = weapon.damage
+                            }
+                        , viewTextInputWithLabel
+                            []
+                            { label = "Group"
+                            , list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setWeaponGroup id)
+                            , value = weapon.group
+                            }
                         ]
-                        [ Html.div
-                            [ HA.class "flex-row" ]
-                            [ viewTextInputWithLabel
-                                [ HA.style "flex" "2" ]
-                                { label = "Name"
-                                , list = Nothing
-                                , onInput = Msg.TextFieldChanged (Character.setWeaponName index)
-                                , value = weapon.name
-                                }
-                            , viewTextInputWithLabel
-                                []
-                                { label = "Damage"
-                                , list = Nothing
-                                , onInput = Msg.TextFieldChanged (Character.setWeaponDamage index)
-                                , value = weapon.damage
-                                }
-                            , viewTextInputWithLabel
-                                []
-                                { label = "Group"
-                                , list = Nothing
-                                , onInput = Msg.TextFieldChanged (Character.setWeaponGroup index)
-                                , value = weapon.group
-                                }
-                            ]
-                        , Html.div
-                            [ HA.class "flex-row" ]
-                            [ viewNumberInputWithLabel
-                                []
-                                { label = "Enc"
-                                , onInput = Msg.NumberFieldChanged (Character.setWeaponEncumbrance index)
-                                , value = weapon.encumbrance
-                                }
-                            , viewTextInputWithLabel
-                                [ HA.style "flex" "2" ]
-                                { label = "Range/Reach"
-                                , list = Nothing
-                                , onInput = Msg.TextFieldChanged (Character.setWeaponRange index)
-                                , value = weapon.range
-                                }
-                            , viewTextInputWithLabel
-                                [ HA.style "flex" "5" ]
-                                { label = "Qualities"
-                                , list = Nothing
-                                , onInput = Msg.TextFieldChanged (Character.setWeaponQualities index)
-                                , value = weapon.qualities
-                                }
-                            ]
+                    , Html.div
+                        [ HA.class "flex-row" ]
+                        [ viewNumberInputWithLabel
+                            []
+                            { label = "Enc"
+                            , onInput = Msg.NumberFieldChanged (Character.setWeaponEncumbrance id)
+                            , value = weapon.encumbrance
+                            }
+                        , viewTextInputWithLabel
+                            [ HA.style "flex" "2" ]
+                            { label = "Range/Reach"
+                            , list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setWeaponRange id)
+                            , value = weapon.range
+                            }
+                        , viewTextInputWithLabel
+                            [ HA.style "flex" "5" ]
+                            { label = "Qualities"
+                            , list = Nothing
+                            , onInput = Msg.TextFieldChanged (Character.setWeaponQualities id)
+                            , value = weapon.qualities
+                            }
                         ]
-                  )
-                model.character.weapons
-              )
-            , [ viewButton
-                { onClick = Msg.ButtonPressed Character.addWeapon
-                , text = "Add"
-                }
-              ]
-            ]
-        )
+                    ]
+                ]
+        }
 
 
 viewArmour : Model -> Html Msg
@@ -1095,67 +1102,56 @@ viewArmour model =
                     }
                 ]
             ]
-        , Html.div
-            [ HA.class "grid"
-            , HA.style "grid-template-columns" "[name] auto [locations] auto [enc] 40px [ap] 40px [qualities] auto"
-            ]
-            (List.concat
-                [ [ Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "Name" ]
-                  , Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "Locations" ]
-                  , Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "Enc" ]
-                  , Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "AP" ]
-                  , Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "Qualities" ]
-                  ]
-                , (List.indexedMap
-                    (\index armour ->
-                        [ viewTextInput
-                            { list = Nothing
-                            , onInput = Msg.TextFieldChanged (Character.setArmourName index)
-                            , value = armour.name
-                            }
-                        , viewTextInput
-                            { list = Nothing
-                            , onInput = Msg.TextFieldChanged (Character.setArmourLocations index)
-                            , value = armour.locations
-                            }
-                        , viewNumberInput
-                            { onInput = Msg.NumberFieldChanged (Character.setArmourEncumbrance index)
-                            , value = armour.encumbrance
-                            }
-                        , viewNumberInput
-                            { onInput = Msg.NumberFieldChanged (Character.setArmourAp index)
-                            , value = armour.ap
-                            }
-                        , viewTextInput
-                            { list = Nothing
-                            , onInput = Msg.TextFieldChanged (Character.setArmourQualities index)
-                            , value = armour.qualities
-                            }
-                        ]
-                    )
-                    model.character.armour
-                    |> List.concat
-                  )
-                , [ Html.div
-                    [ HA.style "grid-column" "span 5" ]
-                    [ viewButton
-                        { onClick = Msg.ButtonPressed (Character.addArmour)
-                        , text = "Add"
+        , viewSortableRows
+            { addMsg = Character.addArmour
+            , card = Ui.Armour
+            , headerView =
+                Just
+                    [ Html.span
+                        [ HA.class "label" ]
+                        [ Html.text "Name" ]
+                    , Html.span
+                        [ HA.class "label" ]
+                        [ Html.text "Locations" ]
+                    , Html.span
+                        [ HA.class "label" ]
+                        [ Html.text "Enc" ]
+                    , Html.span
+                        [ HA.class "label" ]
+                        [ Html.text "AP" ]
+                    , Html.span
+                        [ HA.class "label" ]
+                        [ Html.text "Qualities" ]
+                    ]
+            , items = model.character.armour
+            , model = model
+            , rowView =
+                \id armour ->
+                    [ viewTextInput
+                        { list = Nothing
+                        , onInput = Msg.TextFieldChanged (Character.setArmourName id)
+                        , value = armour.name
+                        }
+                    , viewTextInput
+                        { list = Nothing
+                        , onInput = Msg.TextFieldChanged (Character.setArmourLocations id)
+                        , value = armour.locations
+                        }
+                    , viewNumberInput
+                        { onInput = Msg.NumberFieldChanged (Character.setArmourEncumbrance id)
+                        , value = armour.encumbrance
+                        }
+                    , viewNumberInput
+                        { onInput = Msg.NumberFieldChanged (Character.setArmourAp id)
+                        , value = armour.ap
+                        }
+                    , viewTextInput
+                        { list = Nothing
+                        , onInput = Msg.TextFieldChanged (Character.setArmourQualities id)
+                        , value = armour.qualities
                         }
                     ]
-                  ]
-                ]
-            )
+            }
         ]
 
 
@@ -1240,46 +1236,43 @@ viewWounds model =
                 , value = model.character.currentWounds
                 }
             ]
-        , Html.div
-            [ HA.class "grid"
-            , HA.style "grid-template-columns" "[location] 20% [description] auto"
-            ]
-            (List.concat
-                [ [ Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "Location" ]
-                  , Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "Description" ]
-                  ]
-                , List.indexedMap
-                    (\index injury ->
+        , viewSortableRows
+            { addMsg = Character.addInjury
+            , card = Ui.Wounds
+            , headerView =
+                Just
+                    [ Html.div
+                        [ HA.class "label" ]
+                        [ Html.text "Location" ]
+                    , Html.div
+                        [ HA.class "label"
+                        , HA.style "flex" "3"
+                        ]
+                        [ Html.text "Description" ]
+                    ]
+            , items = model.character.injuries
+            , model = model
+            , rowView =
+                \id injury ->
+                    [ Html.div
+                        [ HA.style "flex" "1" ]
                         [ viewSelect
                             { options = Character.injuryLocations
                             , label = Character.bodyLocationToString
                             , value = Character.bodyLocationToString
                             , selected = Just injury.location
-                            , onInput = Msg.TextFieldChanged (Character.setInjuryLocationFromString index)
+                            , onInput = Msg.TextFieldChanged (Character.setInjuryLocationFromString id)
                             }
-                        , viewTextInput
-                            { list = Nothing
-                            , onInput = Msg.TextFieldChanged (Character.setInjuryDescription index)
+                        ]
+                    , Html.div
+                        [ HA.style "flex" "3" ]
+                        [ viewTextareaInput
+                            { onInput = Msg.TextFieldChanged (Character.setInjuryDescription id)
                             , value = injury.description
                             }
                         ]
-                    )
-                    model.character.injuries
-                    |> List.concat
-                , [ Html.div
-                    [ HA.style "grid-column" "span 2" ]
-                    [ viewButton
-                        { onClick = Msg.ButtonPressed (Character.addInjury)
-                        , text = "Add"
-                        }
                     ]
-                    ]
-                ]
-            )
+            }
         ]
 
 
@@ -1294,7 +1287,7 @@ viewEncumbrance model =
             [ Html.div
                 [ HA.class "label" ]
                 [ Html.text "Weapons" ]
-            , Character.weaponEncumbrance model.character
+            , Character.sumEncumbrance model.character.weapons
                 |> String.fromInt
                 |> Html.text
             ]
@@ -1306,7 +1299,7 @@ viewEncumbrance model =
             [ Html.div
                 [ HA.class "label" ]
                 [ Html.text "Armour" ]
-            , Character.armourEncumbrance model.character
+            , Character.sumEncumbrance model.character.armour
                 |> String.fromInt
                 |> Html.text
             ]
@@ -1318,7 +1311,7 @@ viewEncumbrance model =
             [ Html.div
                 [ HA.class "label" ]
                 [ Html.text "Trappings" ]
-            , Character.trappingsEncumbrance model.character
+            , Character.sumEncumbrance model.character.trappings
                 |> String.fromInt
                 |> Html.text
             ]
@@ -1348,28 +1341,20 @@ viewEncumbrance model =
 
 viewNotes : Model -> Html Msg
 viewNotes model =
-    Html.div
-        [ HA.class "flex-column"
-        ]
-        (List.concat
-            [ List.indexedMap
-                (\index note ->
-                    viewTextareaInput
-                        { onInput = Msg.TextFieldChanged (Character.setNote index)
-                        , value = note
-                        }
-                )
-                model.character.notes
-            , [ Html.div
-                []
-                [ viewButton
-                    { onClick = Msg.ButtonPressed (Character.addNote)
-                    , text = "Add"
+    viewSortableRows
+        { addMsg = Character.addNote
+        , card = Ui.Notes
+        , headerView = Nothing
+        , items = model.character.notes
+        , model = model
+        , rowView =
+            \id note ->
+                [ viewTextareaInput
+                    { onInput = Msg.TextFieldChanged (Character.setNote id)
+                    , value = note
                     }
                 ]
-              ]
-            ]
-        )
+        }
 
 
 viewDatalists : Html msg
@@ -1500,100 +1485,88 @@ viewMovement model =
 
 viewSpells : Model -> Html Msg
 viewSpells model =
-    Html.div
-        [ HA.class "flex-column" ]
-        (List.concat
-            [ (List.indexedMap
-                (\index spell ->
-                    case Ui.getSpellState index model.ui of
-                        Ui.Collapsed ->
-                            Html.div
-                                [ HA.class "flex-row"
-                                ]
-                                [ viewButton
-                                    { onClick = Msg.ToggleSpellStatePressed index
-                                    , text =
-                                        if String.isEmpty spell.name then
-                                            "<New spell>"
+    viewSortableRows
+        { addMsg = Character.addSpell
+        , card = Ui.Spells
+        , headerView = Nothing
+        , items = model.character.spells
+        , model = model
+        , rowView =
+            \id spell ->
+                (case Ui.getSpellState id model.ui of
+                    Ui.Collapsed ->
+                        [ viewButton
+                            { onClick = Msg.ToggleSpellStatePressed id
+                            , text =
+                                if String.isEmpty spell.name then
+                                    "<New spell>"
 
-                                        else
-                                            spell.name
+                                else
+                                    spell.name
+                            }
+                        ]
+
+                    Ui.Open ->
+                        [ Html.div
+                            [ HA.class "flex-column"
+                            ]
+                            [ Html.div
+                                [ HA.class "flex-row" ]
+                                [ viewTextInputWithLabel
+                                    [ HA.style "flex" "1" ]
+                                    { label = "Name"
+                                    , list = Nothing
+                                    , onInput = Msg.TextFieldChanged (Character.setSpellName id)
+                                    , value = spell.name
+                                    }
+                                , viewTextInputWithLabel
+                                    []
+                                    { label = "Range"
+                                    , list = Nothing
+                                    , onInput = Msg.TextFieldChanged (Character.setSpellRange id)
+                                    , value = spell.range
+                                    }
+                                , Html.button
+                                    [ HA.class "button-style"
+                                    , Events.onClick (Msg.ToggleSpellStatePressed id)
+                                    ]
+                                    [ FA.viewIcon FontAwesome.Solid.compress ]
+                                ]
+                            , Html.div
+                                [ HA.class "flex-row" ]
+                                [ viewTextInputWithLabel
+                                    [ HA.style "flex" "5" ]
+                                    { label = "Target"
+                                    , list = Nothing
+                                    , onInput = Msg.TextFieldChanged (Character.setSpellTarget id)
+                                    , value = spell.target
+                                    }
+                                , viewTextInputWithLabel
+                                    [ HA.style "flex" "5" ]
+                                    { label = "Duration"
+                                    , list = Nothing
+                                    , onInput = Msg.TextFieldChanged (Character.setSpellDuration id)
+                                    , value = spell.duration
+                                    }
+                                , viewNumberInputWithLabel
+                                    [ HA.style "flex" "1" ]
+                                    { label = "CN"
+                                    , onInput = Msg.NumberFieldChanged (Character.setSpellCn id)
+                                    , value = spell.cn
                                     }
                                 ]
-
-                        Ui.Open ->
-                            Html.div
-                                [ HA.class "flex-column"
+                            , Html.label
+                                [ HA.class "label" ]
+                                [ Html.text "Effect"
+                                , viewTextareaInput
+                                    { onInput = Msg.TextFieldChanged (Character.setSpellEffect id)
+                                    , value = spell.effect
+                                    }
                                 ]
-                                [ Html.div
-                                    [ HA.class "flex-row" ]
-                                    [ viewTextInputWithLabel
-                                        [ HA.style "flex" "1" ]
-                                        { label = "Name"
-                                        , list = Nothing
-                                        , onInput = Msg.TextFieldChanged (Character.setSpellName index)
-                                        , value = spell.name
-                                        }
-                                    , viewTextInputWithLabel
-                                        []
-                                        { label = "Range"
-                                        , list = Nothing
-                                        , onInput = Msg.TextFieldChanged (Character.setSpellRange index)
-                                        , value = spell.range
-                                        }
-                                    , Html.button
-                                        [ HA.class "button-style"
-                                        , Events.onClick (Msg.ToggleSpellStatePressed index)
-                                        ]
-                                        [ FA.viewIcon FontAwesome.Solid.compress ]
-                                    ]
-                                , Html.div
-                                    [ HA.class "flex-row" ]
-                                    [ viewTextInputWithLabel
-                                        [ HA.style "flex" "5" ]
-                                        { label = "Target"
-                                        , list = Nothing
-                                        , onInput = Msg.TextFieldChanged (Character.setSpellTarget index)
-                                        , value = spell.target
-                                        }
-                                    , viewTextInputWithLabel
-                                        [ HA.style "flex" "5" ]
-                                        { label = "Duration"
-                                        , list = Nothing
-                                        , onInput = Msg.TextFieldChanged (Character.setSpellDuration index)
-                                        , value = spell.duration
-                                        }
-                                    , viewNumberInputWithLabel
-                                        [ HA.style "flex" "1" ]
-                                        { label = "CN"
-                                        , onInput = Msg.NumberFieldChanged (Character.setSpellCn index)
-                                        , value = spell.cn
-                                        }
-                                    ]
-                                , Html.label
-                                    [ HA.class "label" ]
-                                    [ Html.text "Effect"
-                                    , viewTextareaInput
-                                        { onInput = Msg.TextFieldChanged (Character.setSpellEffect index)
-                                        , value = spell.effect
-                                        }
-                                    ]
-                                ]
+                            ]
+                        ]
                 )
-                model.character.spells
-                |> List.intersperse
-                    (Html.div
-                        []
-                        []
-                    )
-              )
-            , [ viewButton
-                { onClick = Msg.ButtonPressed Character.addSpell
-                , text = "Add"
-                }
-              ]
-            ]
-        )
+        }
 
 
 viewCorruption : Model -> Html Msg
@@ -1618,52 +1591,169 @@ viewCorruption model =
                 , Html.text (String.fromInt (Character.mutationThreshold model.character))
                 ]
             ]
-        , Html.div
-            [ HA.class "grid"
-            , HA.style "grid-template-columns" "[kind] 20% [description] 30% [effect] auto"
-            ]
-            (List.concat
-                [ [ Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "Kind" ]
-                  , Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "Description" ]
-                  , Html.span
-                    [ HA.class "label" ]
-                    [ Html.text "Effect" ]
-                  ]
-                , List.indexedMap
-                    (\index mutation ->
+        , viewSortableRows
+            { addMsg = Character.addMutation
+            , card = Ui.Corruption
+            , headerView =
+                Just
+                    [ Html.div
+                        [ HA.class "label"
+                        , HA.style "flex" "3"
+                        ]
+                        [ Html.text "Kind" ]
+                    , Html.div
+                        [ HA.class "label"
+                        , HA.style "flex" "4"
+                        ]
+                        [ Html.text "Description" ]
+                    , Html.div
+                        [ HA.class "label"
+                        , HA.style "flex" "6"
+                        ]
+                        [ Html.text "Effect" ]
+                    ]
+            , items = model.character.mutations
+            , model = model
+            , rowView =
+                \id mutation ->
+                    [ Html.div
+                        [ HA.style "flex" "3" ]
                         [ viewSelect
                             { options = Character.allMutationKinds
                             , label = Character.mutationKindToString
                             , value = Character.mutationKindToString
                             , selected = Just mutation.kind
-                            , onInput = Msg.TextFieldChanged (Character.setMutationKindFromString index)
+                            , onInput = Msg.TextFieldChanged (Character.setMutationKindFromString id)
                             }
-                        , viewTextInput
-                            { list = Nothing
-                            , onInput = Msg.TextFieldChanged (Character.setMutationDescription index)
+                        ]
+                    , Html.div
+                        [ HA.style "flex" "4" ]
+                        [ viewTextareaInput
+                            { onInput = Msg.TextFieldChanged (Character.setMutationDescription id)
                             , value = mutation.description
                             }
-                        , viewTextInput
-                            { list = Nothing
-                            , onInput = Msg.TextFieldChanged (Character.setMutationEffect index)
+                        ]
+                    , Html.div
+                        [ HA.style "flex" "6" ]
+                        [ viewTextareaInput
+                            { onInput = Msg.TextFieldChanged (Character.setMutationEffect id)
                             , value = mutation.effect
                             }
                         ]
+                    ]
+            }
+        ]
+
+
+viewSortableRows :
+    { addMsg : Character.Character -> Character.Character
+    , card : Ui.Card
+    , headerView : Maybe (List (Html Msg))
+    , items : OrderedDict Int item
+    , model : Model
+    , rowView : Int -> item -> List (Html Msg)
+    }
+    -> Html Msg
+viewSortableRows data =
+    Html.div
+        [ HA.class "flex-column" ]
+        [ case data.headerView of
+            Just headerView ->
+                Html.div
+                    [ HA.class "flex-row" ]
+                    (List.append
+                        [ Html.div
+                            [ HA.style "width" "8px" ]
+                            []
+                        ]
+                        headerView
                     )
-                    model.character.mutations
-                    |> List.concat
-                , [ Html.div
-                    [ HA.style "grid-column" "span 3" ]
-                    [ viewButton
-                        { onClick = Msg.ButtonPressed (Character.addMutation)
-                        , text = "Add"
-                        }
-                    ]
-                    ]
-                ]
+
+            Nothing ->
+                Html.text ""
+        , Html.Keyed.node
+            "div"
+            [ HA.class "flex-column"
+            , HA.id (Ui.rowContainerId data.card)
+            , HA.style "position" "relative"
+            ]
+            (OrderedDict.mapToList
+                (\id item ->
+                    ( String.fromInt id
+                    , viewRow data.model id item data.rowView data.card
+                    )
+                )
+                data.items
             )
+        , viewButton
+            { onClick = Msg.ButtonPressed data.addMsg
+            , text = "Add"
+            }
+        ]
+
+
+viewRow :
+    Model
+    -> Int
+    -> a
+    -> (Int -> a -> List (Html Msg))
+    -> Ui.Card
+    -> Html Msg
+viewRow model id item rowView card =
+    let
+        element =
+            Ui.Row card id
+    in
+    Html.div
+        []
+        [ Html.div
+            [ HA.id (Ui.draggableElementId element)
+            , HAE.attributeIf
+                (Just element == model.ui.draggedElement)
+                (HA.class  "element-transparent")
+            , HAE.attributeIf
+                (Dict.member (Ui.draggableElementId element) model.ui.movingElements)
+                (HA.class  "element-fading")
+            ]
+            [ Html.div
+                [ HA.class "flex-row" ]
+                (List.append
+                    [ Html.div
+                        [ Draggable.mouseTrigger (Ui.Row card id) Msg.DragMsgReceived
+                        , HA.style "width" "8px"
+                        , HA.style "cursor" "ns-resize"
+                        ]
+                        [ FA.viewIcon FontAwesome.Solid.arrowsAltV ]
+                    ]
+                    (rowView id item)
+                )
+            ]
+        , if Ui.isElementFloating model.ui element then
+            let
+                ( _, top ) =
+                    Ui.getFloatingRowPosition model.ui element
+            in
+            Html.div
+                [ HA.class "element-floating background"
+                , HAE.attributeIf
+                    (Dict.member (Ui.draggableElementId element) model.ui.movingElements)
+                    (HA.class "element-moving")
+                , HA.style "top" (String.fromInt top ++ "px")
+                ]
+                [ Html.div
+                    [ HA.class "flex-row" ]
+                    (List.append
+                        [ Html.div
+                            [ Draggable.mouseTrigger (Ui.Row card id) Msg.DragMsgReceived
+                            , HA.style "width" "8px"
+                            , HA.style "cursor" "ns-resize"
+                            ]
+                            [ FA.viewIcon FontAwesome.Solid.arrowsAltV ]
+                        ]
+                        (rowView id item)
+                    )
+                ]
+
+          else
+                Html.text ""
         ]

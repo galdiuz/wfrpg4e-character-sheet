@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Draggable
 import Icons
 import List.Extra
+import PositionAndSize exposing (PositionAndSize)
 
 
 type alias Ui =
@@ -13,19 +14,17 @@ type alias Ui =
     , cardsWaitingForFrame : List ( Card, CardState )
     , columns : List (List Card)
     , columnPositions : Dict Int ( Int, Int )
-    , drag : Draggable.State Card
+    , drag : Draggable.State DraggableElement
+    , dragHeight : Int
     , dragPosition : ( Int, Int )
-    , draggedCard : Maybe Card
-    , movingCards : Dict String ( Int, Int )
+    , draggedElement : Maybe DraggableElement
+    , movingElements : Dict String ( Int, Int )
+    , rowContainerPositions : Dict String PositionAndSize
+    , rowPositions : Dict String (Dict Int Int)
     , spellStates : Dict Int CardState
     , theme : Theme
     , windowWidth : Int
     }
-
-
-columnId : Int -> String
-columnId index =
-    "column-" ++ String.fromInt index
 
 
 emptyUi : Ui
@@ -37,13 +36,31 @@ emptyUi =
     , columns = []
     , columnPositions = Dict.empty
     , drag = Draggable.init
+    , dragHeight = 0
     , dragPosition = ( 0, 0 )
-    , draggedCard = Nothing
-    , movingCards = Dict.empty
+    , draggedElement = Nothing
+    , movingElements = Dict.empty
+    , rowContainerPositions = Dict.empty
+    , rowPositions = Dict.empty
     , spellStates = Dict.empty
     , theme = Dark
     , windowWidth = 0
     }
+
+
+minMax : Int -> Int -> Int -> Int
+minMax min max value =
+    Basics.min max (Basics.max min value)
+
+
+columnId : Int -> String
+columnId index =
+    "column-" ++ String.fromInt index
+
+
+type DraggableElement
+    = Card Card
+    | Row Card Int
 
 
 type Theme
@@ -174,10 +191,10 @@ calculateColumns width =
         allCards
 
 
-updateDraggedCard : Ui -> Ui
-updateDraggedCard ui =
-    case ui.draggedCard of
-        Just draggedCard ->
+updateDraggedElement : Ui -> Ui
+updateDraggedElement ui =
+    case ui.draggedElement of
+        Just (Card draggedCard) ->
             { ui
                 | columns =
                     ui.columns
@@ -206,6 +223,21 @@ updateDraggedCard ui =
                                 >> List.sortBy Tuple.first
                                 >> List.map Tuple.second
                             )
+            }
+
+        Just (Row card id) ->
+            { ui
+                | rowPositions =
+                    Dict.update
+                        (cardId card)
+                        (\maybeDict ->
+                            Maybe.withDefault Dict.empty maybeDict
+                                |> Dict.insert
+                                    id
+                                    (Tuple.second ui.dragPosition + ui.dragHeight // 2)
+                                |> Just
+                        )
+                        ui.rowPositions
             }
 
         Nothing ->
@@ -257,14 +289,19 @@ setWindowWidth width ui =
     { ui | windowWidth = width }
 
 
+setDragHeight : Int -> Ui -> Ui
+setDragHeight height ui =
+    { ui | dragHeight = height }
+
+
 setDragPosition : ( Int, Int ) -> Ui -> Ui
 setDragPosition dragPosition ui =
     { ui | dragPosition = dragPosition }
 
 
-setDraggedCard : Maybe Card -> Ui -> Ui
-setDraggedCard card ui =
-    { ui | draggedCard = card }
+setDraggedElement : Maybe DraggableElement -> Ui -> Ui
+setDraggedElement element ui =
+    { ui | draggedElement = element }
 
 
 setCardHeight : Card -> Int -> Ui -> Ui
@@ -302,45 +339,89 @@ setCardState state card ui =
     }
 
 
-setMovingCard : Card -> ( Int, Int ) -> Ui -> Ui
-setMovingCard card position ui =
+setMovingElement : DraggableElement -> ( Int, Int ) -> Ui -> Ui
+setMovingElement element position ui =
     { ui
-        | movingCards =
+        | movingElements =
             Dict.insert
-                (cardId card)
+                (draggableElementId element)
                 position
-                ui.movingCards
+                ui.movingElements
     }
 
 
-removeMovingCard : Card -> Ui -> Ui
-removeMovingCard card ui =
+removeMovingElement : DraggableElement -> Ui -> Ui
+removeMovingElement element ui =
     { ui
-        | movingCards =
+        | movingElements =
             Dict.remove
-                (cardId card)
-                ui.movingCards
+                (draggableElementId element)
+                ui.movingElements
     }
 
 
-isCardFloating : Ui -> Card -> Bool
-isCardFloating ui card =
-    ui.draggedCard == Just card
+draggableElementId : DraggableElement -> String
+draggableElementId element =
+    case element of
+        Card card ->
+            cardId card
+
+        Row card id ->
+            (cardId card) ++ "-row-" ++ String.fromInt id
+
+
+draggableElementCardId : DraggableElement -> String
+draggableElementCardId element =
+    case element of
+        Card _ ->
+            ""
+
+        Row card _ ->
+            cardId card
+
+
+draggableElementRowId : DraggableElement -> Int
+draggableElementRowId element =
+    case element of
+        Card _ ->
+            0
+
+        Row _ id ->
+            id
+
+
+rowContainerId : Card -> String
+rowContainerId card =
+    cardId card ++ "-rows"
+
+
+isElementFloating : Ui -> DraggableElement -> Bool
+isElementFloating ui element =
+    ui.draggedElement == Just element
     && ui.dragPosition /= ( 0, 0 )
-    || Dict.member (cardId card) ui.movingCards
+    || Dict.member (draggableElementId element) ui.movingElements
 
 
 getFloatingCardPosition : Ui -> Card -> Int -> ( Int, Int )
 getFloatingCardPosition ui card index =
-    case ( Dict.get (cardId card) ui.movingCards, Dict.get index ui.columnPositions ) of
+    case ( Dict.get (cardId card) ui.movingElements, Dict.get index ui.columnPositions ) of
         ( Just cardPos, Just columnPos ) ->
             ( Tuple.first cardPos - Tuple.first columnPos
             , Tuple.second cardPos - Tuple.second columnPos
             )
 
-        ( _, Just columnPos ) ->
-            ( Tuple.first ui.dragPosition - Tuple.first columnPos
-            , Tuple.second ui.dragPosition - Tuple.second columnPos
+        ( Nothing, Just columnPos ) ->
+            ( minMax
+                (negate (Tuple.first columnPos))
+                (if index + 1 == List.length ui.columns then
+                    0
+                 else
+                     minColumnWidth * 2
+                )
+                (Tuple.first ui.dragPosition - Tuple.first columnPos)
+            , max
+                0
+                (Tuple.second ui.dragPosition - Tuple.second columnPos)
             )
 
         _ ->
@@ -417,3 +498,58 @@ removeCardWaitingForFrame card ui =
                 (Tuple.first >> (/=) card)
                 ui.cardsWaitingForFrame
     }
+
+
+setRowPosition : DraggableElement -> Int -> Ui -> Ui
+setRowPosition element position ui =
+    { ui
+        | rowPositions =
+            Dict.update
+                (draggableElementCardId element)
+                (\maybeDict ->
+                    Maybe.withDefault Dict.empty maybeDict
+                        |> Dict.insert
+                            (draggableElementRowId element)
+                            position
+                        |> Just
+                )
+                ui.rowPositions
+    }
+
+
+setRowContainerPosition : Card -> PositionAndSize -> Ui -> Ui
+setRowContainerPosition card position ui =
+    { ui
+        | rowContainerPositions =
+            Dict.insert
+                (cardId card)
+                position
+                ui.rowContainerPositions
+    }
+
+
+getFloatingRowPosition : Ui -> DraggableElement -> ( Int, Int )
+getFloatingRowPosition ui element =
+    let
+        maybeRowPos =
+            Dict.get (draggableElementId element) ui.movingElements
+
+        maybeContainerPos =
+            Dict.get (draggableElementCardId element) ui.rowContainerPositions
+    in
+    case ( maybeRowPos, maybeContainerPos ) of
+        ( Just rowPos, Just containerPos ) ->
+            ( Tuple.first rowPos - round containerPos.x
+            , Tuple.second rowPos - round containerPos.y
+            )
+
+        ( Nothing, Just containerPos ) ->
+            ( Tuple.first ui.dragPosition - round containerPos.x
+            , minMax
+                0
+                (round containerPos.height - ui.dragHeight)
+                (Tuple.second ui.dragPosition - round containerPos.y)
+            )
+
+        _ ->
+            ( 0, 0 )

@@ -16,6 +16,8 @@ import Json.Decode
 import Json.Encode
 import Model exposing (Model)
 import Msg as Msg exposing (Msg)
+import OrderedDict exposing (OrderedDict)
+import PositionAndSize exposing (PositionAndSize)
 import Process
 import String.Extra
 import Task
@@ -132,16 +134,16 @@ update msg model =
                 , round (toFloat y + dy)
                 )
                 model.ui
-                |> Ui.updateDraggedCard
+                |> Ui.updateDraggedElement
                 |> Model.asUiIn model
-                |> Cmd.Extra.withNoCmd
+                |> updateCharacterFromUi
 
-        Msg.DragStarted draggedCard ->
+        Msg.DragStarted (Ui.Card draggedCard) ->
             model
                 |> Cmd.Extra.withCmd
                     (getElementPositionAndSize
                         (Ui.cardId draggedCard)
-                        (Msg.DraggedElementPositionAndSizeReceived draggedCard)
+                        (Msg.DraggedElementPositionAndSizeReceived (Ui.Card draggedCard))
                     )
                 |> Cmd.Extra.addCmds
                     (List.map
@@ -162,13 +164,38 @@ update msg model =
                         model.ui.columns
                     )
 
-        Msg.DraggedElementPositionAndSizeReceived card data ->
+        Msg.DragStarted ((Ui.Row card _) as element) ->
+            model
+                |> Cmd.Extra.withCmd
+                    (getElementPositionAndSize
+                        (Ui.draggableElementId element)
+                        (Msg.DraggedElementPositionAndSizeReceived element)
+                    )
+                |> Cmd.Extra.addCmds
+                    (getCharacterDictKeysFromCard model.character card
+                        |> List.map
+                            (\id ->
+                                (getElementPositionAndSize
+                                    (Ui.draggableElementId (Ui.Row card id))
+                                    (Msg.RowPositionAndSizeReceived (Ui.Row card id))
+                                )
+                            )
+                    )
+                |> Cmd.Extra.addCmd
+                    (getElementPositionAndSize
+                        (Ui.rowContainerId card)
+                        (Msg.RowContainerPositionAndSizeReceived card)
+                    )
+
+        Msg.DraggedElementPositionAndSizeReceived element data ->
             model.ui
-                |> Ui.setDraggedCard (Just card)
+                |> Ui.setDraggedElement (Just element)
+                |> Ui.setDragHeight (round data.height)
                 |> Ui.setDragPosition
                     ( round (data.x)
                     , round (data.y)
                     )
+                |> Ui.removeMovingElement element
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
@@ -183,36 +210,36 @@ update msg model =
                 |> Cmd.Extra.withNoCmd
 
         Msg.DragElementClicked _ ->
-            Ui.setDraggedCard Nothing model.ui
+            Ui.setDraggedElement Nothing model.ui
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
         Msg.DragStopped ->
             model
                 |> Cmd.Extra.withCmd
-                    (case model.ui.draggedCard of
-                        Just card ->
+                    (case model.ui.draggedElement of
+                        Just element ->
                             getElementPositionAndSize
-                                (Ui.cardId card)
-                                (Msg.DragStoppedElementPositionAndSizeReceived card)
+                                (Ui.draggableElementId element)
+                                (Msg.DragStoppedElementPositionAndSizeReceived element)
 
-                        Nothing ->
+                        _ ->
                             Cmd.none
                     )
 
-        Msg.DragStoppedElementPositionAndSizeReceived card data ->
+        Msg.DragStoppedElementPositionAndSizeReceived element data ->
             model.ui
-                |> Ui.setMovingCard card ( round data.x, round data.y )
-                |> Ui.setDraggedCard Nothing
+                |> Ui.setMovingElement element ( round data.x, round data.y )
+                |> Ui.setDraggedElement Nothing
                 |> Ui.setDragPosition ( 0, 0 )
                 |> Model.asUiIn model
                 |> Cmd.Extra.withCmd
                     (Process.sleep 1000
-                        |> Task.perform (\_ -> Msg.CardFinishedMoving card)
+                        |> Task.perform (\_ -> Msg.ElementFinishedMoving element)
                     )
 
-        Msg.CardFinishedMoving card ->
-            Ui.removeMovingCard card model.ui
+        Msg.ElementFinishedMoving element ->
+            Ui.removeMovingElement element model.ui
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
@@ -260,7 +287,7 @@ update msg model =
                 |> Ui.removeCardWaitingForFrame card
                 |> Model.asUiIn model
                 |> Cmd.Extra.withCmd
-                    (Process.sleep 500
+                    (Process.sleep 350
                         |> Task.perform (\_ -> Msg.CardToggleTimePassed card)
                     )
 
@@ -292,8 +319,18 @@ update msg model =
                 |> Model.asUiIn model
                 |> Cmd.Extra.withNoCmd
 
+        Msg.RowPositionAndSizeReceived element data ->
+            Ui.setRowPosition element (round data.y + round (data.height / 2)) model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
 
-dragConfig : Draggable.Config Ui.Card Msg
+        Msg.RowContainerPositionAndSizeReceived card data ->
+            Ui.setRowContainerPosition card data model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+
+dragConfig : Draggable.Config Ui.DraggableElement Msg
 dragConfig =
     Draggable.customConfig
         [ Draggable.Events.onDragBy Msg.ElementDragged
@@ -324,7 +361,7 @@ parseIntAndSet data model =
                 model
 
 
-getElementPositionAndSize : String -> (Msg.PositionAndSize -> Msg) -> Cmd Msg
+getElementPositionAndSize : String -> (PositionAndSize -> Msg) -> Cmd Msg
 getElementPositionAndSize id toMsg =
     Browser.Dom.getElement id
         |> Task.map .element
@@ -340,3 +377,113 @@ getElementSceneHeight id toMsg =
         |> Task.map round
         |> Task.attempt
             (Result.map toMsg >> Result.withDefault Msg.NoOp)
+
+
+updateCharacterFromUi model =
+    case model.ui.draggedElement of
+        Just ((Ui.Row card _) as element) ->
+            let
+                uiOrder =
+                    Dict.get (Ui.cardId card) model.ui.rowPositions
+                        |> Maybe.withDefault Dict.empty
+                        |> Dict.toList
+                        |> List.sortBy Tuple.second
+                        |> List.map Tuple.first
+
+                charOrder =
+                    getCharacterDictKeysFromCard model.character card
+            in
+            if uiOrder /= charOrder then
+                setCharacterDictOrderFromCard uiOrder card model.character
+                    |> Model.asCharacterIn model
+                    |> Cmd.Extra.withNoCmd
+            else
+                model
+                    |> Cmd.Extra.withCmds
+                        (charOrder
+                            |> List.map
+                                (\id ->
+                                    (getElementPositionAndSize
+                                        (Ui.draggableElementId (Ui.Row card id))
+                                        (Msg.RowPositionAndSizeReceived (Ui.Row card id))
+                                    )
+                                )
+                        )
+
+        _ ->
+            model
+                |> Cmd.Extra.withNoCmd
+
+
+getCharacterDictKeysFromCard : Character.Character -> Ui.Card -> List Int
+getCharacterDictKeysFromCard character card =
+    case card of
+        Ui.Armour ->
+            OrderedDict.keys character.armour
+
+        Ui.Corruption ->
+            OrderedDict.keys character.mutations
+
+        Ui.Experience ->
+            OrderedDict.keys character.expAdjustments
+
+        Ui.Notes ->
+            OrderedDict.keys character.notes
+
+        Ui.Skills ->
+            OrderedDict.keys character.advancedSkills
+
+        Ui.Spells ->
+            OrderedDict.keys character.spells
+
+        Ui.Talents ->
+            OrderedDict.keys character.talents
+
+        Ui.Trappings ->
+            OrderedDict.keys character.trappings
+
+        Ui.Weapons ->
+            OrderedDict.keys character.weapons
+
+        Ui.Wounds ->
+            OrderedDict.keys character.injuries
+
+        _ ->
+            []
+
+
+setCharacterDictOrderFromCard : List Int -> Ui.Card -> Character.Character -> Character.Character
+setCharacterDictOrderFromCard order card character =
+    case card of
+        Ui.Armour ->
+            Character.setArmourOrder order character
+
+        Ui.Corruption ->
+            Character.setMutationsOrder order character
+
+        Ui.Experience ->
+            Character.setExpAdjustmentsOrder order character
+
+        Ui.Notes ->
+            Character.setNotesOrder order character
+
+        Ui.Skills ->
+            Character.setAdvancedSkillsOrder order character
+
+        Ui.Spells ->
+            Character.setSpellsOrder order character
+
+        Ui.Talents ->
+            Character.setTalentsOrder order character
+
+        Ui.Trappings ->
+            Character.setTrappingsOrder order character
+
+        Ui.Weapons ->
+            Character.setWeaponsOrder order character
+
+        Ui.Wounds ->
+            Character.setInjuriesOrder order character
+
+        _ ->
+            character
