@@ -280,17 +280,17 @@ agitator : Career
 agitator =
     { name = "Agitator"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Pamphleteer"
+          , status = "Brass 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Agitator"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Rabble Rouser"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Demagogue"
+          , status = "Brass 5"
           }
         ]
     }
@@ -300,17 +300,17 @@ artisan : Career
 artisan =
     { name = "Artisan"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Apprentice Artisan"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Artisan"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Artisan"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Guildmaster"
+          , status = "Gold 1"
           }
         ]
     }
@@ -320,17 +320,17 @@ beggar : Career
 beggar =
     { name = "Beggar"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Pauper"
+          , status = "Brass 0"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Beggar"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Beggar"
+          , status = "Brass 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Beggar King"
+          , status = "Silver 2"
           }
         ]
     }
@@ -340,17 +340,17 @@ investigator : Career
 investigator =
     { name = "Investigator"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Sleuth"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Investigator"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Investigator"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Detective"
+          , status = "Silver 5"
           }
         ]
     }
@@ -360,17 +360,17 @@ merchant : Career
 merchant =
     { name = "Merchant"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Trader"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Merchant"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Merchant"
+          , status = "Gold 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Merchant Prince"
+          , status = "Gold 3"
           }
         ]
     }
@@ -380,17 +380,17 @@ ratCatcher : Career
 ratCatcher =
     { name = "Rat Catcher"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Rat Hunter"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Rat Catcher"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Sewer Jack"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Exterminator"
+          , status = "Silver 3"
           }
         ]
     }
@@ -400,17 +400,17 @@ townsman : Career
 townsman =
     { name = "Townsman"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Clerk"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Townsman"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Town Councillor"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Burgomeister"
+          , status = "Gold 1"
           }
         ]
     }
@@ -420,17 +420,17 @@ watchman : Career
 watchman =
     { name = "Watchman"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Watch Recruit"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Watchman"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Watch Sergeant"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Watch Captain"
+          , status = "Gold 1"
           }
         ]
     }
@@ -459,17 +459,17 @@ advisor : Career
 advisor =
     { name = "Advisor"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Aide"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Advisor"
+          , status = "Silver 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Counsellor"
+          , status = "Gold 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Chancellor"
+          , status = "Gold 3"
           }
         ]
     }
@@ -479,17 +479,17 @@ artist : Career
 artist =
     { name = "Artist"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Apprentice Artist"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Artist"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Artist"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Maestro"
+          , status = "Gold 2"
           }
         ]
     }
@@ -499,17 +499,17 @@ duelist : Career
 duelist =
     { name = "Duelist"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Fencer"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Duelist"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Duelmaster"
+          , status = "Gold 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Judical Champion"
+          , status = "Gold 3"
           }
         ]
     }
@@ -519,17 +519,17 @@ envoy : Career
 envoy =
     { name = "Envoy"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Herald"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Envoy"
+          , status = "Silver 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Diplomat"
+          , status = "Gold 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Ambassador"
+          , status = "Gold 5"
           }
         ]
     }
@@ -539,17 +539,17 @@ noble : Career
 noble =
     { name = "Noble"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Scion"
+          , status = "Gold 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Noble"
+          , status = "Gold 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Magnate"
+          , status = "Gold 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Noble Lord"
+          , status = "Gold 7"
           }
         ]
     }
@@ -559,17 +559,17 @@ servant : Career
 servant =
     { name = "Servant"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Menial"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Servant"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Attendant"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Steward"
+          , status = "Gold 1"
           }
         ]
     }
@@ -579,17 +579,17 @@ spy : Career
 spy =
     { name = "Spy"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Informer"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Spy"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Agent"
+          , status = "Gold 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Spymaster"
+          , status = "Gold 4"
           }
         ]
     }
@@ -599,17 +599,17 @@ warden : Career
 warden =
     { name = "Warden"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Custodian"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Warden"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Seneschal"
+          , status = "Gold 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Governor"
+          , status = "Gold 3"
           }
         ]
     }
@@ -638,17 +638,17 @@ bailiff : Career
 bailiff =
     { name = "Bailiff"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Tax Collector"
+          , status = "Solver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Bailiff"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Reeve"
+          , status = "Gold 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Magistrate"
+          , status = "Gold 3"
           }
         ]
     }
@@ -658,17 +658,17 @@ hedgeWitch : Career
 hedgeWitch =
     { name = "Hedge Witch"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Hedge Apprentice"
+          , status = "Brass 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Hedge Witch"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Hedge Master"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Hedgewise"
+          , status = "Brass 5"
           }
         ]
     }
@@ -678,17 +678,17 @@ herbalist : Career
 herbalist =
     { name = "Herbalist"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Herb Gatherer"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Herbalist"
+          , status = "Brass 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Herb Master"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Herbwise"
+          , status = "Silver 3"
           }
         ]
     }
@@ -698,17 +698,17 @@ hunter : Career
 hunter =
     { name = "Hunter"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Trapper"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Hunter"
+          , status = "Brass 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Tracker"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Huntsmaster"
+          , status = "Silver 3"
           }
         ]
     }
@@ -718,17 +718,17 @@ miner : Career
 miner =
     { name = "Miner"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Prospector"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Miner"
+          , status = "Brass 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Miner"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Mine Foreman"
+          , status = "Silver 4"
           }
         ]
     }
@@ -738,17 +738,17 @@ mystic : Career
 mystic =
     { name = "Mystic"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Fortune Teller"
+          , status = "Brass 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Mystic"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Sage"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Seer"
+          , status = "Brass 4"
           }
         ]
     }
@@ -758,17 +758,17 @@ scout : Career
 scout =
     { name = "Scout"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Guide"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Scout"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Pathfinder"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Explorer"
+          , status = "Silver 5"
           }
         ]
     }
@@ -778,17 +778,17 @@ villager : Career
 villager =
     { name = "Villager"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Peasant"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Villager"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Councillor"
+          , status = "Brass 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Village Elder"
+          , status = "Silver 2"
           }
         ]
     }
@@ -817,17 +817,17 @@ bountyHunter : Career
 bountyHunter =
     { name = "Bounty Hunter"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Thief-taker"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Bounty Hunter"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Bounty Hunter"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Bounty Hunter General"
+          , status = "Gold 1"
           }
         ]
     }
@@ -857,17 +857,17 @@ entertainer : Career
 entertainer =
     { name = "Entertainer"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Busker"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Entertainer"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Troubadour"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Troupe Leader"
+          , status = "Gold 1"
           }
         ]
     }
@@ -877,17 +877,17 @@ flagellant : Career
 flagellant =
     { name = "Flagellant"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Zealot"
+          , status = "Brass 0"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Flagellant"
+          , status = "Brass 0"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Penitent"
+          , status = "Brass 0"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Prophet of Doom"
+          , status = "Brass 0"
           }
         ]
     }
@@ -897,17 +897,17 @@ messenger : Career
 messenger =
     { name = "Messenger"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Runner"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Messenger"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Courier"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Courier-Captain"
+          , status = "Silver 5"
           }
         ]
     }
@@ -917,17 +917,17 @@ pedlar : Career
 pedlar =
     { name = "Pedlar"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Vagabond"
+          , status = "Brass 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Pedlar"
+          , status = "Brass 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Pedlar"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Wandering Trader"
+          , status = "Silver 3"
           }
         ]
     }
@@ -937,17 +937,17 @@ roadWarden : Career
 roadWarden =
     { name = "Road Warden"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Toll Keeper"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Road Warden"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Road Sergeant"
+          , status = "Silver 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Road Captain"
+          , status = "Gold 1"
           }
         ]
     }
@@ -957,17 +957,17 @@ witchHunter : Career
 witchHunter =
     { name = "Witch Hunter"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Interrogator"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Witch Hunter"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Inquisitor"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Witchfinder General"
+          , status = "Gold 1"
           }
         ]
     }
@@ -996,17 +996,17 @@ boatman : Career
 boatman =
     { name = "Boatman"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Boat-hand"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Boatman"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Bargeswain"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Barhe Master"
+          , status = "Silver 5"
           }
         ]
     }
@@ -1016,17 +1016,17 @@ huffer : Career
 huffer =
     { name = "Huffer"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Riverguide"
+          , status = "Brass 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Huffer"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Pilot"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Pilot"
+          , status = "Silver 5"
           }
         ]
     }
@@ -1036,17 +1036,17 @@ riverwarden : Career
 riverwarden =
     { name = "Riverwarden"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "River Recruit"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Riverwarden"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Shipsword"
+          , status = "Silver 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Shipsword Master"
+          , status = "Gold 1"
           }
         ]
     }
@@ -1056,17 +1056,17 @@ riverwoman : Career
 riverwoman =
     { name = "Riverwoman"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Greenfish"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Riverwoman"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Riverwise"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "River Elder"
+          , status = "Silver 2"
           }
         ]
     }
@@ -1076,17 +1076,17 @@ seaman : Career
 seaman =
     { name = "Seaman"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Landsman"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Seaman"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Boatswain"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Ship's Master"
+          , status = "Gold 2"
           }
         ]
     }
@@ -1096,17 +1096,17 @@ smuggler : Career
 smuggler =
     { name = "Smuggler"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "River Runner"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Smuggler"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Smuggler"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Smuggler King"
+          , status = "Silver 2"
           }
         ]
     }
@@ -1116,17 +1116,17 @@ stevedore : Career
 stevedore =
     { name = "Stevedore"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Dockhand"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Stevedore"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Foreman"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Dock Master"
+          , status = "Silver 5"
           }
         ]
     }
@@ -1136,17 +1136,17 @@ wrecker : Career
 wrecker =
     { name = "Wrecker"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Cargo Scavenger"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Wrecker"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "River Pirate"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Wrecker Captain"
+          , status = "Silver 2"
           }
         ]
     }
@@ -1195,17 +1195,17 @@ charlatan : Career
 charlatan =
     { name = "Charlatan"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Swindler"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Charlatan"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Con Artist"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Scoundrel"
+          , status = "Silver 4"
           }
         ]
     }
@@ -1215,17 +1215,17 @@ fence : Career
 fence =
     { name = "Fence"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Broker"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Fence"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Fence"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Black Marketeer"
+          , status = "Silver 4"
           }
         ]
     }
@@ -1235,17 +1235,17 @@ graveRobber : Career
 graveRobber =
     { name = "Grave Robber"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Body Snatcher"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Grave Robber"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Tomb Robber"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Treasure Hunter"
+          , status = "Silver 5"
           }
         ]
     }
@@ -1255,17 +1255,17 @@ outlab : Career
 outlab =
     { name = "Outlab"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Brigand"
+          , status = "Brass 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Outlaw"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Outlaw Chief"
+          , status = "Brass 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Bandit King"
+          , status = "Silver 2"
           }
         ]
     }
@@ -1275,17 +1275,17 @@ racketeer : Career
 racketeer =
     { name = "Racketeer"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Thug"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Racketeer"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Gang Boss"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Crime Lord"
+          , status = "Silver 5"
           }
         ]
     }
@@ -1295,17 +1295,17 @@ thief : Career
 thief =
     { name = "Thief"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Prowler"
+          , status = "Brass 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Thief"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Master Thief"
+          , status = "Brass 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Cat Burglar"
+          , status = "Silver 3"
           }
         ]
     }
@@ -1315,17 +1315,17 @@ witch : Career
 witch =
     { name = "Witch"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Hexer"
+          , status = "Brass 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Witch"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Wyrd"
+          , status = "Brass 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Warlock"
+          , status = "Brass 5"
           }
         ]
     }
@@ -1343,8 +1343,8 @@ warrior =
         , knight
         , pitFighter
         , protagonist
-        , soldier
         , slayer
+        , soldier
         , warriorPriest
         ]
     }
@@ -1354,17 +1354,17 @@ cavalryman : Career
 cavalryman =
     { name = "Cavalryman"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Horseman"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Cavalryman"
+          , status = "Silver 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Cavalry Sergeant"
+          , status = "Gold 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Cavalry Officer"
+          , status = "Gold 2"
           }
         ]
     }
@@ -1374,17 +1374,17 @@ guard : Career
 guard =
     { name = "Guard"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Sentry"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Guard"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Honour Guard"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Guard Officer"
+          , status = "Silver 5"
           }
         ]
     }
@@ -1394,17 +1394,17 @@ knight : Career
 knight =
     { name = "Knight"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Squire"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Knight"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "First Knight"
+          , status = "Gold 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Kinght of the Inner Circle"
+          , status = "Gold 4"
           }
         ]
     }
@@ -1414,17 +1414,17 @@ pitFighter : Career
 pitFighter =
     { name = "Pit Fighter"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Purgilist"
+          , status = "Brass 4"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Pit Fighter"
+          , status = "Silver 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Pit Fighter"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Pit Legend"
+          , status = "Gold 2"
           }
         ]
     }
@@ -1450,41 +1450,41 @@ protagonist =
     }
 
 
-soldier : Career
-soldier =
-    { name = "Soldier"
+slayer : Career
+slayer =
+    { name = "Slayer"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Troll Slayer"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Giant Slayer"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Dragon Slayer"
+          , status = "Brass 2"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Daemon Slayer"
+          , status = "Brass 2"
           }
         ]
     }
 
 
-slayer : Career
-slayer =
-    { name = "Slayer"
+soldier : Career
+soldier =
+    { name = "Soldier"
     , levels =
-        [ { name = ""
-          , status = ""
+        [ { name = "Recruit"
+          , status = "Silver 1"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Soldier"
+          , status = "Silver 3"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Sergeant"
+          , status = "Silver 5"
           }
-        , { name = ""
-          , status = ""
+        , { name = "Officer"
+          , status = "Gold 1"
           }
         ]
     }
