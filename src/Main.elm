@@ -61,7 +61,12 @@ init flags url _ =
 view : Model -> Browser.Document Msg
 view model =
     { body = [ View.view model ]
-    , title = ""
+    , title =
+        if String.Extra.isBlank model.character.info.name then
+            "WFRPG 4e Character Sheet"
+
+        else
+            model.character.info.name ++ " - WFRPG 4e Character Sheet"
     }
 
 

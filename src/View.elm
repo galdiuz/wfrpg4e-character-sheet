@@ -1105,51 +1105,53 @@ viewArmour model =
         , viewSortableRows
             { addMsg = Character.addArmour
             , card = Ui.Armour
-            , headerView =
-                Just
-                    [ Html.span
-                        [ HA.class "label" ]
-                        [ Html.text "Name" ]
-                    , Html.span
-                        [ HA.class "label" ]
-                        [ Html.text "Locations" ]
-                    , Html.span
-                        [ HA.class "label" ]
-                        [ Html.text "Enc" ]
-                    , Html.span
-                        [ HA.class "label" ]
-                        [ Html.text "AP" ]
-                    , Html.span
-                        [ HA.class "label" ]
-                        [ Html.text "Qualities" ]
-                    ]
+            , headerView = Nothing
             , items = model.character.armour
             , model = model
             , rowView =
                 \id armour ->
-                    [ viewTextInput
-                        { list = Nothing
-                        , onInput = Msg.TextFieldChanged (Character.setArmourName id)
-                        , value = armour.name
-                        }
-                    , viewTextInput
-                        { list = Nothing
-                        , onInput = Msg.TextFieldChanged (Character.setArmourLocations id)
-                        , value = armour.locations
-                        }
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setArmourEncumbrance id)
-                        , value = armour.encumbrance
-                        }
-                    , viewNumberInput
-                        { onInput = Msg.NumberFieldChanged (Character.setArmourAp id)
-                        , value = armour.ap
-                        }
-                    , viewTextInput
-                        { list = Nothing
-                        , onInput = Msg.TextFieldChanged (Character.setArmourQualities id)
-                        , value = armour.qualities
-                        }
+                    [ Html.div
+                        [ HA.class "flex-column" ]
+                        [ Html.div
+                            [ HA.class "flex-row" ]
+                            [ viewTextInputWithLabel
+                                [ HA.style "flex" "3" ]
+                                { label = "Name"
+                                , list = Nothing
+                                , onInput = Msg.TextFieldChanged (Character.setArmourName id)
+                                , value = armour.name
+                                }
+                            , viewTextInputWithLabel
+                                [ HA.style "flex" "3" ]
+                                { label = "Locations"
+                                , list = Nothing
+                                , onInput = Msg.TextFieldChanged (Character.setArmourLocations id)
+                                , value = armour.locations
+                                }
+                            , viewNumberInputWithLabel
+                                []
+                                { label = "AP"
+                                , onInput = Msg.NumberFieldChanged (Character.setArmourAp id)
+                                , value = armour.ap
+                                }
+                            ]
+                        , Html.div
+                            [ HA.class "flex-row" ]
+                            [ viewNumberInputWithLabel
+                                []
+                                { label = "Enc"
+                                , onInput = Msg.NumberFieldChanged (Character.setArmourEncumbrance id)
+                                , value = armour.encumbrance
+                                }
+                            , viewTextInputWithLabel
+                                [ HA.style "flex" "6" ]
+                                { label = "Qualities"
+                                , list = Nothing
+                                , onInput = Msg.TextFieldChanged (Character.setArmourQualities id)
+                                , value = armour.qualities
+                                }
+                            ]
+                        ]
                     ]
             }
         ]
