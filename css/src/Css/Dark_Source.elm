@@ -49,8 +49,10 @@ declarations =
         , Css.onFocus
             [ Css.borderColor color.border.focus
             ]
-        , Css.onPseudoClass "hover:not(:focus)"
-            [ Css.borderColor color.border.hover
+        , Css.onHover
+            [ Css.onNot (Selector.select (Selector.element ":focus"))
+                [ Css.borderColor color.border.hover
+                ]
             ]
         ]
     , class "label"

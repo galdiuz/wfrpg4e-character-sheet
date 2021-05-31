@@ -35,13 +35,13 @@ declarations =
         [ Css.hasAttribute "type=number"
             [ Css.appearance (Css.str "textfield")
             ]
-        , Css.onPseudoElement "-webkit-outer-spin-button"
+        , Css.onOuterSpinButton
             [ Css.appearance Css.none
             ]
-        , Css.onPseudoElement "-webkit-inner-spin-button"
+        , Css.onInnerSpinButton
             [ Css.appearance Css.none
             ]
-        , Css.onPseudoElement "-webkit-calendar-picker-indicator"
+        , Css.onCalendarPickerIndicator
             [ Css.display Css.none
             ]
         ]
@@ -77,7 +77,7 @@ declarations =
         ]
     , class "moving"
         [ Css.transitionDuration (Css.seconds 1)
-        , Css.transitionProperty "top, left"
+        , Css.transitionProperty (Css.str "top, left")
         , Css.transitionTimingFunction (Css.cubicBezier 0.22 1 0.36 1)
         ]
 
@@ -90,7 +90,7 @@ declarations =
         , Css.padding2 (Css.px 1) (Css.px 6)
         , typography.regular
         , Css.transitionDuration (Css.seconds 0.15)
-        , Css.transitionProperty "background-color, color"
+        , Css.transitionProperty (Css.str "background-color, color")
         , Css.transitionTimingFunction (Css.str "ease-in-out")
         , Css.whiteSpace Css.nowrap
         , Css.width (Css.percent 100)
@@ -118,8 +118,8 @@ declarations =
             [ Css.maxHeight (Css.px 80)
             , Css.overflow Css.auto
             , Css.padding (Css.px 1)
-            , Css.property "overflow-wrap" (Css.str "anywhere")
-            , Css.whiteSpace (Css.str "break-spaces")
+            , Css.overflowWrap Css.anywhere
+            , Css.whiteSpace Css.breakSpaces
             , typography.small
             ]
         , Css.onChild (Css.element "div")
@@ -130,9 +130,9 @@ declarations =
             , Css.height (Css.percent 100)
             , Css.left (Css.num 0)
             , Css.position Css.absolute
+            , Css.resize Css.none
             , Css.top (Css.num 0)
             , Css.width (Css.percent 100)
-            , Css.property "resize" Css.none
             ]
         ]
 
@@ -148,7 +148,7 @@ declarations =
     , class "card-content"
         [ Css.overflowY Css.hidden
         , Css.transitionDuration (Css.seconds 0.35)
-        , Css.transitionProperty "max-height, opacity, padding"
+        , Css.transitionProperty (Css.str "max-height, opacity, padding")
         , Css.transitionTimingFunction (Css.cubicBezier 0.4 0 0.2 1)
         ]
     , class "card-content-collapsed"
@@ -161,7 +161,7 @@ declarations =
         [ Css.padding (Css.px 8)
         , Css.transformOrigin (Css.str "top")
         , Css.transitionDuration (Css.seconds 0.35)
-        , Css.transitionProperty "transform"
+        , Css.transitionProperty (Css.str "transform")
         , Css.transitionTimingFunction (Css.cubicBezier 0.4 0 0.2 1)
         ]
     , class "card-content-inner-collapsed"

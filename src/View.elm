@@ -398,6 +398,7 @@ viewC12cs model =
                 (\c12c ->
                     Html.div
                         [ Css.row
+                        , Css.listRow
                         ]
                         [ Html.div
                             [ HA.style "flex" "2" ]
