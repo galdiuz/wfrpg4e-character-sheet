@@ -26,9 +26,13 @@ color =
 declarations : List Css.Declaration
 declarations =
     [ Css.select Css.anyElement
-        [ Css.color color.text.primary
+        [ Css.color Css.inherit
         ]
     , Css.select (Css.element "body")
+        [ Css.backgroundColor color.background.backdrop
+        , Css.color color.text.primary
+        ]
+    , Css.select (Css.element "option")
         [ Css.backgroundColor color.background.backdrop
         ]
 
@@ -40,13 +44,16 @@ declarations =
             [ Css.backgroundColor color.text.primary
             , Css.color color.background.backdrop
             ]
+        , Css.onFocusVisible
+            [ Css.borderColor color.border.focus
+            ]
         ]
     , class "input"
         [ Css.borderBottomColor color.border.default
         , Css.borderLeftColor (Css.rgba 0 0 0 0)
         , Css.borderRightColor (Css.rgba 0 0 0 0)
         , Css.borderTopColor (Css.rgba 0 0 0 0)
-        , Css.onFocus
+        , Css.onFocusVisible
             [ Css.borderColor color.border.focus
             ]
         , Css.onHover
@@ -55,8 +62,15 @@ declarations =
                 ]
             ]
         ]
+    , class "select"
+        [ Css.onFocusVisible
+            [ Css.borderColor color.border.focus
+            ]
+        ]
     , class "label"
         [ Css.color color.text.secondary
+        , Css.onChild (Css.anyElement)
+            [ Css.color color.text.primary ]
         ]
 
 

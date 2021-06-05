@@ -55,11 +55,11 @@ viewHeader =
             [ Css.row ]
             [ viewButton
                 { onClick = Msg.SetAllCardStatesPressed Ui.Collapsed
-                , text = "Collapse all"
+                , label = Html.text "Collapse all"
                 }
             , viewButton
                 { onClick = Msg.SetAllCardStatesPressed Ui.Open
-                , text = "Expand all"
+                , label = Html.text "Expand all"
                 }
             ]
         ]
@@ -143,25 +143,21 @@ viewCard model card =
             , Html.div
                 [ Css.row
                 ]
-                [ Html.div
-                    [ Css.row ]
-                    [ Html.button
-                        [ Css.button
-                        , Events.onClick (Msg.ToggleCardStatePressed card)
-                        ]
-                        [ case Ui.getCardState card model.ui of
+                [ viewButton
+                    { onClick = Msg.ToggleCardStatePressed card
+                    , label =
+                        case Ui.getCardState card model.ui of
                             Ui.Open ->
                                 FA.viewIcon FontAwesome.Regular.windowMinimize
 
                             Ui.Collapsed ->
                                 FA.viewIcon FontAwesome.Regular.windowMaximize
-                        ]
-                    ]
+                    }
                 ]
             ]
         , Html.div
             (List.append
-                [ Css.cardContent
+                [ Css.collapsible
                 , HA.id (Ui.cardId card ++ "-content")
                 ]
                 (case Ui.getCardState card model.ui of
@@ -174,12 +170,13 @@ viewCard model card =
                         ]
 
                     Ui.Collapsed ->
-                        [ Css.cardContentCollapsed
+                        [ Css.collapsibleCollapsed
                         ]
                 )
             )
             [ Html.div
-                [ Css.cardContentInner
+                [ Css.collapsibleInner
+                , HA.style "padding" "8px"
                 , HAE.attributeMaybe
                     (\height ->
                         HA.style "height" (String.fromInt height ++ "px")
@@ -190,7 +187,7 @@ viewCard model card =
                         HAE.empty
 
                     Ui.Collapsed ->
-                        Css.cardContentInnerCollapsed
+                        Css.collapsibleInnerCollapsed
 
                 ]
                 [ case card of
@@ -252,11 +249,11 @@ viewFile =
         [ Css.row ]
         [ viewButton
             { onClick = Msg.SavePressed
-            , text = "Save"
+            , label = Html.text "Save"
             }
         , viewButton
             { onClick = Msg.LoadPressed
-            , text = "Load"
+            , label = Html.text "Load"
             }
         ]
 
@@ -550,19 +547,17 @@ viewInputWithLabel attributes label input =
         ]
 
 
-type alias ButtonData msg =
-    { onClick : msg
-    , text : String
-    }
-
-
-viewButton : ButtonData msg -> Html msg
+viewButton :
+   { onClick : msg
+   , label : Html msg
+   }
+   -> Html msg
 viewButton data =
     Html.button
         [ Css.button
         , Events.onClick data.onClick
         ]
-        [ Html.text data.text ]
+        [ data.label ]
 
 
 viewExperience : Model -> Html Msg
@@ -985,56 +980,56 @@ viewWealth model =
                 [ HA.style "flex" "1" ]
                 [ viewButton
                     { onClick = Msg.ButtonPressed (Character.convertOneGoldToSilver)
-                    , text = ">"
+                    , label = Html.text ">"
                     }
                 ]
             , Html.div
                 [ HA.style "flex" "1" ]
                 [ viewButton
                     { onClick = Msg.ButtonPressed (Character.convertAllGoldToSilver)
-                    , text = ">>"
+                    , label = Html.text ">>"
                     }
                 ]
             , Html.div
                 [ HA.style "flex" "1" ]
                 [ viewButton
                     { onClick = Msg.ButtonPressed (Character.convertAllSilverToGold)
-                    , text = "<<"
+                    , label = Html.text "<<"
                     }
                 ]
             , Html.div
                 [ HA.style "flex" "1" ]
                 [ viewButton
                     { onClick = Msg.ButtonPressed (Character.convertOneSilverToGold)
-                    , text = "<"
+                    , label = Html.text "<"
                     }
                 ]
             , Html.div
                 [ HA.style "flex" "1" ]
                 [ viewButton
                     { onClick = Msg.ButtonPressed (Character.convertOneSilverToBrass)
-                    , text = ">"
+                    , label = Html.text ">"
                     }
                 ]
             , Html.div
                 [ HA.style "flex" "1" ]
                 [ viewButton
                     { onClick = Msg.ButtonPressed (Character.convertAllSilverToBrass)
-                    , text = ">>"
+                    , label = Html.text ">>"
                     }
                 ]
             , Html.div
                 [ HA.style "flex" "1" ]
                 [ viewButton
                     { onClick = Msg.ButtonPressed (Character.convertAllBrassToSilver)
-                    , text = "<<"
+                    , label = Html.text "<<"
                     }
                 ]
             , Html.div
                 [ HA.style "flex" "1" ]
                 [ viewButton
                     { onClick = Msg.ButtonPressed (Character.convertOneBrassToSilver)
-                    , text = "<"
+                    , label = Html.text "<"
                     }
                 ]
             , Html.div
@@ -1569,12 +1564,12 @@ viewSpells model =
                     Ui.Collapsed ->
                         [ viewButton
                             { onClick = Msg.ToggleSpellStatePressed id
-                            , text =
+                            , label =
                                 if String.isEmpty spell.name then
-                                    "<New spell>"
+                                    Html.text "<New spell>"
 
                                 else
-                                    spell.name
+                                    Html.text spell.name
                             }
                         ]
 
@@ -1598,11 +1593,13 @@ viewSpells model =
                                     , onInput = Msg.TextFieldChanged (Character.setSpellRange id)
                                     , value = spell.range
                                     }
-                                , Html.button
-                                    [ HA.class "button-style"
-                                    , Events.onClick (Msg.ToggleSpellStatePressed id)
+                                , Html.div
+                                    []
+                                    [ viewButton
+                                        { onClick = Msg.ToggleSpellStatePressed id
+                                        , label = FA.viewIcon FontAwesome.Solid.compress
+                                        }
                                     ]
-                                    [ FA.viewIcon FontAwesome.Solid.compress ]
                                 ]
                             , Html.div
                                 [ Css.row ]
@@ -1759,7 +1756,7 @@ viewSortableRows data =
             )
         , viewButton
             { onClick = Msg.ButtonPressed data.addMsg
-            , text = "Add"
+            , label = Html.text "Add"
             }
         ]
 
@@ -1777,28 +1774,77 @@ viewRow model id item rowView card =
             Ui.Row card id
     in
     Html.div
-        [ HA.class "list-row" ]
+        [ Css.listRow
+        ]
         [ Html.div
-            [ HA.id (Ui.draggableElementId element)
-            , HAE.attributeIf
-                (Just element == model.ui.draggedElement)
-                (Css.transparent)
-            , HAE.attributeIf
-                (Dict.member (Ui.draggableElementId element) model.ui.movingElements)
-                (Css.fading)
-            ]
+            [ HA.style "position" "relative" ]
             [ Html.div
-                [ Css.row ]
-                (List.append
-                    [ Html.div
-                        [ Draggable.mouseTrigger (Ui.Row card id) Msg.DragMsgReceived
-                        , HA.style "width" "8px"
-                        , HA.style "cursor" "ns-resize"
-                        ]
-                        [ FA.viewIcon FontAwesome.Solid.arrowsAltV ]
+                [ HA.id (Ui.draggableElementId element)
+                , Css.collapsible
+                , HAE.attributeIf
+                    (Just element == model.ui.draggedElement)
+                    (Css.transparent)
+                , HAE.attributeIf
+                    (Dict.member (Ui.draggableElementId element) model.ui.movingElements)
+                    (Css.fading)
+                , HAE.attributeMaybe
+                    (\height ->
+                        if height /= 0 then
+                            HA.style "max-height" (String.fromInt height ++ "px")
+
+                        else
+                            Css.collapsibleCollapsed
+                    )
+                    (Ui.getRowHeight model.ui card id)
+                ]
+                [ Html.div
+                    [ Css.row
+                    , Css.collapsibleInner
+                    , HAE.attributeMaybe
+                        (\height ->
+                            if height == 0 then
+                                Css.collapsibleInnerCollapsed
+
+                            else
+                                HAE.empty
+                        )
+                        (Ui.getRowHeight model.ui card id)
                     ]
-                    (rowView id item)
-                )
+                    (List.append
+                        [ Html.div
+                            [ Draggable.mouseTrigger (Ui.Row card id) Msg.DragMsgReceived
+                            , HA.style "width" "8px"
+                            , HA.style "cursor" "ns-resize"
+                            ]
+                            [ FA.viewIcon FontAwesome.Solid.arrowsAltV ]
+                        ]
+                        (rowView id item)
+                    )
+                ]
+            , if Ui.isElementFloating model.ui element || Ui.getRowHeight model.ui card id /= Nothing then
+                Html.text ""
+
+              else
+                Html.div
+                    [ Css.listRowDelete
+                    ]
+                    [ Html.div
+                        [ Css.listRowDeleteConfirm
+                        , HAE.attributeIf (not (Ui.getRowDeleteState model.ui card id)) (HA.style "width" "0")
+                        ]
+                        [ viewButton
+                            { onClick = Msg.DeleteListRowPressed card id
+                            , label = Html.text "Confirm?"
+                            }
+                        ]
+                    , Html.div
+                        []
+                        [ viewButton
+                            { onClick = Msg.ToggleDeleteListRowPressed card id
+                            , label = FA.viewIcon FontAwesome.Solid.trashAlt
+                            }
+                        ]
+                    ]
             ]
         , if Ui.isElementFloating model.ui element then
             let

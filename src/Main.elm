@@ -73,16 +73,21 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        (List.append
-            [ Browser.Events.onResize Msg.WindowSizeReceived
-            , Draggable.subscriptions Msg.DragMsgReceived model.ui.drag
-            ]
-            (List.map
+        (List.concat
+            [ [ Browser.Events.onResize Msg.WindowSizeReceived
+              , Draggable.subscriptions Msg.DragMsgReceived model.ui.drag
+              ]
+            , List.map
                 (\( card, cardState ) ->
-                    Browser.Events.onAnimationFrame (always (Msg.CardToggleAnimationFramePassed card cardState))
+                    Browser.Events.onAnimationFrame (\_ -> Msg.CardToggleAnimationFramePassed card cardState)
                 )
                 model.ui.cardsWaitingForFrame
-            )
+            , List.map
+                (\( card, id ) ->
+                    Browser.Events.onAnimationFrame (\_ -> Msg.ListRowDeleteAnimationFramePassed card id)
+                )
+                model.ui.rowsWaitingForFrame
+            ]
         )
 
 
@@ -270,10 +275,7 @@ update msg model =
                         (\card ->
                             (getElementSceneHeight
                                 (Ui.cardId card ++ "-content")
-                                (Msg.CardContentHeightReceived
-                                    card
-                                    cardState
-                                )
+                                (Msg.CardContentHeightReceived card cardState)
                             )
                         )
                         Ui.allCards
@@ -332,6 +334,46 @@ update msg model =
         Msg.RowContainerPositionAndSizeReceived card data ->
             Ui.setRowContainerPosition card data model.ui
                 |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ToggleDeleteListRowPressed card id ->
+            Ui.toggleRowDeleteState card id model.ui
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.DeleteListRowPressed card id ->
+            model
+                |> Cmd.Extra.withCmd
+                    (getElementSceneHeight
+                        (Ui.draggableElementId (Ui.Row card id))
+                        (Msg.ListRowHeightReceived card id)
+                    )
+
+        Msg.ListRowHeightReceived card id height ->
+            model.ui
+                |> Ui.setRowHeight card id height
+                |> Ui.addRowWaitingForFrame card id
+                |> Model.asUiIn model
+                |> Cmd.Extra.withNoCmd
+
+        Msg.ListRowDeleteAnimationFramePassed card id ->
+            model.ui
+                |> Ui.setRowHeight card id 0
+                |> Ui.removeRowWaitingForFrame card id
+                |> Model.asUiIn model
+                |> Cmd.Extra.withCmd
+                    (Process.sleep 350
+                        |> Task.perform (\_ -> Msg.ListRowDeleteTimePassed card id)
+                    )
+
+        Msg.ListRowDeleteTimePassed card id ->
+            { model
+                | character = deleteCharacterDictKeyFromCard card id model.character
+                , ui =
+                    model.ui
+                        |> Ui.deleteRowHeight card id
+                        |> Ui.toggleRowDeleteState card id
+            }
                 |> Cmd.Extra.withNoCmd
 
 
@@ -489,6 +531,43 @@ setCharacterDictOrderFromCard order card character =
 
         Ui.Wounds ->
             Character.setInjuriesOrder order character
+
+        _ ->
+            character
+
+
+deleteCharacterDictKeyFromCard : Ui.Card -> Int -> Character.Character -> Character.Character
+deleteCharacterDictKeyFromCard card id character =
+    case card of
+        Ui.Armour ->
+            Character.removeArmour id character
+
+        Ui.Corruption ->
+            Character.removeMutation id character
+
+        Ui.Experience ->
+            Character.removeExpAdjustment id character
+
+        Ui.Notes ->
+            Character.removeNote id character
+
+        Ui.Skills ->
+            Character.removeAdvancedSkill id character
+
+        Ui.Spells ->
+            Character.removeSpell id character
+
+        Ui.Talents ->
+            Character.removeTalent id character
+
+        Ui.Trappings ->
+            Character.removeTrapping id character
+
+        Ui.Weapons ->
+            Character.removeWeapon id character
+
+        Ui.Wounds ->
+            Character.removeInjury id character
 
         _ ->
             character

@@ -35,3 +35,8 @@ type Msg
     | ToggleSpellStatePressed Int
     | RowPositionAndSizeReceived Ui.DraggableElement PositionAndSize
     | RowContainerPositionAndSizeReceived Ui.Card PositionAndSize
+    | ToggleDeleteListRowPressed Ui.Card Int
+    | DeleteListRowPressed Ui.Card Int
+    | ListRowHeightReceived Ui.Card Int Int
+    | ListRowDeleteAnimationFramePassed Ui.Card Int
+    | ListRowDeleteTimePassed Ui.Card Int

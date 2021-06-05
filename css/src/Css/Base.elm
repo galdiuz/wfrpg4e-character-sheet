@@ -15,26 +15,6 @@ card =
     Html.Attributes.class "card"
 
 
-cardContent : Html.Attribute msg
-cardContent =
-    Html.Attributes.class "card-content"
-
-
-cardContentCollapsed : Html.Attribute msg
-cardContentCollapsed =
-    Html.Attributes.class "card-content-collapsed"
-
-
-cardContentInner : Html.Attribute msg
-cardContentInner =
-    Html.Attributes.class "card-content-inner"
-
-
-cardContentInnerCollapsed : Html.Attribute msg
-cardContentInnerCollapsed =
-    Html.Attributes.class "card-content-inner-collapsed"
-
-
 cardHeader : Html.Attribute msg
 cardHeader =
     Html.Attributes.class "card-header"
@@ -48,6 +28,26 @@ cardHeaderIcon =
 cardHeaderTitle : Html.Attribute msg
 cardHeaderTitle =
     Html.Attributes.class "card-header-title"
+
+
+collapsible : Html.Attribute msg
+collapsible =
+    Html.Attributes.class "collapsible"
+
+
+collapsibleCollapsed : Html.Attribute msg
+collapsibleCollapsed =
+    Html.Attributes.class "collapsible-collapsed"
+
+
+collapsibleInner : Html.Attribute msg
+collapsibleInner =
+    Html.Attributes.class "collapsible-inner"
+
+
+collapsibleInnerCollapsed : Html.Attribute msg
+collapsibleInnerCollapsed =
+    Html.Attributes.class "collapsible-inner-collapsed"
 
 
 column : Html.Attribute msg
@@ -100,6 +100,16 @@ listRow =
     Html.Attributes.class "list-row"
 
 
+listRowDelete : Html.Attribute msg
+listRowDelete =
+    Html.Attributes.class "list-row-delete"
+
+
+listRowDeleteConfirm : Html.Attribute msg
+listRowDeleteConfirm =
+    Html.Attributes.class "list-row-delete-confirm"
+
+
 moving : Html.Attribute msg
 moving =
     Html.Attributes.class "moving"
@@ -145,13 +155,19 @@ styleSheet =
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
+  display: flex;
   font-size: 16px;
-  padding: 1px 6px;
+  justify-content: center;
+  padding: 2px 6px;
   transition-duration: 0.15s;
-  transition-property: background-color, color;
+  transition-property: background-color, border-color, color;
   transition-timing-function: ease-in-out;
   white-space: nowrap;
   width: 100%;
+}
+
+.button:focus-visible {
+  outline: none;
 }
 
 .card {
@@ -160,32 +176,6 @@ styleSheet =
   border-style: solid;
   border-width: 0px;
   margin: 4px 2px 4px 8px;
-}
-
-.card-content {
-  overflow-y: hidden;
-  transition-duration: 0.35s;
-  transition-property: max-height, opacity, padding;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-content-collapsed {
-  max-height: 0px;
-  opacity: 0;
-  padding-bottom: 0px;
-  padding-top: 0px;
-}
-
-.card-content-inner {
-  padding: 8px;
-  transform-origin: top;
-  transition-duration: 0.35s;
-  transition-property: transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-content-inner-collapsed {
-  transform: scale(1, 0);
 }
 
 .card-header {
@@ -215,6 +205,29 @@ styleSheet =
 .card-header-title {
   flex: 1;
   padding-left: 36px;
+}
+
+.collapsible {
+  overflow-y: hidden;
+  transition-duration: 0.35s;
+  transition-property: max-height, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsible-collapsed {
+  max-height: 0px;
+  opacity: 0;
+}
+
+.collapsible-inner {
+  transform-origin: top;
+  transition-duration: 0.35s;
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsible-inner-collapsed {
+  transform: scale(1, 0);
 }
 
 .column {
@@ -264,8 +277,50 @@ styleSheet =
   width: 100%;
 }
 
+.input:focus-visible {
+  outline: none;
+}
+
 .label {
   font-size: 14px;
+}
+
+.list-row {
+  transition-duration: 0.5s;
+  transition-property: background-color;
+  transition-timing-function: ease-in-out;
+}
+
+.list-row-delete {
+  display: none;
+  flex-direction: row;
+  gap: 4px;
+  justify-content: space-between;
+  padding: 2px 4px;
+  position: absolute;
+  right: 0px;
+  top: 100%;
+  z-index: 1;
+}
+
+.list-row-delete-confirm {
+  overflow: hidden;
+  transition-duration: 0.35s;
+  transition-property: width;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  width: 80px;
+}
+
+.list-row-delete:hover {
+  display: flex;
+}
+
+.list-row:focus-within .list-row-delete {
+  display: flex;
+}
+
+.list-row:hover .list-row-delete {
+  display: flex;
 }
 
 .list-row:nth-child(odd) {
@@ -289,7 +344,12 @@ styleSheet =
 .select {
   background-color: inherit;
   font-size: 14px;
+  transition: border-color 0.15s ease-in-out;
   width: 100%;
+}
+
+.select:focus-visible {
+  outline: none;
 }
 
 .textarea {

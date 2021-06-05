@@ -20,7 +20,10 @@ type alias Ui =
     , draggedElement : Maybe DraggableElement
     , movingElements : Dict String ( Int, Int )
     , rowContainerPositions : Dict String PositionAndSize
+    , rowDeleteStates : Dict String (Dict Int Bool)
+    , rowHeights : Dict String (Dict Int Int)
     , rowPositions : Dict String (Dict Int Int)
+    , rowsWaitingForFrame : List ( Card, Int )
     , spellStates : Dict Int CardState
     , theme : Theme
     , windowWidth : Int
@@ -41,7 +44,10 @@ emptyUi =
     , draggedElement = Nothing
     , movingElements = Dict.empty
     , rowContainerPositions = Dict.empty
+    , rowDeleteStates = Dict.empty
+    , rowHeights = Dict.empty
     , rowPositions = Dict.empty
+    , rowsWaitingForFrame = []
     , spellStates = Dict.empty
     , theme = Dark
     , windowWidth = 0
@@ -230,12 +236,11 @@ updateDraggedElement ui =
                 | rowPositions =
                     Dict.update
                         (cardId card)
-                        (\maybeDict ->
-                            Maybe.withDefault Dict.empty maybeDict
-                                |> Dict.insert
-                                    id
-                                    (Tuple.second ui.dragPosition + ui.dragHeight // 2)
-                                |> Just
+                        (Maybe.withDefault Dict.empty
+                            >> Dict.insert
+                                id
+                                (Tuple.second ui.dragPosition + ui.dragHeight // 2)
+                            >> Just
                         )
                         ui.rowPositions
             }
@@ -553,3 +558,87 @@ getFloatingRowPosition ui element =
 
         _ ->
             ( 0, 0 )
+
+
+toggleRowDeleteState : Card -> Int -> Ui -> Ui
+toggleRowDeleteState card id ui =
+    { ui
+        | rowDeleteStates =
+            Dict.update
+                (cardId card)
+                (Maybe.withDefault Dict.empty
+                    >> Dict.insert
+                        id
+                        (not (getRowDeleteState ui card id))
+                    >> Just
+                )
+                ui.rowDeleteStates
+    }
+
+
+getRowDeleteState : Ui -> Card -> Int -> Bool
+getRowDeleteState ui card id =
+    ui.rowDeleteStates
+        |> Dict.get (cardId card)
+        |> Maybe.andThen (Dict.get id)
+        |> Maybe.withDefault False
+
+
+setRowHeight : Card -> Int -> Int -> Ui -> Ui
+setRowHeight card id height ui =
+    { ui
+        | rowHeights =
+            Dict.update
+                (cardId card)
+                (Maybe.withDefault Dict.empty
+                    >> Dict.insert
+                        id
+                        height
+                    >> Just
+                )
+                ui.rowHeights
+    }
+
+
+deleteRowHeight : Card -> Int -> Ui -> Ui
+deleteRowHeight card id ui =
+    { ui
+        | rowHeights =
+            Dict.update
+                (cardId card)
+                (Maybe.withDefault Dict.empty
+                    >> Dict.remove
+                        id
+                    >> Just
+                )
+                ui.rowHeights
+    }
+
+
+getRowHeight : Ui -> Card -> Int -> Maybe Int
+getRowHeight ui card id =
+    ui.rowHeights
+        |> Dict.get (cardId card)
+        |> Maybe.andThen (Dict.get id)
+
+
+addRowWaitingForFrame : Card -> Int -> Ui -> Ui
+addRowWaitingForFrame card id ui =
+    { ui
+        | rowsWaitingForFrame =
+            ui.rowsWaitingForFrame ++ [ ( card, id ) ]
+                |> List.Extra.uniqueBy
+                    (\( c, i ) ->
+                        cardId c ++ String.fromInt i
+                    )
+    }
+
+
+removeRowWaitingForFrame : Card -> Int -> Ui -> Ui
+removeRowWaitingForFrame card id ui =
+    { ui
+        | rowsWaitingForFrame =
+            List.filter
+                ((/=) ( card, id ))
+                ui.rowsWaitingForFrame
+    }

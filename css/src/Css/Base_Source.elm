@@ -87,13 +87,18 @@ declarations =
         [ Css.borderRadius (Css.px 4)
         , Css.borderStyle Css.solid
         , Css.borderWidth (Css.px 1)
-        , Css.padding2 (Css.px 1) (Css.px 6)
+        , Css.display Css.flex
+        , Css.justifyContent Css.center
+        , Css.padding2 (Css.px 2) (Css.px 6)
         , typography.regular
         , Css.transitionDuration (Css.seconds 0.15)
-        , Css.transitionProperty (Css.str "background-color, color")
+        , Css.transitionProperty (Css.str "background-color, border-color, color")
         , Css.transitionTimingFunction (Css.str "ease-in-out")
         , Css.whiteSpace Css.nowrap
         , Css.width (Css.percent 100)
+        , Css.onFocusVisible
+            [ Css.outline Css.none
+            ]
         ]
     , class "input"
         [ Css.backgroundColor Css.inherit
@@ -103,6 +108,9 @@ declarations =
         , typography.small
         , Css.transition "border-color 0.15s ease-in-out"
         , Css.width (Css.percent 100)
+        , Css.onFocusVisible
+            [ Css.outline Css.none
+            ]
         ]
     , class "label"
         [ typography.small
@@ -110,7 +118,11 @@ declarations =
     , class "select"
         [ Css.backgroundColor Css.inherit
         , Css.width (Css.percent 100)
+        , Css.transition "border-color 0.15s ease-in-out"
         , typography.small
+        , Css.onFocusVisible
+            [ Css.outline Css.none
+            ]
         ]
     , class "textarea"
         [ Css.position Css.relative
@@ -145,26 +157,23 @@ declarations =
         , Css.borderWidth (Css.px 0)
         , Css.margin4 (Css.px 4) (Css.px 2) (Css.px 4) (Css.px 8)
         ]
-    , class "card-content"
+    , class "collapsible"
         [ Css.overflowY Css.hidden
         , Css.transitionDuration (Css.seconds 0.35)
-        , Css.transitionProperty (Css.str "max-height, opacity, padding")
+        , Css.transitionProperty (Css.str "max-height, opacity")
         , Css.transitionTimingFunction (Css.cubicBezier 0.4 0 0.2 1)
         ]
-    , class "card-content-collapsed"
+    , class "collapsible-collapsed"
         [ Css.maxHeight (Css.px 0)
-        , Css.paddingBottom (Css.px 0)
-        , Css.paddingTop (Css.px 0)
         , Css.opacity 0
         ]
-    , class "card-content-inner"
-        [ Css.padding (Css.px 8)
-        , Css.transformOrigin (Css.str "top")
+    , class "collapsible-inner"
+        [ Css.transformOrigin (Css.str "top")
         , Css.transitionDuration (Css.seconds 0.35)
         , Css.transitionProperty (Css.str "transform")
         , Css.transitionTimingFunction (Css.cubicBezier 0.4 0 0.2 1)
         ]
-    , class "card-content-inner-collapsed"
+    , class "collapsible-inner-collapsed"
         [ Css.transform "scale(1, 0)"
         ]
     , class "card-header"
@@ -210,8 +219,39 @@ declarations =
         [ Css.padding (Css.px 2)
         ]
     , class "list-row"
-        [ Css.onNthChild "odd"
+        [ Css.transitionDuration (Css.seconds 0.5)
+        , Css.transitionProperty (Css.str "background-color")
+        , Css.transitionTimingFunction (Css.str "ease-in-out")
+        , Css.onNthChild "odd"
             [ Css.backgroundColor (Css.gray 222)
             ]
+        , Css.onHover
+            [ Css.onDescendant (Css.class "list-row-delete")
+                [ Css.display Css.flex ]
+            ]
+        , Css.onFocusWithin
+            [ Css.onDescendant (Css.class "list-row-delete")
+                [ Css.display Css.flex ]
+            ]
+        ]
+    , class "list-row-delete"
+        [ Css.display Css.none
+        , Css.flexDirection Css.row
+        , Css.gap (Css.px 4)
+        , Css.justifyContent Css.spaceBetween
+        , Css.padding2 (Css.px 2) (Css.px 4)
+        , Css.position Css.absolute
+        , Css.right (Css.px 0)
+        , Css.top (Css.percent 100)
+        , Css.zIndex 1
+        , Css.onHover
+            [ Css.display Css.flex ]
+        ]
+    , class "list-row-delete-confirm"
+        [ Css.overflow Css.hidden
+        , Css.transitionDuration (Css.seconds 0.35)
+        , Css.transitionProperty (Css.str "width")
+        , Css.transitionTimingFunction (Css.cubicBezier 0.4 0 0.2 1)
+        , Css.width (Css.px 80)
         ]
     ]

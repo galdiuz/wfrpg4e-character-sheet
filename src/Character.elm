@@ -225,6 +225,11 @@ addArmour character =
     { character | armour = OrderedDict.insert emptyArmour character.armour }
 
 
+removeArmour : Int -> Character -> Character
+removeArmour id character =
+    { character | armour = OrderedDict.remove id character.armour }
+
+
 setAp : BodyLocation -> Int -> Character -> Character
 setAp location value ({ ap } as character) =
     { character
@@ -683,6 +688,11 @@ addMutation character =
     { character | mutations = OrderedDict.insert emptyMutation character.mutations }
 
 
+removeMutation : Int -> Character -> Character
+removeMutation id character =
+    { character | mutations = OrderedDict.remove id character.mutations }
+
+
 setCorruption : Int -> Character -> Character
 setCorruption value character =
     { character | corruption = max 0 value }
@@ -838,6 +848,11 @@ spentExp character =
 addExpAdjustment : Character -> Character
 addExpAdjustment character =
     { character | expAdjustments = OrderedDict.insert emptyExpAdjustment character.expAdjustments }
+
+
+removeExpAdjustment : Int -> Character -> Character
+removeExpAdjustment id character =
+    { character | expAdjustments = OrderedDict.remove id character.expAdjustments }
 
 
 setExperience : Int -> Character -> Character
@@ -1068,6 +1083,11 @@ addNote character =
     { character | notes = OrderedDict.insert "" character.notes }
 
 
+removeNote : Int -> Character -> Character
+removeNote id character =
+    { character | notes = OrderedDict.remove id character.notes }
+
+
 setNote : Int -> String -> Character -> Character
 setNote id value character =
     { character
@@ -1258,6 +1278,11 @@ addAdvancedSkill character =
     { character | advancedSkills = OrderedDict.insert emptySkill character.advancedSkills }
 
 
+removeAdvancedSkill : Int -> Character -> Character
+removeAdvancedSkill id character =
+    { character | advancedSkills = OrderedDict.remove id character.advancedSkills }
+
+
 setAdvancedSkillAdvances : Int -> Int -> Character -> Character
 setAdvancedSkillAdvances id value character =
     { character
@@ -1375,6 +1400,11 @@ emptySpell =
 addSpell : Character -> Character
 addSpell character =
     { character | spells = OrderedDict.insert emptySpell character.spells }
+
+
+removeSpell : Int -> Character -> Character
+removeSpell id character =
+    { character | spells = OrderedDict.remove id character.spells }
 
 
 setSpellCn : Int -> Int -> Character -> Character
@@ -1523,6 +1553,11 @@ addTalent character =
     { character | talents = OrderedDict.insert emptyTalent character.talents }
 
 
+removeTalent : Int -> Character -> Character
+removeTalent id character =
+    { character | talents = OrderedDict.remove id character.talents }
+
+
 setTalentDescription : Int -> String -> Character -> Character
 setTalentDescription id value character =
     { character
@@ -1609,6 +1644,11 @@ emptyTrapping =
 addTrapping : Character -> Character
 addTrapping character =
     { character | trappings = OrderedDict.insert emptyTrapping character.trappings }
+
+
+removeTrapping : Int -> Character -> Character
+removeTrapping id character =
+    { character | trappings = OrderedDict.remove id character.trappings }
 
 
 setTrappingEncumbrance : Int -> Int -> Character -> Character
@@ -1843,6 +1883,11 @@ addWeapon character =
     { character | weapons = OrderedDict.insert emptyWeapon character.weapons }
 
 
+removeWeapon : Int -> Character -> Character
+removeWeapon id character =
+    { character | weapons = OrderedDict.remove id character.weapons }
+
+
 setWeaponDamage : Int -> String -> Character -> Character
 setWeaponDamage id value character =
     { character |
@@ -2032,6 +2077,11 @@ getWounds character =
 addInjury : Character -> Character
 addInjury character =
     { character | injuries = OrderedDict.insert emptyInjury character.injuries }
+
+
+removeInjury : Int -> Character -> Character
+removeInjury id character =
+    { character | injuries = OrderedDict.remove id character.injuries }
 
 
 setCurrentWounds : Int -> Character -> Character
