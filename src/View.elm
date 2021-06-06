@@ -1416,10 +1416,13 @@ viewNotes model =
         , model = model
         , rowView =
             \id note ->
-                [ viewTextareaInput
-                    { onInput = Msg.TextFieldChanged (Character.setNote id)
-                    , value = note
-                    }
+                [ Html.div
+                    [ HA.style "flex" "1" ]
+                    [ viewTextareaInput
+                        { onInput = Msg.TextFieldChanged (Character.setNote id)
+                        , value = note
+                        }
+                    ]
                 ]
         }
 

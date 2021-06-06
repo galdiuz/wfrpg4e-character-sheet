@@ -42,7 +42,7 @@ type alias Character =
 
 emptyCharacter : Character
 emptyCharacter =
-    { advancedSkills = OrderedDict.empty
+    { advancedSkills = OrderedDict.fromList groupedBasicSkillsList
     , armour = OrderedDict.empty
     , ap = emptyApLocations
     , basicSkills = basicSkillsList
@@ -1117,10 +1117,6 @@ type alias Skill =
 basicSkillsList : List Skill
 basicSkillsList =
     [ { advances = 0
-      , c12c = Dex
-      , name = "Art"
-      }
-    , { advances = 0
       , c12c = Ag
       , name = "Athletics"
       }
@@ -1159,10 +1155,6 @@ basicSkillsList =
     , { advances = 0
       , c12c = T
       , name = "Endurance"
-      }
-    , { advances = 0
-      , c12c = Fel
-      , name = "Entertain"
       }
     , { advances = 0
       , c12c = Int
@@ -1205,16 +1197,29 @@ basicSkillsList =
       , name = "Perception"
       }
     , { advances = 0
-      , c12c = Ag
-      , name = "Ride"
-      }
-    , { advances = 0
       , c12c = S
       , name = "Row"
       }
+    ]
+
+
+groupedBasicSkillsList : List Skill
+groupedBasicSkillsList =
+    [ { advances = 0
+      , c12c = Dex
+      , name = "Art (?)"
+      }
+    , { advances = 0
+      , c12c = Fel
+      , name = "Entertain (?)"
+      }
     , { advances = 0
       , c12c = Ag
-      , name = "Stealth"
+      , name = "Ride (?)"
+      }
+    , { advances = 0
+      , c12c = Ag
+      , name = "Stealth (?)"
       }
     ]
 
@@ -1535,7 +1540,7 @@ type alias Talent =
 emptyTalent : Talent
 emptyTalent =
     { description = ""
-    , timesTaken = 0
+    , timesTaken = 1
     , name = ""
     }
 
